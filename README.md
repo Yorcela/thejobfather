@@ -47,6 +47,12 @@ Pensé pour passer les logiciels de recrutement (ATS) : le CV est en anglais par
 
 Traduit la fiche dans la langue de votre choix et enregistre le résultat comme **nouvelle version** : contenu, titres de rubriques, mois et mots comme « today ». Les noms propres, entreprises, écoles et certifications restent tels quels, et les intitulés de poste usuels en anglais aussi. Rien n'est remplacé.
 
+### `/thejobfather:thejobfather ats_score [offre]`
+
+Estime la compatibilité ATS de la version affichée du CV avec un score sur 100 et propose des améliorations concrètes. Sans offre, le score est **générique** : lisibilité par un parseur (coordonnées, titres de rubrique standard, dates, ordre des rubriques) et qualité du contenu (résumé, puces, résultats chiffrés, compétences, longueur). Avec une offre d'emploi (URL, fichier ou texte), le score est **ciblé** : il ajoute la couverture des mots-clés de l'offre, qui pèsent 40 points, et indique ceux qui manquent. Avec le chemin d'un export PDF, il vérifie aussi ce qu'un parseur extrait du fichier.
+
+Aucun éditeur d'ATS ne publie de score universel : le barème est le nôtre, construit sur ce que disent les sources, et donne une estimation, pas une prédiction. Le détail du barème et les sources sont dans `skills/thejobfather/references/ats.md`. Le calcul est fait par un script (`skills/thejobfather/scripts/ats_score.py`), donc reproductible. Les améliorations acceptées sont enregistrées dans une nouvelle version, jamais dans celle qui a été évaluée.
+
 ### Versions
 
 Chaque CV est une version, nommée avec le drapeau de sa langue : « 🇫🇷 v20261025-1 » (date du jour et numéro). `init` (ajout d'une version) et `translate` créent une nouvelle version et gardent toutes les autres. Dès qu'il y a une version, un menu déroulant à côté de « Customize » permet de :
@@ -62,7 +68,8 @@ Les modifications faites dans la page (bouton « Edit ») s'appliquent à la ver
 ```
 .claude-plugin/plugin.json          manifeste du plugin
 .claude-plugin/marketplace.json     permet l'installation depuis ce dépôt
-skills/thejobfather/SKILL.md        commande /thejobfather et sous-commande init
-skills/thejobfather/references/     schéma de la base de données
+skills/thejobfather/SKILL.md        commande /thejobfather et sous-commandes init, translate, ats_score
+skills/thejobfather/references/     schéma de la base de données, barème et sources du score ATS
+skills/thejobfather/scripts/        calcul du score ATS
 skills/thejobfather/assets/         page de l'artefact
 ```

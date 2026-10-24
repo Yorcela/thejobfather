@@ -1,7 +1,7 @@
 ---
 name: thejobfather
-description: Assistant de recherche d'emploi. Sous-commandes : `init`, qui importe le profil de l'utilisateur (CV PDF ou site web comme LinkedIn, via Claude in Chrome) dans la base de données d'un artefact, en anglais par défaut ; `translate`, qui traduit ce profil dans la langue de son choix en créant une nouvelle version, sans rien remplacer. À utiliser quand l'utilisateur tape /thejobfather, parle d'initialiser son profil de recherche d'emploi ou de traduire son CV.
-argument-hint: init | translate [langue]
+description: Assistant de recherche d'emploi. Sous-commandes : `init`, qui importe le profil de l'utilisateur (CV PDF ou site web comme LinkedIn, via Claude in Chrome) dans la base de données d'un artefact, en anglais par défaut ; `translate`, qui traduit ce profil dans la langue de son choix en créant une nouvelle version, sans rien remplacer ; `ats_score`, qui calcule un score ATS du CV (générique ou ciblé sur une offre d'emploi) et propose des améliorations. À utiliser quand l'utilisateur tape /thejobfather, parle d'initialiser son profil de recherche d'emploi, de traduire son CV ou d'évaluer sa compatibilité ATS.
+argument-hint: init | translate [langue] | ats_score [offre]
 ---
 
 # The Job Father
@@ -10,7 +10,8 @@ Point d'entrée du plugin. Le premier argument est la sous-commande : `$ARGUMENT
 
 - `init` : voir ci-dessous.
 - `translate` : voir tout en bas. Le reste de l'argument est la langue demandée.
-- vide ou inconnue : dire en une phrase que `init` et `translate` existent et proposer de lancer `init`.
+- `ats_score` : voir tout en bas. Le reste de l'argument est l'offre d'emploi (URL, chemin de fichier ou texte) et éventuellement le chemin d'un PDF.
+- vide ou inconnue : dire en une phrase que `init`, `translate` et `ats_score` existent et proposer de lancer `init`.
 
 Répondre en français.
 
@@ -126,3 +127,31 @@ Objectif : traduire une version du CV dans la langue choisie, en **créant une n
 5. Écrire le fichier avec `ArtifactData` `set` sur `versions/<id>`. Puis rendre la nouvelle version affichée : `update` de `settings/layout` avec `if_version` et `{"active": "<id>"}` seulement.
 6. Relire la nouvelle version et vérifier que le nombre d'éléments de chaque collection est le même que dans la source.
 7. Répondre : le lien de l'artefact, le nom de la nouvelle version et la version dont elle est issue, et ce qui a été volontairement laissé tel quel (noms propres, certifications, intitulés de poste). Une courte phrase.
+
+## `ats_score`
+
+Objectif : estimer la compatibilité ATS d'une version du CV avec un score sur 100, et proposer des améliorations concrètes. Il n'existe pas de score ATS universel : le barème est le nôtre, il est décrit avec ses sources dans [references/ats.md](references/ats.md). Le lire avant d'expliquer un résultat.
+
+Deux modes :
+
+- **générique** (sans offre) : lisibilité par un parseur et qualité du contenu ;
+- **ciblé** (avec une offre) : en plus, couverture des mots-clés de l'offre, qui pèsent 40 points. C'est le score qui compte pour une candidature précise.
+
+1. Lire `~/.thejobfather/config.json`. Sans `artifactUrl`, dire de lancer `init` d'abord et s'arrêter.
+2. Offre : le reste de `$ARGUMENTS` (URL, chemin de fichier ou texte collé). S'il est vide, demander avec AskUserQuestion : « Quel score calculer ? » avec « Générique (sans offre) » et « Ciblé sur une offre » (l'URL, le chemin ou le texte arrive par « Other »). Pour une URL, utiliser WebFetch ; si la page est protégée ou vide (LinkedIn par exemple), passer par Claude in Chrome comme pour `init`, ou demander à l'utilisateur de coller le texte. Si l'argument contient un chemin se terminant par `.pdf`, c'est l'export PDF du CV à vérifier (étape 5), pas l'offre.
+3. Lire avec `ArtifactData` (le charger via ToolSearch s'il est différé), avec `out_dir` dans le scratchpad : `settings/layout` (version affichée dans `active`, ordre et masquage des rubriques) puis la version affichée dans `versions/<active>`, à défaut la plus récente. Dire quelle version est évaluée (son `name`).
+4. Avec une offre, écrire dans le scratchpad un fichier `keywords.json` : une liste de 15 à 40 objets `{"term", "kind", "required", "variants"}`.
+   - `kind` : `hard` (outils, technologies, méthodes, compétences métier), `title` (intitulé du poste visé), `education` (diplôme ou certification exigés), `soft` (compétences comportementales), `other`.
+   - `required` : `true` quand l'offre dit requis, indispensable, must, ou que le terme figure dans la liste des prérequis.
+   - `variants` : uniquement de vrais synonymes que l'offre ou le métier emploient (acronyme et forme développée, singulier et pluriel irrégulier, équivalent dans l'autre langue de l'offre). Rien d'autre.
+   - Ne mettre que des termes présents dans l'offre. Pas de verbes génériques ni de formules creuses (« dynamique », « passionné »).
+5. Si l'utilisateur a un export PDF du CV, ajouter `--pdf <chemin>` : cela vérifie ce qu'un parseur extrait vraiment du fichier (le bouton « Export PDF » de l'artefact le produit). Sinon, ne pas insister : le dire dans le rapport comme une vérification non faite.
+6. Lancer : `python3 -I ${CLAUDE_PLUGIN_ROOT}/skills/thejobfather/scripts/ats_score.py <version.json> --settings <layout.json> [--keywords <keywords.json>] [--pdf <cv.pdf>]`. Le script écrit un rapport JSON (score, `groups`, `checks` avec leurs `findings`, `top_gaps`, `keywords`). Ne jamais recalculer le score à la main : le rapporter tel quel.
+7. Répondre en français, de façon concise :
+   - le score, son libellé, le mode (générique ou ciblé) et la version évaluée ;
+   - un tableau par catégorie (lisibilité, contenu, mots-clés si ciblé) avec les points ;
+   - **5 à 7 améliorations maximum**, classées par points récupérables (`top_gaps`), chacune avec ce qui ne va pas, où, et une proposition concrète : une phrase réécrite, un titre à renommer, un ordre à changer. Écrire les propositions dans la langue du CV ;
+   - en mode ciblé : le taux de couverture, les mots-clés trouvés (et où) et manquants. Pour chaque manque, dire si le CV montre une expérience qui le justifie (alors proposer où l'écrire, avec les mots de l'offre) ou si c'est un vrai manque (le dire, ne rien inventer, suggérer de ne l'ajouter que si c'est vrai) ;
+   - une mise en garde d'une ligne : c'est une estimation, aucun ATS ne publie de score universel, et les recruteurs lisent aussi le CV.
+8. Proposer ensuite d'appliquer les améliorations qui ne touchent qu'au texte et à l'ordre des rubriques. Avec AskUserQuestion (choix multiple), laisser l'utilisateur cocher celles à appliquer. Pour celles retenues, créer une **nouvelle version** (`kind: "copy"`, `parent` = la version évaluée, même langue, identifiant et nom selon [references/schema.md](references/schema.md), comme pour `translate`) et la rendre affichée via `settings/layout.active`. Ne jamais modifier la version évaluée. L'ordre des rubriques est un réglage commun à toutes les versions (`settings/layout.order`) : ne le changer qu'avec l'accord explicite de l'utilisateur, et le dire. N'ajouter aucun fait absent du CV : une amélioration qui demande une information que seul l'utilisateur connaît (un chiffre, un outil) lui est posée en question.
+9. Après application, relancer le script sur la nouvelle version et montrer le score avant et après. Si rien n'est appliqué, terminer sur le rapport.
