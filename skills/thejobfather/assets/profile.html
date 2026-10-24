@@ -56,7 +56,15 @@ a { color: var(--accent); overflow-wrap: anywhere; }
 button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, a:focus-visible { outline: 2px solid var(--ui-accent); outline-offset: 2px; }
 
 .page { max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
-.bar { display: flex; justify-content: flex-end; gap: 8px; }
+.bar { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+.vwrap { position: relative; }
+.vmenu { position: absolute; top: calc(100% + 6px); right: 0; z-index: 30; width: min(380px, calc(100vw - 32px)); background: var(--ui-bg); color: var(--ui-ink); border: 1px solid var(--ui-line); border-radius: 10px; box-shadow: 0 10px 30px rgba(0, 0, 0, .22); padding: 6px; display: flex; flex-direction: column; gap: 2px; }
+.vitem { display: flex; align-items: center; gap: 6px; }
+.vpick { flex: 1; min-width: 0; text-align: left; display: flex; flex-direction: column; gap: 1px; padding: 7px 10px; border: 0; border-radius: 7px; background: none; color: inherit; cursor: pointer; }
+.vpick:hover, .vpick[aria-checked="true"] { background: var(--ui-field); }
+.vpick b { font-weight: 600; overflow-wrap: anywhere; }
+.vpick span { font-size: 12px; color: var(--ui-muted); }
+.vfoot { border-top: 1px solid var(--ui-line); margin-top: 4px; padding: 6px 4px 2px; }
 .btn {
   display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 8px;
   border: 1px solid var(--ui-line); background: var(--ui-bg); color: var(--ui-ink); cursor: pointer; font-size: 14px; font-weight: 500;
@@ -180,7 +188,7 @@ input[type="color"] { width: 44px; height: 32px; padding: 2px; border: 1px solid
 </style>
 
 <div class="page">
-  <div class="bar"><button id="export" class="btn" type="button" hidden>Export PDF</button><button id="toggle" class="btn" type="button" aria-expanded="false" aria-controls="panel" hidden>Customize</button></div>
+  <div class="bar"><div class="vwrap"><button id="versions" class="btn" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="vmenu" hidden></button><div id="vmenu" class="vmenu" role="menu" aria-label="Versions" hidden></div></div><button id="export" class="btn" type="button" hidden>Export PDF</button><button id="toggle" class="btn" type="button" aria-expanded="false" aria-controls="panel" hidden>Customize</button></div>
   <div id="empty" class="empty">
     <h1>Loading profile</h1>
     <p>Reading the database...</p>
@@ -219,13 +227,14 @@ input[type="color"] { width: 44px; height: 32px; padding: 2px; border: 1px solid
   };
   var LABEL_KEYS = Object.keys(DICT.en);
   var EN_MONTHS = ["Jan.", "Feb.", "Mar.", "Apr.", "May", "June", "July", "Aug.", "Sept.", "Oct.", "Nov.", "Dec."];
+  function curLang() { return (state.version && state.version.lang) || "en"; }
   function L(key) {
-    var s = state.settings, base = String(s.lang || "en").slice(0, 2).toLowerCase();
-    return (s.labels && s.labels[key]) || (DICT[base] && DICT[base][key]) || DICT.en[key];
+    var base = curLang().slice(0, 2).toLowerCase(), lb = state.version && state.version.labels;
+    return (lb && lb[key]) || (DICT[base] && DICT[base][key]) || DICT.en[key];
   }
 
   var db = null, assetsApi = null, downloadsApi = null;
-  var state = { profile: null, meta: null, settings: norm(null), data: {}, panelOpen: false, tab: "sections" };
+  var state = { profile: null, meta: null, settings: norm(null), data: {}, versions: {}, version: null, activeId: null, panelOpen: false, tab: "sections" };
   COLLS.forEach(function (c) { state.data[c] = []; });
 
   var $ = function (id) { return document.getElementById(id); };
@@ -262,7 +271,7 @@ input[type="color"] { width: 44px; height: 32px; padding: 2px; border: 1px solid
     var p = parseYm(s);
     if (!p) return s ? String(s) : "";
     if (!p.m) return String(p.y);
-    var lang = state.settings.lang || "en";
+    var lang = curLang();
     if (/^en/i.test(lang)) return EN_MONTHS[p.m - 1] + " " + p.y;
     try { return new Date(p.y, p.m - 1, 1).toLocaleDateString(lang, { month: "short", year: "numeric" }); }
     catch (e) { return EN_MONTHS[p.m - 1] + " " + p.y; }
@@ -306,18 +315,12 @@ input[type="color"] { width: 44px; height: 32px; padding: 2px; border: 1px solid
     var order = [];
     arr(d.order).forEach(function (id) { if (ids.indexOf(id) >= 0 && order.indexOf(id) < 0) order.push(id); });
     ids.forEach(function (id) { if (order.indexOf(id) < 0) order.push(id); });
-    var titles = {};
-    if (d.titles && typeof d.titles === "object") ids.forEach(function (id) { if (typeof d.titles[id] === "string" && d.titles[id].trim()) titles[id] = d.titles[id].slice(0, 80); });
     var theme = {};
     if (d.theme && typeof d.theme === "object") THEME_KEYS.forEach(function (k) { if (isHex(d.theme[k[0]])) theme[k[0]] = d.theme[k[0]]; });
-    var labels = {};
-    if (d.labels && typeof d.labels === "object") LABEL_KEYS.forEach(function (k) { if (typeof d.labels[k] === "string" && d.labels[k].trim()) labels[k] = d.labels[k].slice(0, 80); });
     return {
       order: order,
       hidden: arr(d.hidden).filter(function (id) { return ids.indexOf(id) >= 0; }),
-      titles: titles,
-      lang: typeof d.lang === "string" && /^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$/.test(d.lang) ? d.lang : "en",
-      labels: labels,
+      active: typeof d.active === "string" ? d.active : null,
       theme: theme,
       font: FONTS.some(function (f) { return f[0] === d.font; }) ? d.font : "modern"
     };
@@ -328,7 +331,7 @@ input[type="color"] { width: 44px; height: 32px; padding: 2px; border: 1px solid
       if (t[k[0]]) r.style.setProperty("--" + k[0], t[k[0]]); else r.style.removeProperty("--" + k[0]);
     });
     r.setAttribute("data-font", state.settings.font);
-    r.setAttribute("lang", state.settings.lang);
+    r.setAttribute("lang", curLang());
   }
   var persisting = false, again = false;
   function persist() {
@@ -346,7 +349,127 @@ input[type="color"] { width: 44px; height: 32px; padding: 2px; border: 1px solid
     clearTimeout(toastTimer);
     toastTimer = setTimeout(function () { t.hidden = true; }, 3500);
   }
-  function titleOf(id) { return state.settings.titles[id] || sectionTitle(id); }
+  function titleOf(id) { return (state.version && state.version.titles && state.version.titles[id]) || sectionTitle(id); }
+  function saveFail(e) { toast("Could not save: " + (e && e.message ? e.message : "unknown error")); }
+
+  /* ---------- Versions ----------
+     Une version est un CV complet : versions/<id> = { name, lang, labels, titles, kind, parent, createdAt, profile,
+     experiences, projects, education, certifications, skills, languages, hobbies } (les collections sont des objets indexés par identifiant). */
+  var COUNTRY = { en: "GB", fr: "FR", es: "ES", de: "DE", it: "IT", pt: "PT", nl: "NL", pl: "PL", sv: "SE", da: "DK", nb: "NO", no: "NO", fi: "FI", cs: "CZ", ro: "RO", hu: "HU", el: "GR", tr: "TR", ru: "RU", uk: "UA", ja: "JP", zh: "CN", ko: "KR", ar: "SA", he: "IL", hi: "IN" };
+  function flagOf(lang) {
+    var cc = COUNTRY[String(lang || "en").slice(0, 2).toLowerCase()];
+    return cc ? String.fromCodePoint(127397 + cc.charCodeAt(0), 127397 + cc.charCodeAt(1)) : "\uD83C\uDF10";
+  }
+  function langName(lang) {
+    try { return new Intl.DisplayNames(["en"], { type: "language" }).of(lang) || lang; } catch (e) { return lang; }
+  }
+  var KINDS = { "import": "Imported", migration: "Imported", translation: "Translated", copy: "Copy" };
+  function clone(o) { return JSON.parse(JSON.stringify(o)); }
+  function versionLabel(v) { return v.name || (flagOf(v.lang) + " " + v._id); }
+  function versionList() {
+    return Object.keys(state.versions).map(function (id) { return Object.assign({ _id: id }, state.versions[id]); })
+      .sort(function (a, b) { return String(b.createdAt || b._id).localeCompare(String(a.createdAt || a._id)); });
+  }
+  function recompute() {
+    var list = versionList(), pick = null;
+    list.forEach(function (v) { if (v._id === state.settings.active) pick = v; });
+    if (!pick && list.length) pick = list[0];
+    state.version = pick; state.activeId = pick ? pick._id : null;
+    var v = pick || {};
+    state.profile = v.profile || null;
+    COLLS.forEach(function (c) {
+      var m = v[c] && typeof v[c] === "object" ? v[c] : {};
+      state.data[c] = Object.keys(m).sort().map(function (id) { return Object.assign({ _id: id }, m[id]); });
+    });
+  }
+  /* toute modification de contenu réécrit la version affichée */
+  function saveVersion(mutate) {
+    if (!db || !state.version) return Promise.reject(new Error("no version loaded"));
+    var doc = clone(state.versions[state.activeId]);
+    mutate(doc);
+    return db.doc("versions/" + state.activeId).set(doc);
+  }
+  function todayStamp() {
+    var d = new Date();
+    return d.getFullYear() + String(d.getMonth() + 1).padStart(2, "0") + String(d.getDate()).padStart(2, "0");
+  }
+  function nextVersionId() {
+    var stamp = todayStamp(), n = 0;
+    Object.keys(state.versions).forEach(function (id) {
+      var m = id.match(/^v(\d{8})-(\d+)$/);
+      if (m && m[1] === stamp) n = Math.max(n, +m[2]);
+    });
+    return "v" + stamp + "-" + (n + 1);
+  }
+  function copyVersion() {
+    if (!db || !state.version) return;
+    var id = nextVersionId(), doc = clone(state.versions[state.activeId]);
+    doc.name = flagOf(doc.lang) + " " + id; doc.kind = "copy"; doc.parent = state.activeId; doc.createdAt = new Date().toISOString();
+    db.doc("versions/" + id).set(doc).then(function () {
+      state.settings.active = id; persist(); toast("Saved a copy: " + doc.name);
+    }).catch(saveFail);
+  }
+  function selectVersion(id) {
+    closeMenu();
+    state.settings.active = id; persist(); recompute(); applyTheme(); render();
+    if (state.panelOpen) renderPanel();
+  }
+  function deleteVersion(id) {
+    if (!db) return;
+    db.doc("versions/" + id).delete().then(function () { toast("Version deleted."); }).catch(saveFail);
+  }
+
+  var menuOpen = false;
+  function onMenuClick(e) {
+    var b = $("versions");
+    if (!$("vmenu").contains(e.target) && e.target !== b && !b.contains(e.target)) closeMenu();
+  }
+  function onMenuKey(e) { if (e.key === "Escape") { closeMenu(); $("versions").focus(); } }
+  function closeMenu() {
+    menuOpen = false; $("vmenu").hidden = true; $("versions").setAttribute("aria-expanded", "false");
+    document.removeEventListener("click", onMenuClick, true); document.removeEventListener("keydown", onMenuKey, true);
+  }
+  function toggleMenu() {
+    if (menuOpen) { closeMenu(); return; }
+    menuOpen = true; renderMenu(); $("vmenu").hidden = false; $("versions").setAttribute("aria-expanded", "true");
+    document.addEventListener("click", onMenuClick, true); document.addEventListener("keydown", onMenuKey, true);
+  }
+  function renderBar() {
+    var b = $("versions");
+    b.hidden = !(db && state.version);
+    if (!b.hidden) b.textContent = versionLabel(state.version) + " \u25BE";
+    else if (menuOpen) closeMenu();
+  }
+  function renderMenu() {
+    var m = $("vmenu"), list = versionList();
+    clear(m);
+    list.forEach(function (v) {
+      var row = h("div", "vitem"), pick = h("button", "vpick");
+      pick.type = "button"; pick.setAttribute("role", "menuitemradio");
+      var on = v._id === state.activeId;
+      pick.setAttribute("aria-checked", on ? "true" : "false");
+      pick.appendChild(h("b", null, versionLabel(v) + (on ? "  \u2713" : "")));
+      var when = v.createdAt ? String(v.createdAt).slice(0, 10) : "";
+      pick.appendChild(h("span", null, [langName(v.lang), KINDS[v.kind] || "Version", when].filter(Boolean).join(" \u00B7 ")));
+      pick.addEventListener("click", function () { selectVersion(v._id); });
+      row.appendChild(pick);
+      var del = btn("Delete", "small danger"), armed = false, timer = null;
+      if (list.length < 2) { del.disabled = true; del.title = "A resume needs at least one version"; }
+      del.addEventListener("click", function () {
+        if (!armed) {
+          armed = true; del.textContent = "Confirm";
+          timer = setTimeout(function () { armed = false; del.textContent = "Delete"; }, 4000);
+          return;
+        }
+        clearTimeout(timer); deleteVersion(v._id);
+      });
+      row.appendChild(del);
+      m.appendChild(row);
+    });
+    var foot = h("div", "vfoot");
+    foot.appendChild(btn("Save a copy of this version", "small", function () { closeMenu(); copyVersion(); }));
+    m.appendChild(foot);
+  }
 
   /* ---------- Fiche ---------- */
   function countOf(id) {
@@ -488,6 +611,7 @@ input[type="color"] { width: 44px; height: 32px; padding: 2px; border: 1px solid
     var p = state.profile, total = 0;
     COLLS.forEach(function (k) { total += state.data[k].length; });
     var sheet = $("sheet");
+    renderBar();
     if (!p && !total) {
       sheet.hidden = true; $("warnings").hidden = true; $("empty").hidden = false; $("export").hidden = true;
       clear($("empty"));
@@ -513,7 +637,7 @@ input[type="color"] { width: 44px; height: 32px; padding: 2px; border: 1px solid
       var lf = h("div", "facts");
       links.forEach(function (l) {
         var sp = h("span");
-        if (l.label) sp.appendChild(document.createTextNode(l.label + " : "));
+        if (l.label) sp.appendChild(document.createTextNode(l.label + ": "));
         var a = h("a", null, l.url); a.href = l.url; a.target = "_blank"; a.rel = "noopener noreferrer";
         sp.appendChild(a); lf.appendChild(sp);
       });
@@ -796,9 +920,9 @@ input[type="color"] { width: 44px; height: 32px; padding: 2px; border: 1px solid
         });
         if (data.current) data.end = null;
         var id = existing ? existing._id : uid(spec.prefix);
-        return db.doc(coll + "/" + id).set(data);
+        return saveVersion(function (doc) { doc[coll] = doc[coll] || {}; doc[coll][id] = data; });
       },
-      onDelete: existing ? function () { return db.doc(coll + "/" + existing._id).delete(); } : null
+      onDelete: existing ? function () { return saveVersion(function (doc) { delete (doc[coll] || {})[existing._id]; }); } : null
     });
   }
 
@@ -835,12 +959,12 @@ input[type="color"] { width: 44px; height: 32px; padding: 2px; border: 1px solid
         var p = Promise.resolve();
         if (v.photo.remove) data.photoAssetId = null;
         else if (v.photo.file && assetsApi) p = assetsApi.upload(v.photo.file).then(function (r) { data.photoAssetId = r.id; });
-        return p.then(function () { return db.doc("profile/me").set(data); });
+        return p.then(function () { return saveVersion(function (doc) { doc.profile = data; }); });
       }
     });
   }
 
-  function sequence(ops) { return ops.reduce(function (p, op) { return p.then(op); }, Promise.resolve()); }
+  function pad2(n) { return String(n).padStart(2, "0"); }
   function openSkillEditor(category) {
     if (!db) return;
     var olds = category == null ? [] : state.data.skills.filter(function (s) { return (s.category || "Skills") === category; });
@@ -853,45 +977,42 @@ input[type="color"] { width: 44px; height: 32px; padding: 2px; border: 1px solid
       values: { category: category || "", items: olds },
       validate: function (v) { return !v.category ? "Enter the category name." : (!v.items.length ? "Add at least one skill." : ""); },
       onSave: function (v) {
-        var taken = {};
-        state.data.skills.forEach(function (s) { if (olds.indexOf(s) < 0) taken[s._id] = true; });
-        var keep = {}, ops = [];
-        v.items.forEach(function (it) {
-          var id = "skill-" + slug(it.name);
-          if (taken[id] || keep[id]) id = id + "-" + slug(v.category);
-          while (taken[id] || keep[id]) id = id + "-2";
-          keep[id] = true;
+        /* les identifiants gardent le numéro de la catégorie pour ne pas la déplacer : skill-09.01-… */
+        var maxN = 0, base = null;
+        state.data.skills.forEach(function (s) { var m = s._id.match(/^skill-(\d+)/); if (m) maxN = Math.max(maxN, +m[1]); });
+        if (olds.length) { var mo = olds[0]._id.match(/^skill-(\d+)/); if (mo) base = mo[1]; }
+        if (!base) base = pad2(maxN + 1);
+        var items = {};
+        v.items.forEach(function (it, i) {
           var data = { name: it.name, category: v.category };
           if (it.level) data.level = it.level;
-          ops.push(function () { return db.doc("skills/" + id).set(data); });
+          items["skill-" + base + "." + pad2(i + 1) + "-" + slug(it.name)] = data;
         });
-        olds.forEach(function (s) { if (!keep[s._id]) ops.push(function () { return db.doc("skills/" + s._id).delete(); }); });
-        return sequence(ops);
+        return saveVersion(function (doc) {
+          doc.skills = doc.skills || {};
+          olds.forEach(function (s) { delete doc.skills[s._id]; });
+          Object.keys(items).forEach(function (id) { doc.skills[id] = items[id]; });
+        });
       },
       onDelete: category == null ? null : function () {
-        return sequence(olds.map(function (s) { return function () { return db.doc("skills/" + s._id).delete(); }; }));
+        return saveVersion(function (doc) { olds.forEach(function (s) { delete (doc.skills || {})[s._id]; }); });
       }
     });
   }
   function openLanguageEditor() {
     if (!db) return;
-    var olds = state.data.languages;
     openEditor({
       title: "Languages",
       fields: [{ k: "items", l: "One language per line: Name | level", t: "pairs", keys: ["name", "level"], rows: 5 }],
-      values: { items: olds },
+      values: { items: state.data.languages },
       onSave: function (v) {
-        var keep = {}, ops = [];
-        v.items.forEach(function (it) {
-          var id = "lang-" + slug(it.name);
-          while (keep[id]) id = id + "-2";
-          keep[id] = true;
+        var items = {};
+        v.items.forEach(function (it, i) {
           var data = { name: it.name };
           if (it.level) data.level = it.level;
-          ops.push(function () { return db.doc("languages/" + id).set(data); });
+          items["lang-" + pad2(i + 1) + "-" + slug(it.name)] = data;
         });
-        olds.forEach(function (l) { if (!keep[l._id]) ops.push(function () { return db.doc("languages/" + l._id).delete(); }); });
-        return sequence(ops);
+        return saveVersion(function (doc) { doc.languages = items; });
       }
     });
   }
@@ -940,8 +1061,10 @@ input[type="color"] { width: 44px; height: 32px; padding: 2px; border: 1px solid
       inp.setAttribute("aria-label", "Section title: " + sectionTitle(id));
       inp.addEventListener("change", function () {
         var v = inp.value.trim().slice(0, 80);
-        if (v && v !== sectionTitle(id)) state.settings.titles[id] = v; else delete state.settings.titles[id];
-        persist(); render();
+        saveVersion(function (doc) {
+          doc.titles = doc.titles || {};
+          if (v && v !== sectionTitle(id)) doc.titles[id] = v; else delete doc.titles[id];
+        }).catch(saveFail);
       });
       li.appendChild(inp);
       var ctl = h("div", "sctl");
@@ -1024,7 +1147,7 @@ input[type="color"] { width: 44px; height: 32px; padding: 2px; border: 1px solid
     list.appendChild(btn("Add a hobby", "", function () { openDocEditor("hobbies", null); }));
     body.appendChild(list);
     if (state.meta && arr(state.meta.dismissed).length) body.appendChild(btn("Show dismissed import warnings (" + state.meta.dismissed.length + ")", "", function () { setDismissed([]); }));
-    body.appendChild(h("p", "note", "To translate the resume into another language, run /thejobfather:thejobfather translate in Claude Code. Current language: " + state.settings.lang + "."));
+    body.appendChild(h("p", "note", "To translate the resume, run /thejobfather:thejobfather translate in Claude Code: the translation is saved as a new version, nothing is replaced. Current language: " + curLang() + "."));
   }
 
   function setDismissed(list) {
@@ -1275,8 +1398,8 @@ input[type="color"] { width: 44px; height: 32px; padding: 2px; border: 1px solid
 
     var name = S(p.fullName || "Resume");
     try { doc.setProperties({ title: name + " - Resume", author: name, subject: "Resume" }); } catch (e) { /* facultatif */ }
-    try { doc.setLanguage(state.settings.lang === "en" ? "en-US" : state.settings.lang); } catch (e) { /* facultatif */ }
-    return { bytes: doc.output("arraybuffer"), name: name.replace(/[^A-Za-z0-9]+/g, "_").replace(/^_+|_+$/g, "") + "_Resume.pdf", lost: lost, pages: doc.getNumberOfPages() };
+    try { doc.setLanguage(curLang() === "en" ? "en-US" : curLang()); } catch (e) { /* facultatif */ }
+    return { bytes: doc.output("arraybuffer"), name: name.replace(/[^A-Za-z0-9]+/g, "_").replace(/^_+|_+$/g, "") + "_Resume_" + curLang().slice(0, 2).toUpperCase() + ".pdf", lost: lost, pages: doc.getNumberOfPages() };
   }
 
   function exportPdf() {
@@ -1308,6 +1431,7 @@ input[type="color"] { width: 44px; height: 32px; padding: 2px; border: 1px solid
   applyTheme();
   $("toggle").addEventListener("click", function () { setPanel(!state.panelOpen); });
   $("export").addEventListener("click", exportPdf);
+  $("versions").addEventListener("click", toggleMenu);
   window.claude.use("assets").then(function (a) { assetsApi = a; }, function () { assetsApi = null; });
   window.claude.use("downloads").then(function (a) { downloadsApi = a; if (db) render(); }, function () { downloadsApi = null; });
   window.claude.use("db").then(function (store) {
@@ -1315,19 +1439,19 @@ input[type="color"] { width: 44px; height: 32px; padding: 2px; border: 1px solid
     db = store;
     $("toggle").hidden = false;
     var onErr = function () { showError("Could not read the database. Reload the page."); };
-    db.doc("profile/me").onSnapshot(function (s) { state.profile = s.exists ? s.data() : null; render(); }, onErr);
     db.doc("meta/import").onSnapshot(function (s) { state.meta = s.exists ? s.data() : null; render(); }, onErr);
     db.doc("settings/layout").onSnapshot(function (s) {
       state.settings = norm(s.exists ? s.data() : null);
-      applyTheme(); render();
+      recompute(); applyTheme(); render();
       if (state.panelOpen && !panelBusy()) renderPanel();
     }, onErr);
-    COLLS.forEach(function (name) {
-      db.collection(name).onSnapshot(function (snap) {
-        state.data[name] = snap.docs.map(function (d) { return Object.assign({ _id: d.id }, d.data()); });
-        render();
-      }, onErr);
-    });
+    db.collection("versions").onSnapshot(function (snap) {
+      state.versions = {};
+      snap.docs.forEach(function (d) { state.versions[d.id] = d.data(); });
+      recompute(); applyTheme(); render();
+      if (menuOpen) renderMenu();
+      if (state.panelOpen && !panelBusy()) renderPanel();
+    }, onErr);
   }, function () { showError("Database capability unavailable."); });
 })();
 </script>

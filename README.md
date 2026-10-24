@@ -45,11 +45,17 @@ Pensé pour passer les logiciels de recrutement (ATS) : le CV est en anglais par
 
 ### `/thejobfather:thejobfather translate [langue]`
 
-Traduit la fiche dans la langue de votre choix : contenu, titres de rubriques, mois et mots comme « today ». Les noms propres, entreprises, écoles et certifications restent tels quels. La traduction remplace le contenu actuel de l'artefact : pour revenir à la langue d'origine, relancez `init`.
+Traduit la fiche dans la langue de votre choix et enregistre le résultat comme **nouvelle version** : contenu, titres de rubriques, mois et mots comme « today ». Les noms propres, entreprises, écoles et certifications restent tels quels, et les intitulés de poste usuels en anglais aussi. Rien n'est remplacé.
 
-LinkedIn et les sites similaires ne proposent pas d'API publique. Pour un import depuis un site web, le plugin vous demande de passer par [Claude in Chrome](https://claude.com/chrome) : votre session y est déjà ouverte, ce qui facilite la récupération. Si l'extension n'est pas disponible, vous pouvez exporter votre profil en PDF et l'importer comme un CV.
+### Versions
 
-Le lien de l'artefact est conservé dans `~/.thejobfather/config.json` pour les commandes suivantes.
+Chaque CV est une version, nommée avec le drapeau de sa langue : « 🇫🇷 v20261025-1 » (date du jour et numéro). `init` (ajout d'une version) et `translate` créent une nouvelle version et gardent toutes les autres. Dès qu'il y a une version, un menu déroulant à côté de « Customize » permet de :
+
+- lire une version : cliquez dessus, la fiche et l'export PDF suivent ;
+- la supprimer (en deux clics, sauf la dernière) ;
+- enregistrer une copie de la version affichée.
+
+Les modifications faites dans la page (bouton « Edit ») s'appliquent à la version affichée. L'ordre des rubriques, les couleurs et la police sont communs à toutes les versions.
 
 ## Structure
 
