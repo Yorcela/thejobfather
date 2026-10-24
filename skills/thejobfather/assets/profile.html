@@ -1,0 +1,254 @@
+<title>The Job Father</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Fiche de profil : en-tête d'identité, puis colonne chronologique (parcours) et colonne d'index (compétences, langues, certifications). */
+:root {
+  --bg: #f2f4f6;
+  --surface: #ffffff;
+  --ink: #14202b;
+  --muted: #5b6b79;
+  --line: #d9dfe5;
+  --accent: #0b6e6e;
+  --accent-soft: #dcefee;
+  --warn: #8a5a00;
+  --warn-soft: #fbefd3;
+  --font-display: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f171e; --surface: #17222b; --ink: #e8eef3; --muted: #92a3b1; --line: #2a3945;
+    --accent: #5fc4c0; --accent-soft: #163a3b; --warn: #f0c36a; --warn-soft: #3a2f14;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f171e; --surface: #17222b; --ink: #e8eef3; --muted: #92a3b1; --line: #2a3945;
+  --accent: #5fc4c0; --accent-soft: #163a3b; --warn: #f0c36a; --warn-soft: #3a2f14;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink);
+  font: 15px/1.55 var(--font-body);
+  padding-block: 28px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 1040px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+h1, h2, h3 { font-family: var(--font-display); margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(28px, 5vw, 42px); line-height: 1.1; font-weight: 700; }
+h2 { font-size: 13px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+h3 { font-size: 17px; font-weight: 500; line-height: 1.3; }
+p { margin: 0; }
+a { color: var(--accent); }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.mono { font-family: var(--font-mono); font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+header { display: flex; flex-direction: column; gap: 12px; padding-bottom: 24px; border-bottom: 1px solid var(--line); }
+.headline { font-size: 18px; color: var(--muted); max-width: 60ch; }
+.facts { display: flex; flex-wrap: wrap; gap: 6px 18px; }
+.links { display: flex; flex-wrap: wrap; gap: 8px; }
+.links a { padding: 3px 10px; border: 1px solid var(--line); border-radius: 999px; text-decoration: none; font-size: 13px; background: var(--surface); }
+.summary { max-width: 68ch; }
+.source { display: inline-flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; }
+.pill { font-family: var(--font-mono); font-size: 12px; padding: 2px 9px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
+
+.grid { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: 36px; align-items: start; }
+@media (max-width: 760px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+section { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.col { display: flex; flex-direction: column; gap: 32px; min-width: 0; }
+.entry { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 4px 18px; padding-top: 14px; border-top: 1px solid var(--line); }
+@media (max-width: 520px) { .entry { grid-template-columns: minmax(0, 1fr); } }
+.entry .body { display: flex; flex-direction: column; gap: 4px; min-width: 0; overflow-wrap: anywhere; }
+.entry ul { margin: 6px 0 0; padding-left: 18px; }
+.entry li + li { margin-top: 3px; }
+.org { color: var(--muted); }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.tag { font-size: 13px; padding: 2px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+.index-row { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-top: 1px solid var(--line); }
+.cat { display: flex; flex-direction: column; gap: 6px; }
+.empty { padding: 36px 24px; border: 1px dashed var(--line); border-radius: 10px; background: var(--surface); display: flex; flex-direction: column; gap: 8px; }
+.empty code { font-family: var(--font-mono); font-size: 13px; }
+.warnings { padding: 12px 16px; border-radius: 8px; background: var(--warn-soft); color: var(--warn); }
+.warnings ul { margin: 6px 0 0; padding-left: 18px; }
+</style>
+
+<div class="wrap">
+  <div id="empty" class="empty">
+    <h1>Profil en cours de chargement</h1>
+    <p>Lecture de la base de données...</p>
+  </div>
+  <header id="head" hidden></header>
+  <div id="warnings" class="warnings" hidden></div>
+  <div class="grid" id="main" hidden>
+    <div class="col">
+      <section id="s-experiences"></section>
+      <section id="s-projects"></section>
+      <section id="s-education"></section>
+    </div>
+    <div class="col">
+      <section id="s-skills"></section>
+      <section id="s-languages"></section>
+      <section id="s-certifications"></section>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var state = { profile: null, meta: null, experiences: [], education: [], skills: [], languages: [], certifications: [], projects: [] };
+  var $ = function (id) { return document.getElementById(id); };
+
+  function h(tag, cls, text) {
+    var el = document.createElement(tag);
+    if (cls) el.className = cls;
+    if (text != null && text !== "") el.textContent = text;
+    return el;
+  }
+  function safeUrl(u) { return typeof u === "string" && /^https?:\/\//i.test(u) ? u : null; }
+  function period(d) {
+    var a = d.start || "", b = d.current ? "aujourd'hui" : (d.end || "");
+    return a && b ? a + " → " + b : (a || b || "");
+  }
+  function byStartDesc(a, b) { return String(b.start || "").localeCompare(String(a.start || "")); }
+  function clear(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+  function entry(date, titleText, orgText, descText, bullets, tags) {
+    var e = h("div", "entry");
+    e.appendChild(h("div", "mono", date));
+    var b = h("div", "body");
+    b.appendChild(h("h3", null, titleText));
+    if (orgText) b.appendChild(h("div", "org", orgText));
+    if (descText) b.appendChild(h("p", null, descText));
+    if (bullets && bullets.length) {
+      var ul = h("ul");
+      bullets.forEach(function (t) { ul.appendChild(h("li", null, t)); });
+      b.appendChild(ul);
+    }
+    if (tags && tags.length) {
+      var t = h("div", "tags");
+      tags.forEach(function (x) { t.appendChild(h("span", "tag", x)); });
+      b.appendChild(t);
+    }
+    e.appendChild(b);
+    return e;
+  }
+  function fill(id, title, nodes) {
+    var s = $(id); clear(s);
+    if (!nodes.length) { s.hidden = true; return; }
+    s.hidden = false;
+    s.appendChild(h("h2", null, title));
+    nodes.forEach(function (n) { s.appendChild(n); });
+  }
+
+  function render() {
+    var p = state.profile, total = 0;
+    ["experiences", "education", "skills", "languages", "certifications", "projects"].forEach(function (k) { total += state[k].length; });
+
+    if (!p && !total) {
+      $("head").hidden = true; $("main").hidden = true; $("warnings").hidden = true; $("empty").hidden = false;
+      clear($("empty"));
+      $("empty").appendChild(h("h1", null, "Aucun profil importé"));
+      var t = h("p", null, "La base est vide. Lancez ");
+      t.appendChild(h("code", null, "/thejobfather init"));
+      t.appendChild(document.createTextNode(" dans Claude Code pour importer un CV au format PDF ou un profil LinkedIn."));
+      $("empty").appendChild(t);
+      return;
+    }
+    $("empty").hidden = true; $("head").hidden = false; $("main").hidden = false;
+
+    var head = $("head"); clear(head);
+    p = p || {};
+    head.appendChild(h("h1", null, p.fullName || "Profil sans nom"));
+    if (p.headline) head.appendChild(h("p", "headline", p.headline));
+    var facts = h("div", "facts");
+    [p.location, p.email, p.phone, p.website].forEach(function (x) { if (x) facts.appendChild(h("span", "mono", x)); });
+    if (facts.childNodes.length) head.appendChild(facts);
+    var links = (p.links || []).filter(function (l) { return safeUrl(l && l.url); });
+    if (links.length) {
+      var lw = h("div", "links");
+      links.forEach(function (l) {
+        var a = h("a", null, l.label || l.url);
+        a.href = l.url; a.target = "_blank"; a.rel = "noopener noreferrer";
+        lw.appendChild(a);
+      });
+      head.appendChild(lw);
+    }
+    if (p.summary) head.appendChild(h("p", "summary", p.summary));
+    var m = state.meta, w = $("warnings");
+    clear(w); w.hidden = true;
+    if (m) {
+      var src = h("div", "source");
+      src.appendChild(h("span", "pill", m.sourceType === "linkedin" ? "LinkedIn" : "CV PDF"));
+      var when = m.importedAt ? String(m.importedAt).slice(0, 10) : "";
+      src.appendChild(h("span", "mono", [m.sourceRef, when && "importé le " + when].filter(Boolean).join(" · ")));
+      head.appendChild(src);
+      if (m.warnings && m.warnings.length) {
+        w.hidden = false;
+        w.appendChild(h("strong", null, "À vérifier après l'import"));
+        var ul = h("ul");
+        m.warnings.forEach(function (x) { ul.appendChild(h("li", null, x)); });
+        w.appendChild(ul);
+      }
+    }
+
+    fill("s-experiences", "Expériences", state.experiences.slice().sort(byStartDesc).map(function (d) {
+      return entry(period(d), d.title || "Poste", [d.company, d.location, d.employmentType].filter(Boolean).join(" · "), d.description, d.highlights);
+    }));
+    fill("s-projects", "Projets", state.projects.slice().sort(byStartDesc).map(function (d) {
+      return entry(period(d), d.name || "Projet", safeUrl(d.url) ? d.url : "", d.description, null, d.technologies);
+    }));
+    fill("s-education", "Formation", state.education.slice().sort(byStartDesc).map(function (d) {
+      return entry(period(d), [d.degree, d.field].filter(Boolean).join(", ") || "Formation", d.school, d.description);
+    }));
+
+    var cats = {}, order = [];
+    state.skills.forEach(function (d) {
+      var c = d.category || "Compétences";
+      if (!cats[c]) { cats[c] = []; order.push(c); }
+      cats[c].push(d);
+    });
+    fill("s-skills", "Compétences", order.map(function (c) {
+      var box = h("div", "cat");
+      box.appendChild(h("div", "mono", c));
+      var tags = h("div", "tags");
+      cats[c].forEach(function (d) { tags.appendChild(h("span", "tag", d.level ? d.name + " · " + d.level : d.name)); });
+      box.appendChild(tags);
+      return box;
+    }));
+    fill("s-languages", "Langues", state.languages.map(function (d) {
+      var r = h("div", "index-row"); r.appendChild(h("span", null, d.name)); r.appendChild(h("span", "mono", d.level || "")); return r;
+    }));
+    fill("s-certifications", "Certifications", state.certifications.map(function (d) {
+      var r = h("div", "index-row");
+      var left = h("span", null, d.name);
+      if (d.issuer) left.appendChild(h("span", "org", " · " + d.issuer));
+      r.appendChild(left); r.appendChild(h("span", "mono", d.date || ""));
+      return r;
+    }));
+  }
+
+  function showError(msg) {
+    $("empty").hidden = false; $("head").hidden = true; $("main").hidden = true; $("warnings").hidden = true;
+    clear($("empty"));
+    $("empty").appendChild(h("h1", null, "Base de données indisponible"));
+    $("empty").appendChild(h("p", null, msg));
+  }
+
+  window.claude.use("db").then(function (db) {
+    if (!db) { showError("Ouvrez cet artefact connecté à votre compte pour afficher votre profil."); return; }
+    var onErr = function () { showError("Lecture de la base impossible. Rechargez la page."); };
+    db.doc("profile/me").onSnapshot(function (s) { state.profile = s.exists ? s.data() : null; render(); }, onErr);
+    db.doc("meta/import").onSnapshot(function (s) { state.meta = s.exists ? s.data() : null; render(); }, onErr);
+    ["experiences", "education", "skills", "languages", "certifications", "projects"].forEach(function (name) {
+      db.collection(name).onSnapshot(function (snap) {
+        state[name] = snap.docs.map(function (d) { return d.data(); });
+        render();
+      }, onErr);
+    });
+  }, function () { showError("Capacité de base de données indisponible."); });
+})();
+</script>

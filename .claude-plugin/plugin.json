@@ -1,0 +1,11 @@
+{
+  "name": "thejobfather",
+  "version": "0.1.0",
+  "description": "Gérer sa recherche d'emploi avec Claude : profil structuré en base de données, candidatures, relances.",
+  "author": {
+    "name": "Yorcela",
+    "url": "https://github.com/Yorcela"
+  },
+  "repository": "https://github.com/Yorcela/thejobfather",
+  "keywords": ["emploi", "recherche-emploi", "cv", "linkedin", "candidatures"]
+}

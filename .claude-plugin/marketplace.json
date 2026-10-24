@@ -1,0 +1,13 @@
+{
+  "name": "thejobfather",
+  "owner": {
+    "name": "Yorcela"
+  },
+  "plugins": [
+    {
+      "name": "thejobfather",
+      "source": "./",
+      "description": "Gérer sa recherche d'emploi avec Claude : profil structuré en base de données, candidatures, relances."
+    }
+  ]
+}
