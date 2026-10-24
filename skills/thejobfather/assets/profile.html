@@ -18,6 +18,7 @@
   --ui-bg: #ffffff; --ui-ink: #14202b; --ui-muted: #5b6b79; --ui-line: #d3dae1;
   --ui-accent: #0b6e6e; --ui-on-accent: #ffffff; --ui-field: #f4f6f8;
   --warn: #8a5a00; --warn-soft: #fbefd3;
+  --s-high: #1f7a4d; --s-good: #2f6f9e; --s-mid: #9a6700; --s-low: #a8402f;
   --font-display: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
   --font-body: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
@@ -27,6 +28,7 @@
     --ui-bg: #1b2833; --ui-ink: #e8eef3; --ui-muted: #92a3b1; --ui-line: #2f4150;
     --ui-accent: #5fc4c0; --ui-on-accent: #0b1a1a; --ui-field: #223341;
     --warn: #f0c36a; --warn-soft: #3a2f14;
+    --s-high: #6fd49b; --s-good: #7db8e8; --s-mid: #e6b955; --s-low: #f09a8a;
     color-scheme: dark;
   }
 }
@@ -35,6 +37,7 @@
   --ui-bg: #1b2833; --ui-ink: #e8eef3; --ui-muted: #92a3b1; --ui-line: #2f4150;
   --ui-accent: #5fc4c0; --ui-on-accent: #0b1a1a; --ui-field: #223341;
   --warn: #f0c36a; --warn-soft: #3a2f14;
+  --s-high: #6fd49b; --s-good: #7db8e8; --s-mid: #e6b955; --s-low: #f09a8a;
   color-scheme: dark;
 }
 :root[data-font="classic"] { --font-display: "Source Serif 4", Georgia, "Times New Roman", serif; }
@@ -209,10 +212,41 @@ textarea.ie-input { overflow: hidden; }
 .photo-wrap { position: relative; flex: none; }
 .photo-wrap .ie-x { position: absolute; top: -6px; right: -6px; background: var(--paper); border: 1px solid var(--line); border-radius: 50%; width: 22px; height: 22px; padding: 0; opacity: 1; }
 .formpage { width: 100%; background: var(--ui-bg); color: var(--ui-ink); border: 1px solid var(--ui-line); border-radius: 12px; padding: clamp(18px, 4vw, 36px); display: flex; flex-direction: column; gap: 14px; }
+/* Mes offres */
+.page.wide { max-width: 1280px; }
+.formpage.offers h3 { font-family: var(--font-display); font-size: 16px; padding-top: 6px; }
+.formpage.offers h4 { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ui-muted); margin-top: 6px; }
+.score { display: inline-flex; align-items: center; justify-content: center; min-width: 38px; padding: 2px 8px; border-radius: 999px; border: 2px solid currentColor; font-weight: 700; font-size: 14px; flex: none; }
+.s-high { color: var(--s-high); } .s-good { color: var(--s-good); } .s-mid { color: var(--s-mid); } .s-low { color: var(--s-low); }
+.chip { display: inline-block; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--ui-line); font-size: 12px; background: var(--ui-field); color: var(--ui-muted); white-space: nowrap; }
+.chip.st-ok { color: var(--s-high); border-color: currentColor; } .chip.st-mid { color: var(--s-mid); border-color: currentColor; } .chip.st-low { color: var(--s-low); border-color: currentColor; }
+.mrow { border: 1px solid var(--ui-line); border-radius: 8px; background: var(--ui-field); }
+.mtop { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 12px; border: 0; background: none; cursor: pointer; text-align: left; color: var(--ui-ink); }
+.mmain { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.mrow > .analysis, .mrow > .actions { padding: 0 12px 12px; }
+.analysis { display: flex; flex-direction: column; gap: 8px; }
+.analysis ul { padding-left: 20px; display: flex; flex-direction: column; gap: 3px; }
+.an-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.an-warn { padding: 8px 10px; border-radius: 8px; background: var(--warn-soft); color: var(--warn); }
+.an-table { display: flex; flex-direction: column; gap: 6px; }
+.an-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 2px 10px; align-items: baseline; }
+.an-row .why { grid-column: 2 / 4; color: var(--ui-muted); font-size: 13.5px; }
+.kanban { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(220px, 1fr); gap: 10px; overflow-x: auto; padding-bottom: 6px; align-items: start; }
+.kcol { display: flex; flex-direction: column; gap: 8px; padding: 8px; border: 1px solid var(--ui-line); border-radius: 8px; min-height: 120px; min-width: 0; }
+.kcol.over { border-color: var(--ui-accent); background: var(--ui-field); }
+.kcol h3 { font-size: 13px; padding: 0; }
+.kcard { display: flex; flex-direction: column; gap: 4px; padding: 8px; border: 1px solid var(--ui-line); border-radius: 8px; background: var(--ui-field); cursor: grab; overflow-wrap: anywhere; }
+.kcard b { cursor: pointer; }
+.kmeta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.kcard select { font-size: 12.5px; padding: 3px 6px; }
+.kform { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; align-items: center; }
+.od { display: flex; flex-direction: column; gap: 12px; }
+.tl { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+details > summary { cursor: pointer; padding: 4px 0; }
 </style>
 
 <div class="page">
-  <div class="bar"><div class="vwrap"><button id="versions" class="btn" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="vmenu" hidden></button><div id="vmenu" class="vmenu" role="menu" aria-label="Versions" hidden></div></div><button id="export" class="btn" type="button" hidden>Export PDF</button><button id="prefs" class="btn" type="button" hidden>Preferences</button><button id="toggle" class="btn" type="button" aria-expanded="false" aria-controls="panel" hidden>Customize</button></div>
+  <div class="bar"><div class="vwrap"><button id="versions" class="btn" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="vmenu" hidden></button><div id="vmenu" class="vmenu" role="menu" aria-label="Versions" hidden></div></div><button id="export" class="btn" type="button" hidden>Export PDF</button><button id="offers" class="btn" type="button" hidden>My offers</button><button id="prefs" class="btn" type="button" hidden>Preferences</button><button id="toggle" class="btn" type="button" aria-expanded="false" aria-controls="panel" hidden>Customize</button></div>
   <div id="empty" class="empty">
     <h1>Loading profile</h1>
     <p>Reading the database...</p>
@@ -220,6 +254,7 @@ textarea.ie-input { overflow: hidden; }
   <div id="warnings" class="warnings" hidden></div>
   <main id="sheet" class="sheet" hidden></main>
   <section id="prefsView" class="prefs-view" hidden></section>
+  <section id="offersView" class="prefs-view" hidden></section>
 </div>
 
 <aside id="panel" class="panel" aria-label="Customization" hidden></aside>
@@ -258,7 +293,7 @@ textarea.ie-input { overflow: hidden; }
   }
 
   var db = null, assetsApi = null, downloadsApi = null;
-  var state = { profile: null, meta: null, settings: norm(null), data: {}, versions: {}, version: null, activeId: null, panelOpen: false, tab: "sections", prefs: null, answers: {}, view: "resume" };
+  var state = { profile: null, meta: null, settings: norm(null), data: {}, versions: {}, version: null, activeId: null, panelOpen: false, tab: "sections", prefs: null, answers: {}, matches: {}, offers: {}, offersTab: "matches", offerOpen: null, openMatch: null, addingOffer: false, view: "resume" };
   COLLS.forEach(function (c) { state.data[c] = []; });
 
   var $ = function (id) { return document.getElementById(id); };
@@ -460,7 +495,7 @@ textarea.ie-input { overflow: hidden; }
   }
   function renderBar() {
     var b = $("versions");
-    b.hidden = !(db && state.version) || state.view === "prefs";
+    b.hidden = !(db && state.version) || state.view !== "resume";
     if (!b.hidden) b.textContent = versionLabel(state.version) + " \u25BE";
     else if (menuOpen) closeMenu();
   }
@@ -910,28 +945,33 @@ textarea.ie-input { overflow: hidden; }
 
   /* Préférences dans le corps de la page, à la place du CV */
   function syncView() {
-    var prefs = state.view === "prefs";
+    var prefs = state.view === "prefs", offers = state.view === "offers";
     $("prefsView").hidden = !prefs;
+    $("offersView").hidden = !offers;
     $("prefs").textContent = prefs ? "Back to resume" : "Preferences";
-    if (prefs) {
+    $("offers").textContent = offers ? "Back to resume" : "My offers";
+    document.querySelector(".page").classList.toggle("wide", offers);
+    if (prefs || offers) {
       $("sheet").hidden = true; $("warnings").hidden = true; $("empty").hidden = true;
       $("export").hidden = true; $("toggle").hidden = true;
     } else if (db) { $("toggle").hidden = false; }
   }
-  function leavePrefs() {
+  function leaveView() {
     state.view = "resume";
-    clear($("prefsView"));
+    clear($("prefsView")); clear($("offersView"));
     render();
     window.scrollTo(0, 0);
   }
-  function togglePrefs() { if (state.view === "prefs") leavePrefs(); else openPreferencesEditor(); }
+  var leavePrefs = leaveView;
+  function togglePrefs() { if (state.view === "prefs") leaveView(); else openPreferencesEditor(); }
+  function toggleOffers() { if (state.view === "offers") leaveView(); else openOffers(); }
 
   function render() {
     var ae = document.activeElement;
     if (ae && ae.classList && ae.classList.contains("ie-input") && !ae.disabled) { pendingRender = true; return; }
     renderBar();
     syncView();
-    if (state.view === "prefs") return;
+    if (state.view !== "resume") return;
     var p = state.profile, total = 0;
     COLLS.forEach(function (k) { total += state.data[k].length; });
     var sheet = $("sheet");
@@ -1794,11 +1834,383 @@ textarea.ie-input { overflow: hidden; }
     return !!(a && p.contains(a) && /^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName));
   }
 
+  /* ---------- My offers : matchings enregistrés et suivi des candidatures (collections matches et offers) ---------- */
+  var OFFER_STATUSES = [
+    ["not_applied", "Not applied"], ["applied", "Applied"], ["response", "Response received"],
+    ["no_response", "No response"], ["rejected", "Rejected by company"], ["declined", "Declined by me"]
+  ];
+  var TRACKING_PARAM = /^(utm_.*|gclid|fbclid|msclkid|mc_[a-z]+|trk|trackingid|refid|ref|referrer|source|src|campaign|li_.*|ga_.*)$/i;
+  var offersDirty = false;
+
+  /* même normalisation et même empreinte que scripts/offers.py : l'identifiant d'une offre est o-<12 premiers caractères du SHA-1> */
+  function normUrl(url) {
+    var u;
+    try { u = new URL(String(url).trim()); } catch (e) { return null; }
+    var host = u.hostname.toLowerCase().replace(/^www\./, "");
+    var path = u.pathname.replace(/\/+$/, "");
+    var pairs = u.search.replace(/^\?/, "").split("&").filter(Boolean).filter(function (p) { return !TRACKING_PARAM.test(p.split("=")[0]); }).sort();
+    return host + path + (pairs.length ? "?" + pairs.join("&") : "");
+  }
+  function urlHash(url) {
+    var k = normUrl(url);
+    if (k == null) return Promise.reject(new Error("invalid address"));
+    return crypto.subtle.digest("SHA-1", new TextEncoder().encode(k)).then(function (b) {
+      return Array.prototype.map.call(new Uint8Array(b), function (x) { return ("0" + x.toString(16)).slice(-2); }).join("").slice(0, 12);
+    });
+  }
+  function statusLabel(s) { var f = OFFER_STATUSES.filter(function (x) { return x[0] === s; })[0]; return f ? f[1] : "Not applied"; }
+  function scoreClass(n) { return n >= 80 ? "s-high" : n >= 65 ? "s-good" : n >= 50 ? "s-mid" : "s-low"; }
+  function scoreChip(n) { return h("span", "score " + scoreClass(n), String(n)); }
+  function statusClass(s) { return s === "met" || s === "ok" ? "st-ok" : s === "partial" || s === "unknown" ? "st-mid" : "st-low"; }
+  function day(iso) { return String(iso || "").slice(0, 10); }
+  function matchList() {
+    return Object.keys(state.matches).map(function (id) { return Object.assign({ _id: id }, state.matches[id]); })
+      .sort(function (a, b) { return String(b.createdAt || "").localeCompare(String(a.createdAt || "")); });
+  }
+  function offerMatches(offerId) { return matchList().filter(function (m) { return m.offerId === offerId; }); }
+  function offerRows() {
+    return Object.keys(state.offers).map(function (id) { return Object.assign({ _id: id }, state.offers[id]); })
+      .sort(function (a, b) { return String(b.statusUpdatedAt || "").localeCompare(String(a.statusUpdatedAt || "")); });
+  }
+  function saveOffer(id, patch) {
+    if (!db || !state.offers[id]) return Promise.resolve();
+    return db.doc("offers/" + id).update(patch).catch(saveFail);
+  }
+  function setOfferStatus(id, status) {
+    var o = state.offers[id];
+    if (!o || (o.status || "not_applied") === status) return;
+    var now = new Date().toISOString(), ms = offerMatches(id);
+    var patch = { status: status, statusUpdatedAt: now, events: arr(o.events).concat([{ at: now, type: "status", from: o.status || "not_applied", to: status, by: "user" }]) };
+    if (status === "applied" && !o.appliedAt) patch.appliedAt = new Date().toLocaleDateString("en-CA");
+    if (status === "applied" && !o.cvVersionId) patch.cvVersionId = ms.length ? ms[0].versionId : (state.activeId || "");
+    saveOffer(id, patch);
+  }
+  function twoClick(label, doneLabel, fn) {
+    var b = btn(label, "small danger"), armed = false, timer = null;
+    b.addEventListener("click", function () {
+      if (!armed) { armed = true; b.textContent = doneLabel; timer = setTimeout(function () { armed = false; b.textContent = label; }, 3500); return; }
+      clearTimeout(timer); fn();
+    });
+    return b;
+  }
+  function labeled(text, control, id) {
+    var w = h("div", "field"), l = h("label", null, text);
+    if (id) l.setAttribute("for", id);
+    w.appendChild(l); w.appendChild(control);
+    return w;
+  }
+  function bindSave(input, id, key) {
+    input.addEventListener("change", function () { var p = {}; p[key] = input.value.trim(); saveOffer(id, p); });
+  }
+
+  /* l'analyse complète d'un matching : score, groupes, chaque exigence et chaque préférence avec sa preuve, points d'attention */
+  function analysisNode(m) {
+    var box = h("div", "analysis"), head = h("div", "an-head");
+    head.appendChild(scoreChip(m.score));
+    head.appendChild(h("strong", null, m.label || ""));
+    head.appendChild(h("span", "note", [m.mode, m.versionName, day(m.createdAt)].filter(Boolean).join(" · ")));
+    box.appendChild(head);
+    var g = m.groups || {};
+    var gl = [];
+    if (g.requirements) gl.push("Requirements " + g.requirements.points + " / " + g.requirements.max);
+    if (g.preferences) gl.push("Preferences " + g.preferences.points + " / " + g.preferences.max);
+    if (gl.length) box.appendChild(h("p", "note", gl.join(" · ")));
+    if (m.summary) box.appendChild(h("p", null, m.summary));
+    if (arr(m.dealBreakers).length) {
+      var db1 = h("div", "an-warn");
+      db1.appendChild(h("strong", null, "Deal-breaker" + (m.capped ? " (score capped at 25)" : "")));
+      arr(m.dealBreakers).forEach(function (d) { db1.appendChild(h("div", null, [d.type, d.text, d.detail].filter(Boolean).join(" — "))); });
+      box.appendChild(db1);
+    }
+    var items = arr(m.items);
+    [["requirements", "Requirements of the posting"], ["preferences", "Your preferences"]].forEach(function (grp) {
+      var rows = items.filter(function (i) { return i.group === grp[0]; });
+      if (!rows.length) return;
+      box.appendChild(h("h4", null, grp[1]));
+      var t = h("div", "an-table");
+      rows.forEach(function (i) {
+        var r = h("div", "an-row");
+        r.appendChild(h("span", "chip " + statusClass(i.status), i.status));
+        r.appendChild(h("span", null, i.label + (i.kind === "must" ? "" : (i.kind === "nice" ? " (nice to have)" : ""))));
+        r.appendChild(h("span", "note", i.points + " / " + i.max));
+        if (i.detail) r.appendChild(h("span", "why", i.detail + (i.source && i.source !== "cv" ? " [" + i.source + "]" : "")));
+        t.appendChild(r);
+      });
+      box.appendChild(t);
+    });
+    if (!items.length && (arr(m.strengths).length || arr(m.gaps).length)) {
+      [["Strengths", m.strengths], ["Gaps", m.gaps]].forEach(function (x) {
+        if (!arr(x[1]).length) return;
+        box.appendChild(h("h4", null, x[0]));
+        var ul = h("ul");
+        arr(x[1]).forEach(function (i) { ul.appendChild(h("li", null, i.label + (i.detail ? " — " + i.detail : ""))); });
+        box.appendChild(ul);
+      });
+    }
+    function list(title, a) {
+      if (!arr(a).length) return;
+      box.appendChild(h("h4", null, title));
+      var ul = h("ul");
+      arr(a).forEach(function (t) { ul.appendChild(h("li", null, t)); });
+      box.appendChild(ul);
+    }
+    list("Still unclear", arr(m.unclear).map(function (u) { return u.label + (u.detail ? " — " + u.detail : ""); }));
+    list("Points of attention", m.attention);
+    list("What to put forward", m.next && m.next.highlights);
+    list("Questions for the recruiter", m.next && m.next.recruiterQuestions);
+    list("Saved answers relied on", m.answersUsed);
+    return box;
+  }
+
+  function matchesTab(wrap) {
+    var list = matchList();
+    if (!list.length) {
+      wrap.appendChild(h("p", "note", "No matching saved yet. Run /thejobfather:thejobfather match <job posting URL> in Claude Code: each result is saved here with its full analysis."));
+      return;
+    }
+    wrap.appendChild(h("p", "note", "One matching per resume version and job posting. Running match again on the same posting offers to review the previous result, or to compare again with a newer resume version."));
+    var box = h("div", "stack");
+    list.forEach(function (m) {
+      var open = state.openMatch === m._id, row = h("article", "mrow"), p = m.posting || {};
+      var top = h("button", "mtop"); top.type = "button"; top.setAttribute("aria-expanded", open ? "true" : "false");
+      top.appendChild(scoreChip(m.score));
+      var main = h("span", "mmain");
+      main.appendChild(h("b", null, (p.title || "Offer") + (p.company ? " · " + p.company : "")));
+      main.appendChild(h("span", "note", [m.versionName, day(m.createdAt), m.label].filter(Boolean).join(" · ")));
+      top.appendChild(main);
+      var off = state.offers[m.offerId];
+      if (off) top.appendChild(h("span", "chip", statusLabel(off.status)));
+      top.addEventListener("click", function () { state.openMatch = open ? null : m._id; renderOffers(); });
+      row.appendChild(top);
+      if (open) {
+        row.appendChild(analysisNode(m));
+        var act = h("div", "actions");
+        if (safeUrl(m.url)) { var a = h("a", "btn small", "Open the posting"); a.href = m.url; a.target = "_blank"; a.rel = "noopener noreferrer"; act.appendChild(a); }
+        if (off) act.appendChild(btn("Open the application", "small", function () { state.offerOpen = m.offerId; renderOffers(); window.scrollTo(0, 0); }));
+        act.appendChild(h("span", "sp"));
+        act.appendChild(twoClick("Delete this matching", "Confirm deletion", function () {
+          db.doc("matches/" + m._id).delete().then(function () { state.openMatch = null; toast("Matching deleted."); }).catch(saveFail);
+        }));
+        row.appendChild(act);
+      }
+      box.appendChild(row);
+    });
+    wrap.appendChild(box);
+  }
+
+  function offerCard(o) {
+    var c = h("div", "kcard"), ms = offerMatches(o._id);
+    c.draggable = true;
+    c.addEventListener("dragstart", function (e) { e.dataTransfer.setData("text/plain", o._id); e.dataTransfer.effectAllowed = "move"; });
+    var t = h("b", null, o.title || "Untitled offer");
+    t.tabIndex = 0; t.setAttribute("role", "button");
+    function openIt() { state.offerOpen = o._id; renderOffers(); window.scrollTo(0, 0); }
+    t.addEventListener("click", openIt);
+    t.addEventListener("keydown", function (e) { if (e.key === "Enter") openIt(); });
+    c.appendChild(t);
+    if (o.company) c.appendChild(h("span", "note", o.company));
+    var meta = h("div", "kmeta");
+    if (ms.length) meta.appendChild(scoreChip(ms[0].score));
+    if (o.appliedAt) meta.appendChild(h("span", "note", "applied " + o.appliedAt));
+    c.appendChild(meta);
+    var cv = o.cvVersionId && state.versions[o.cvVersionId];
+    if (cv) c.appendChild(h("span", "note", "CV: " + versionLabel(Object.assign({ _id: o.cvVersionId }, cv))));
+    if (arr(o.emails).length) c.appendChild(h("span", "note", "✉ " + arr(o.emails).length + " e-mail" + (arr(o.emails).length > 1 ? "s" : "")));
+    var sel = plainSelect("mv-" + o._id, OFFER_STATUSES, o.status || "not_applied", "Move to");
+    sel.addEventListener("change", function () { setOfferStatus(o._id, sel.value); });
+    c.appendChild(sel);
+    return c;
+  }
+
+  function addOfferForm(wrap) {
+    var f = h("form", "kform");
+    var url = plainInput("ao-url", "", "https://… address of the posting", "Posting address");
+    var title = plainInput("ao-title", "", "Job title", "Job title"), company = plainInput("ao-company", "", "Company", "Company");
+    var err = h("div", "err"); err.hidden = true;
+    var go = h("button", "btn primary small", "Add"); go.type = "submit";
+    f.appendChild(url); f.appendChild(title); f.appendChild(company); f.appendChild(go);
+    f.appendChild(btn("Cancel", "small", function () { state.addingOffer = false; renderOffers(); }));
+    f.appendChild(err);
+    f.addEventListener("submit", function (ev) {
+      ev.preventDefault();
+      var u = url.value.trim();
+      if (!safeUrl(u)) { err.hidden = false; err.textContent = "Enter the address of the posting, starting with http."; return; }
+      urlHash(u).then(function (hash) {
+        var id = "o-" + hash;
+        if (state.offers[id]) { err.hidden = false; err.textContent = "This offer is already tracked."; return null; }
+        var now = new Date().toISOString();
+        return db.doc("offers/" + id).set({ url: u, urlKey: normUrl(u), title: title.value.trim(), company: company.value.trim(), status: "not_applied", statusUpdatedAt: now, createdAt: now, formQA: [], events: [], emails: [] })
+          .then(function () { state.addingOffer = false; toast("Offer added."); });
+      }).catch(saveFail);
+    });
+    wrap.appendChild(f);
+  }
+
+  function kanbanTab(wrap) {
+    var bar = h("div", "actions");
+    bar.appendChild(h("span", "note", "Drag a card to change its status, or use the menu on the card. Click a title to open the application."));
+    bar.appendChild(h("span", "sp"));
+    if (!state.addingOffer) bar.appendChild(btn("+ Add an offer", "small", function () { state.addingOffer = true; renderOffers(); }));
+    wrap.appendChild(bar);
+    if (state.addingOffer) addOfferForm(wrap);
+    var rows = offerRows(), board = h("div", "kanban");
+    if (!rows.length) wrap.appendChild(h("p", "note", "No offer yet. Offers appear here when you run match, or add one yourself."));
+    OFFER_STATUSES.forEach(function (st) {
+      var col = h("section", "kcol"), mine = rows.filter(function (o) { return (o.status || "not_applied") === st[0]; });
+      col.appendChild(h("h3", null, st[1] + " (" + mine.length + ")"));
+      mine.forEach(function (o) { col.appendChild(offerCard(o)); });
+      col.addEventListener("dragover", function (e) { e.preventDefault(); col.classList.add("over"); });
+      col.addEventListener("dragleave", function () { col.classList.remove("over"); });
+      col.addEventListener("drop", function (e) {
+        e.preventDefault(); col.classList.remove("over");
+        var id = e.dataTransfer.getData("text/plain");
+        if (id) setOfferStatus(id, st[0]);
+      });
+      board.appendChild(col);
+    });
+    wrap.appendChild(board);
+  }
+
+  function offerDetail(wrap, id) {
+    var o = state.offers[id], box = h("div", "od");
+    wrap.appendChild(btn("← All offers", "small", function () { state.offerOpen = null; renderOffers(); }));
+    var title = plainInput("od-title", o.title, "Job title", "Job title"), company = plainInput("od-company", o.company, "Company", "Company");
+    bindSave(title, id, "title"); bindSave(company, id, "company");
+    var p1 = h("div", "pair");
+    p1.appendChild(labeled("Job title", title, "od-title")); p1.appendChild(labeled("Company", company, "od-company"));
+    box.appendChild(p1);
+    if (safeUrl(o.url)) {
+      var a = h("a", null, o.url); a.href = o.url; a.target = "_blank"; a.rel = "noopener noreferrer";
+      var pa = h("p", "note"); pa.appendChild(a); box.appendChild(pa);
+    }
+
+    var sel = plainSelect("od-status", OFFER_STATUSES, o.status || "not_applied", "Status");
+    sel.addEventListener("change", function () { setOfferStatus(id, sel.value); });
+    var applied = plainInput("od-applied", o.appliedAt, "", "Applied on"); applied.type = "date"; bindSave(applied, id, "appliedAt");
+    var p2 = h("div", "pair");
+    p2.appendChild(labeled("Status", sel, "od-status")); p2.appendChild(labeled("Applied on", applied, "od-applied"));
+    box.appendChild(p2);
+
+    box.appendChild(h("h3", null, "Resume sent"));
+    var cv = document.createElement("select"); cv.id = "od-cv"; cv.setAttribute("aria-label", "Resume version sent");
+    var none = h("option", null, "(not set)"); none.value = ""; cv.appendChild(none);
+    versionList().forEach(function (v) { var op = h("option", null, versionLabel(v)); op.value = v._id; if (v._id === o.cvVersionId) op.selected = true; cv.appendChild(op); });
+    cv.addEventListener("change", function () { saveOffer(id, { cvVersionId: cv.value }); });
+    var cvRow = h("div", "actions");
+    cvRow.appendChild(cv);
+    var openCv = btn("Open this version of the resume", "small", function () { selectVersion(o.cvVersionId); leaveView(); });
+    openCv.disabled = !(o.cvVersionId && state.versions[o.cvVersionId]);
+    cvRow.appendChild(openCv);
+    box.appendChild(cvRow);
+
+    var ms = offerMatches(id);
+    box.appendChild(h("h3", null, "Matching analysis"));
+    if (!ms.length) box.appendChild(h("p", "note", "No matching saved for this offer. Run /thejobfather:thejobfather match with its address."));
+    ms.forEach(function (m, i) {
+      var d = document.createElement("details"); if (i === 0) d.open = true;
+      var s = document.createElement("summary");
+      s.appendChild(scoreChip(m.score)); s.appendChild(document.createTextNode(" " + [m.versionName, day(m.createdAt), m.label].filter(Boolean).join(" · ")));
+      d.appendChild(s); d.appendChild(analysisNode(m));
+      box.appendChild(d);
+    });
+
+    box.appendChild(h("h3", null, "Application form"));
+    box.appendChild(h("p", "note", "Keep the questions of the form and the answers you gave, to say the same thing during a call."));
+    var qaBox = h("div", "stack"), qaRows = [];
+    function commitQA() {
+      saveOffer(id, { formQA: qaRows.map(function (r) { return { q: r.q.value.trim(), a: r.a.value.trim() }; }).filter(function (x) { return x.q || x.a; }) });
+    }
+    function addQA(q, ans) {
+      var r = h("div", "grp"), rec = { q: plainInput("qa-q-" + Date.now() + "-" + qaRows.length, q, "Question", "Question"), a: document.createElement("textarea") };
+      rec.a.value = ans || ""; rec.a.placeholder = "Your answer"; rec.a.rows = 3; rec.a.setAttribute("aria-label", "Answer");
+      rec.q.addEventListener("change", commitQA); rec.a.addEventListener("change", commitQA);
+      var rm = btn("Remove this question", "small", function () { qaRows.splice(qaRows.indexOf(rec), 1); qaBox.removeChild(r); commitQA(); });
+      r.appendChild(rec.q); r.appendChild(rec.a); r.appendChild(rm);
+      qaRows.push(rec); qaBox.appendChild(r);
+    }
+    arr(o.formQA).forEach(function (x) { addQA(x.q, x.a); });
+    box.appendChild(qaBox);
+    box.appendChild(btn("Add a question", "small", function () { addQA("", ""); }));
+
+    var cl = document.createElement("textarea"); cl.id = "od-cover"; cl.rows = 6; cl.value = o.coverLetter || ""; cl.placeholder = "Cover letter or message sent with the application";
+    cl.addEventListener("change", function () { saveOffer(id, { coverLetter: cl.value.trim() }); });
+    box.appendChild(labeled("Cover letter or message sent", cl, "od-cover"));
+    var notes = document.createElement("textarea"); notes.id = "od-notes"; notes.rows = 5; notes.value = o.notes || ""; notes.placeholder = "Contacts, interview notes, things to remember for the next call";
+    notes.addEventListener("change", function () { saveOffer(id, { notes: notes.value.trim() }); });
+    box.appendChild(labeled("Notes", notes, "od-notes"));
+
+    box.appendChild(h("h3", null, "History"));
+    var tl = [];
+    arr(o.events).forEach(function (e) {
+      var text = e.type === "status" ? "Status: " + statusLabel(e.from) + " → " + statusLabel(e.to) + (e.by === "gmail" ? " (found in Gmail)" : "") : (e.note || e.type);
+      tl.push({ at: e.at, text: text });
+    });
+    arr(o.emails).forEach(function (m) { tl.push({ at: m.date, mail: m }); });
+    tl.sort(function (x, y) { return String(y.at || "").localeCompare(String(x.at || "")); });
+    if (tl.length) {
+      var ul = h("ul", "tl");
+      tl.forEach(function (e) {
+        var li = h("li");
+        li.appendChild(h("span", "note", day(e.at) + "  "));
+        if (e.mail) {
+          li.appendChild(h("b", null, "✉ " + (e.mail.subject || "(no subject)")));
+          li.appendChild(h("span", "note", "  — " + (e.mail.from || "") + (e.mail.kind ? " · " + e.mail.kind : "")));
+          if (e.mail.snippet) li.appendChild(h("div", "note", e.mail.snippet));
+        } else { li.appendChild(document.createTextNode(e.text)); }
+        ul.appendChild(li);
+      });
+      box.appendChild(ul);
+    } else { box.appendChild(h("p", "note", "Nothing yet.")); }
+    box.appendChild(h("p", "note", "To look for replies in your mailbox, run /thejobfather:thejobfather track in Claude Code (Gmail, read-only)." + (o.lastEmailCheck ? " Last check: " + day(o.lastEmailCheck) + "." : "")));
+
+    var danger = h("div", "actions");
+    danger.appendChild(twoClick("Delete this offer and its matchings", "Confirm deletion", function () {
+      var ops = offerMatches(id).map(function (m) { return db.doc("matches/" + m._id).delete(); });
+      ops.push(db.doc("offers/" + id).delete());
+      Promise.all(ops).then(function () { state.offerOpen = null; toast("Offer deleted."); }).catch(saveFail);
+    }));
+    box.appendChild(danger);
+    wrap.appendChild(box);
+  }
+
+  function renderOffers() {
+    var mount = $("offersView"), ae = document.activeElement;
+    if (ae && mount.contains(ae) && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName)) { offersDirty = true; return; }
+    offersDirty = false;
+    clear(mount);
+    var wrap = h("div", "formpage offers");
+    wrap.appendChild(h("h2", null, "My offers"));
+    if (state.offerOpen && state.offers[state.offerOpen]) {
+      offerDetail(wrap, state.offerOpen);
+    } else {
+      state.offerOpen = null;
+      var tabs = h("div", "tabs"); tabs.setAttribute("role", "tablist");
+      [["matches", "Matchings (" + Object.keys(state.matches).length + ")"], ["kanban", "Applications (" + Object.keys(state.offers).length + ")"]].forEach(function (t) {
+        var b = h("button", "tab", t[1]); b.type = "button"; b.setAttribute("role", "tab");
+        b.setAttribute("aria-selected", state.offersTab === t[0] ? "true" : "false");
+        b.addEventListener("click", function () { state.offersTab = t[0]; renderOffers(); });
+        tabs.appendChild(b);
+      });
+      wrap.appendChild(tabs);
+      if (state.offersTab === "matches") matchesTab(wrap); else kanbanTab(wrap);
+    }
+    mount.appendChild(wrap);
+  }
+  function openOffers() {
+    if (!db) return;
+    if (state.panelOpen) setPanel(false);
+    state.view = "offers";
+    render();
+    renderOffers();
+    window.scrollTo(0, 0);
+  }
+
   applyTheme();
   $("toggle").addEventListener("click", function () { setPanel(!state.panelOpen); });
   $("export").addEventListener("click", exportPdf);
   $("versions").addEventListener("click", toggleMenu);
   $("prefs").addEventListener("click", togglePrefs);
+  $("offers").addEventListener("click", toggleOffers);
   window.claude.use("assets").then(function (a) { assetsApi = a; }, function () { assetsApi = null; });
   window.claude.use("downloads").then(function (a) { downloadsApi = a; if (db) render(); }, function () { downloadsApi = null; });
   window.claude.use("db").then(function (store) {
@@ -1806,9 +2218,21 @@ textarea.ie-input { overflow: hidden; }
     db = store;
     $("toggle").hidden = false;
     $("prefs").hidden = false;
+    $("offers").hidden = false;
     var onErr = function () { showError("Could not read the database. Reload the page."); };
     db.doc("meta/import").onSnapshot(function (s) { state.meta = s.exists ? s.data() : null; render(); }, onErr);
     db.doc("settings/preferences").onSnapshot(function (s) { state.prefs = s.exists ? s.data() : null; }, onErr);
+    function refreshOffers() { if (state.view === "offers") renderOffers(); }
+    db.collection("matches").onSnapshot(function (snap) {
+      state.matches = {};
+      snap.docs.forEach(function (d) { state.matches[d.id] = d.data(); });
+      refreshOffers();
+    }, onErr);
+    db.collection("offers").onSnapshot(function (snap) {
+      state.offers = {};
+      snap.docs.forEach(function (d) { state.offers[d.id] = d.data(); });
+      refreshOffers();
+    }, onErr);
     db.collection("answers").onSnapshot(function (snap) {
       state.answers = {};
       snap.docs.forEach(function (d) { state.answers[d.id] = d.data(); });

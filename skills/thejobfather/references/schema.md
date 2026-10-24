@@ -11,6 +11,8 @@ Places:
 | `meta/import` | trace of the last import and warnings | `init`, the page (`dismissed`) |
 | `settings/preferences` | the user's job preferences, used by `match` | the page ("Preferences" button); commands only read it |
 | `answers/<id>` | answers the user gave to `match` questions, kept for a while | `match`; the page (to forget one) |
+| `matches/<id>` | one saved matching (resume version + posting), with the whole analysis | `match`; the page (to delete) |
+| `offers/<id>` | one tracked job offer and its application | `match` (creates it), `track`; the page (status, form answers, notes) |
 
 There are no longer top-level `profile`, `experiences`, etc. collections: the whole content of a resume lives in its `versions/<id>` document.
 
@@ -145,6 +147,46 @@ One document per topic the user answered about in `match`, so the same question 
 | `expiresAt` | string | ISO date, computed with `scripts/answers.py ttl <verdict>`: 7 days for `refused` and `accepted`, 90 for `lacks` and `partial`, 365 for `has` |
 
 An answer whose `expiresAt` is in the past is ignored by `match` and hidden by the page.
+
+## `matches/<id>` and `offers/<id>`
+
+Written by `scripts/offers.py build`, never by hand. The page "My offers" lists them: the matchings tab shows `matches`, the applications board shows `offers`.
+
+**Identifiers.** The posting's address is normalized (host in lower case without `www.`, path without trailing slash, query string without tracking parameters such as `utm_*`, `gclid`, `ref`, the remaining pairs sorted, fragment dropped) and hashed: `hash` = the first 12 characters of the SHA-1. The offer is `offers/o-<hash>`, and the matching is `matches/<versionId>--<hash>`: **one matching per resume version and posting**. `scripts/offers.py key <url>` prints them; the page computes the same values (`normUrl`, `urlHash`).
+
+### `matches/<versionId>--<hash>`
+
+| Field | Type | Note |
+|---|---|---|
+| `offerId`, `url`, `urlKey` | string | the offer it belongs to, the address as given, the normalized address |
+| `versionId`, `versionName` | string | the resume version that was compared |
+| `createdAt` | string | ISO date |
+| `posting` | object | `title`, `company`, `location`, `work_mode`, `salary`, `contract`, `sector` as read from the posting |
+| `score`, `label`, `mode` | number, string, string | from `match_score.py`: `strong`/`good`/`partial`/`weak`, `requirements+preferences` or `requirements` |
+| `groups`, `capped`, `dealBreakers` | object, bool, array | points per group, whether the cap applied, deal-breakers found |
+| `summary` | string | why this score, in two or three sentences |
+| `items` | array | the whole analysis: every requirement and preference with `group`, `label`, `kind`, `status`, `weight`, `max`, `points`, `lost`, `detail` (the evidence) and `source` (`cv`, `user`, `saved answer`, `posting`) |
+| `strengths`, `gaps`, `unclear` | array | the top items, as reported |
+| `attention` | `string[]` | points of attention that are not scored |
+| `next` | object | `highlights` (what to put forward), `recruiterQuestions` |
+| `answersUsed` | `string[]` | the saved answers relied on |
+
+### `offers/o-<hash>`
+
+| Field | Type | Note |
+|---|---|---|
+| `url`, `urlKey`, `title`, `company` | string | the page lets the user fix `title` and `company` |
+| `status` | string | `not_applied` (default), `applied`, `response`, `no_response`, `rejected` (by the company), `declined` (by the user) |
+| `statusUpdatedAt`, `createdAt` | string | ISO dates |
+| `appliedAt` | string | `YYYY-MM-DD`, set when the status first becomes `applied` |
+| `cvVersionId` | string | the resume version sent (defaults to the version of the latest matching); the page can open it |
+| `formQA` | `[{q, a}]` | the application form: questions and the answers given, to say the same thing during a call |
+| `coverLetter`, `notes` | string | |
+| `events` | array | history: `{at, type: "status", from, to, by}` with `by` = `user` or `gmail` |
+| `emails` | array | found by `track`: `{date, from, subject, kind, snippet}`, `kind` = `response`, `rejected` or `ack`; snippet at most 200 characters, never a whole message |
+| `lastEmailCheck` | string | ISO date of the last `track` |
+
+When `match` runs again on a posting whose offer exists, the offer is kept as it is: status, form answers and history belong to the user.
 
 ## `meta/import`
 

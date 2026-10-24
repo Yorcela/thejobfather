@@ -61,6 +61,17 @@ Le score a deux parties : les exigences de l'annonce face à votre CV (60 points
 
 Comme pour `ats_score`, le calcul est fait par un script (`skills/thejobfather/scripts/match_score.py`) à partir de l'analyse de la commande, et le barème est dans `skills/thejobfather/references/match.md`. C'est une estimation, pas une prédiction d'embauche.
 
+### Mes offres et suivi des candidatures
+
+Le bouton « My offers » de l'artefact affiche deux onglets :
+
+- **Matchings** : chaque `match` est enregistré avec son score et **toute l'analyse** (chaque exigence et chaque préférence avec sa preuve, points d'attention, ce qu'il faut mettre en avant, questions au recruteur). Il y a un matching par version du CV et par annonce, identifiée par son adresse (les paramètres de suivi comme `utm_*` et la barre finale sont ignorés). Si vous relancez `match` sur une annonce déjà comparée, la commande propose de revoir le matching précédent, ou d'en refaire un (par exemple avec une version plus récente du CV).
+- **Applications** : un tableau kanban (pas postulé, postulé, réponse reçue, sans réponse, refusé par l'entreprise, refusé par moi). Glissez une carte ou utilisez son menu pour changer le statut ; « + Add an offer » ajoute une offre à la main. Chaque candidature s'ouvre sur sa fiche : statut et date, **version du CV envoyée** (avec un lien pour l'ouvrir), analyse de matching, **formulaire de candidature** (questions et réponses données, pour dire la même chose lors d'un call), lettre de motivation, notes et historique.
+
+### `/thejobfather:thejobfather track`
+
+Suivi des réponses : la commande cherche dans votre Gmail (connecteur Gmail de Claude, en lecture seule, avec votre accord avant toute lecture) les messages reçus après chaque candidature, les classe (réponse, refus, simple accusé de réception), et vous propose de mettre à jour le statut. Rien n'est modifié sans votre validation, seules les métadonnées utiles (date, expéditeur, objet, un court extrait) sont gardées, et elle propose « sans réponse » après environ 21 jours de silence.
+
 ### Préférences d'emploi
 
 Le bouton « Preferences » de l'artefact affiche, à la place du CV, un formulaire pour saisir ce que vous cherchez (« Back to resume » pour revenir au CV). Tout est facultatif, et les préférences sont communes à toutes les versions du CV :
@@ -87,8 +98,8 @@ Les modifications faites dans la page (édition sur place) s'appliquent à la ve
 ```
 .claude-plugin/plugin.json          manifeste du plugin
 .claude-plugin/marketplace.json     permet l'installation depuis ce dépôt
-skills/thejobfather/SKILL.md        commande /thejobfather et sous-commandes init, translate, ats_score, match
+skills/thejobfather/SKILL.md        commande /thejobfather et sous-commandes init, translate, ats_score, match, track
 skills/thejobfather/references/     schéma de la base de données, barèmes des scores ATS et de matching
-skills/thejobfather/scripts/        calcul des scores ATS et de matching
+skills/thejobfather/scripts/        calcul des scores ATS et de matching, identifiants des offres
 skills/thejobfather/assets/         page de l'artefact
 ```
