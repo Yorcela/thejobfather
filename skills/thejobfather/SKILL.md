@@ -1,157 +1,157 @@
 ---
 name: thejobfather
-description: Assistant de recherche d'emploi. Sous-commandes : `init`, qui importe le profil de l'utilisateur (CV PDF ou site web comme LinkedIn, via Claude in Chrome) dans la base de données d'un artefact, en anglais par défaut ; `translate`, qui traduit ce profil dans la langue de son choix en créant une nouvelle version, sans rien remplacer ; `ats_score`, qui calcule un score ATS du CV (générique ou ciblé sur une offre d'emploi) et propose des améliorations. À utiliser quand l'utilisateur tape /thejobfather, parle d'initialiser son profil de recherche d'emploi, de traduire son CV ou d'évaluer sa compatibilité ATS.
-argument-hint: init | translate [langue] | ats_score [offre]
+description: Job search assistant. Subcommands: `init`, which imports the user's profile (PDF resume or a website such as LinkedIn, via Claude in Chrome) into an artifact database, in English by default; `translate`, which translates that profile into the language of their choice by creating a new version, replacing nothing; `ats_score`, which computes an ATS score for the resume (generic or targeted at a job posting) and suggests improvements. Use when the user types /thejobfather, talks about setting up their job search profile, translating their resume, or checking their ATS compatibility.
+argument-hint: init | translate [language] | ats_score [job posting]
 ---
 
 # The Job Father
 
-Point d'entrée du plugin. Le premier argument est la sous-commande : `$ARGUMENTS`
+Entry point of the plugin. Arguments received: `$ARGUMENTS`. The first word is the subcommand, the rest is its complement.
 
-- `init` : voir ci-dessous.
-- `translate` : voir tout en bas. Le reste de l'argument est la langue demandée.
-- `ats_score` : voir tout en bas. Le reste de l'argument est l'offre d'emploi (URL, chemin de fichier ou texte) et éventuellement le chemin d'un PDF.
-- vide ou inconnue : dire en une phrase que `init`, `translate` et `ats_score` existent et proposer de lancer `init`.
+- `init`: see below.
+- `translate`: see the bottom of this file. The rest of the arguments is the requested language.
+- `ats_score`: see the bottom of this file. The rest of the arguments is the job posting (URL, file path or text) and possibly the path of a PDF.
+- empty or unknown: say in one sentence that `init`, `translate` and `ats_score` exist and offer to run `init`.
 
-Répondre en français.
+Reply in the user's language. The questions and button labels written in quotes below are given in English: say them in the user's language.
 
 ## `init`
 
-Objectif : lire toutes les données de profil de l'utilisateur dans la source qu'il choisit, et les stocker dans la base de données d'un artefact, sous la forme d'une **nouvelle version** du CV. L'artefact sert ensuite de référence pour tout le reste de la recherche d'emploi, et garde l'historique de ses versions.
+Goal: read all of the user's profile data from the source they choose, and store it in an artifact database as a **new version** of the resume. The artifact then serves as the reference for the rest of the job search, and keeps the history of its versions.
 
-Le schéma exact des documents est dans [references/schema.md](references/schema.md). Le lire avant l'étape 3.
+The exact document schema is in [references/schema.md](references/schema.md). Read it before step 3.
 
-### 1. Reprise éventuelle
+### 1. Resuming
 
-Lire `~/.thejobfather/config.json` s'il existe (clé `artifactUrl`). S'il existe, demander avec AskUserQuestion : « Ajouter une nouvelle version » (réimporter dans le même artefact : les versions existantes sont conservées) ou « Repartir de zéro » (nouvel artefact). Ne jamais supprimer l'ancien artefact ni une version sans demande explicite.
+Read `~/.thejobfather/config.json` if it exists (key `artifactUrl`). If it does, ask with AskUserQuestion: "Add a new version" (re-import into the same artifact: existing versions are kept) or "Start from scratch" (new artifact). Never delete the old artifact or a version without an explicit request.
 
-### 2. Choix de la source
+### 2. Choosing the source
 
-Poser la question avec AskUserQuestion : « D'où voulez-vous importer votre profil ? »
+Ask with AskUserQuestion: "Where do you want to import your profile from?"
 
-- **CV au format PDF** : demander le chemin du fichier (champ « Other » ou message suivant).
-- **Site web (LinkedIn par exemple)** : demander l'URL de la page de profil, puis voir « Source site web » plus bas.
+- **PDF resume**: ask for the file path ("Other" field or next message).
+- **Website (LinkedIn for example)**: ask for the URL of the profile page, then see "Website source" below.
 
 ### 3. Extraction
 
-**CV PDF.** Lire le fichier avec l'outil Read (paramètre `pages` par tranches de 20 pages si besoin). Si le PDF est illisible (scan sans texte), le dire et demander un autre fichier.
+**PDF resume.** Read the file with the Read tool (`pages` parameter in chunks of 20 pages if needed). If the PDF is unreadable (scan without text), say so and ask for another file.
 
-**Source site web (LinkedIn par exemple).** Ces sites n'ont pas d'API publique et bloquent la lecture automatisée. La récupération passe par **Claude in Chrome** (outils `mcp__claude-in-chrome__*`, à charger via ToolSearch s'ils sont différés), car la session de l'utilisateur y est déjà ouverte. Ne pas utiliser le navigateur intégré ni WebFetch pour cette source.
+**Website source (LinkedIn for example).** These sites have no public API and block automated reading. Retrieval goes through **Claude in Chrome** (`mcp__claude-in-chrome__*` tools, to be loaded with ToolSearch if deferred), because the user's session is already open there. Do not use the built-in browser or WebFetch for this source.
 
-1. Demander explicitement à l'utilisateur de passer par Claude in Chrome pour faciliter la récupération : lui dire d'ouvrir Chrome avec l'extension Claude in Chrome activée et d'être connecté au site concerné. Attendre sa confirmation (AskUserQuestion : « Claude in Chrome est prêt » ou « Je préfère un export PDF »).
-2. Si les outils Claude in Chrome ne sont pas disponibles ou ne se connectent pas, l'indiquer, rappeler comment l'installer (extension Claude in Chrome depuis le Chrome Web Store, puis connexion à Claude Code), et proposer de réessayer ou de passer à l'option 4.
-3. Une fois connecté : ouvrir l'URL dans un nouvel onglet, lire la page avec `get_page_text`, et déplier les sections du type « Afficher tout » pour obtenir les expériences, formations et compétences complètes. Ne jamais saisir d'identifiants. Si le site demande une connexion, s'arrêter, demander à l'utilisateur de se connecter lui-même dans Chrome, puis reprendre.
-4. En dernier recours, demander à l'utilisateur d'exporter son profil en PDF (sur LinkedIn : bouton « Ressources » ou « Plus » puis « Enregistrer au format PDF ») et traiter ce fichier comme un CV PDF.
+1. Explicitly ask the user to go through Claude in Chrome to make retrieval easier: tell them to open Chrome with the Claude in Chrome extension enabled and to be signed in to the site. Wait for their confirmation (AskUserQuestion: "Claude in Chrome is ready" or "I prefer a PDF export").
+2. If the Claude in Chrome tools are not available or fail to connect, say so, remind them how to install it (the Claude in Chrome extension from the Chrome Web Store, then connect it to Claude Code), and offer to retry or to move on to option 4.
+3. Once connected: open the URL in a new tab, read the page with `get_page_text`, and expand sections such as "Show all" (or the equivalent in the site's language) to get the complete experiences, education and skills. Never type credentials. If the site asks for a sign-in, stop, ask the user to sign in themselves in Chrome, then resume.
+4. As a last resort, ask the user to export their profile as a PDF (on LinkedIn: "Resources" or "More" button, then "Save to PDF") and treat that file as a PDF resume.
 
-Ne pas utiliser de données trouvées ailleurs sur le web.
+Do not use data found elsewhere on the web.
 
-**Règles d'extraction** (les deux sources) :
+**Extraction rules** (both sources):
 
-- Ne reprendre que ce que la source dit. Ne rien déduire, ne rien embellir, ne pas inventer de dates, de chiffres ni de niveaux.
-- Ce qui est ambigu ou illisible va dans `meta/import.warnings`, pas dans une valeur devinée. Les avertissements sont affichés tels quels dans la page : les écrire en anglais.
-- L'âge, s'il est écrit dans la source, va dans `profile.age` de la version (nombre). Ne jamais le calculer à partir d'une date de naissance.
-- Le CV est en anglais par défaut. Si la source est dans une autre langue, traduire fidèlement en anglais (sans embellir ni condenser), en laissant tels quels les noms propres, entreprises, écoles, produits, technologies et intitulés officiels de certifications. Noter dans `meta/import.warnings` « Translated from <language> to English ». Les dates restent au format `YYYY-MM`, la page se charge de l'affichage.
-- Recoller les lignes coupées naturellement. Une source PDF ou web coupe ses phrases à la largeur de la page : ces retours ne sont pas des paragraphes. Un paragraphe ou une puce est une seule chaîne sans retour à la ligne. Ne séparer par une ligne vide que de vrais paragraphes (`summary`, `description`).
-- Si le nom complet n'est pas trouvé, arrêter et le dire : la source n'est probablement pas un profil.
-- Reprendre la structure de la source. Quand un poste range ses puces sous des sous-titres (ex. « Responsabilités », « Activités », « Résultats »), les garder dans `groups`. Quand l'entreprise est accompagnée d'une description, la mettre dans `companyDescription`. Les entreprises ou projets personnels et entrepreneuriaux vont dans `projects` (avec `role`), pas dans `experiences`.
-- Les loisirs, hobbies ou centres d'intérêt vont dans `hobbies`. Ne rien créer si la source n'en a pas.
+- Only take what the source says. Do not infer, do not embellish, do not invent dates, figures or levels.
+- Anything ambiguous or unreadable goes into `meta/import.warnings`, not into a guessed value. Warnings are shown as-is in the page: write them in English.
+- The age, if the source states it, goes into the version's `profile.age` (number). Never compute it from a birth date.
+- The resume is in English by default. If the source is in another language, translate it faithfully into English (without embellishing or condensing), leaving proper nouns, companies, schools, products, technologies and official certification titles as they are. Add "Translated from <language> to English" to `meta/import.warnings`. Dates stay in `YYYY-MM` format, the page takes care of the display.
+- Re-join lines that wrapped naturally. A PDF or web source breaks its sentences at the page width: these breaks are not paragraphs. A paragraph or a bullet is a single string with no line break. Only separate real paragraphs (`summary`, `description`) with a blank line.
+- If the full name is not found, stop and say so: the source is probably not a profile.
+- Keep the structure of the source. When a job lists its bullets under subheadings (e.g. "Responsibilities", "Activities", "Results"), keep them in `groups`. When the company comes with a description, put it in `companyDescription`. Personal and entrepreneurial companies or projects go in `projects` (with `role`), not in `experiences`.
+- Hobbies and interests go in `hobbies`. Create nothing if the source has none.
 
-### 3 bis. Photo de profil
+### 3 bis. Profile photo
 
-La photo est facultative et toujours le choix de l'utilisateur. Avant de poser la question, repérer ce qui est disponible :
+The photo is optional and always the user's choice. Before asking, find out what is available:
 
-- **Source site web** : la photo de profil du site est disponible. La repérer dans la page déjà ouverte avec Claude in Chrome (`find` ou `read_page`), en prenant l'image principale de l'en-tête du profil et non celles des suggestions ou des contacts.
-- **Source CV PDF** : chercher une photo dans le PDF, par exemple avec `pdfimages -png -f 1 -l 1 <cv.pdf> <préfixe>` (ou, à défaut, Python avec PyMuPDF lancé avec `-I`), en écrivant les images dans le dossier scratchpad. Regarder les candidates avec Read et ne retenir qu'un portrait. Si aucune photo n'est trouvée, ne pas proposer cette option.
+- **Website source**: the site's profile photo is available. Locate it in the page already open with Claude in Chrome (`find` or `read_page`), taking the main image of the profile header, not the ones for suggestions or contacts.
+- **PDF resume source**: look for a photo in the PDF, for example with `pdfimages -png -f 1 -l 1 <resume.pdf> <prefix>` (or, failing that, Python with PyMuPDF run with `-I`), writing the images to the scratchpad folder. Look at the candidates with Read and keep only a portrait. If no photo is found, do not offer that option.
 
-Poser la question avec AskUserQuestion : « Quelle photo utiliser pour votre profil ? » avec les options qui s'appliquent :
+Ask with AskUserQuestion: "Which photo should be used for your profile?" with the options that apply:
 
-- **Reprendre ma photo du site** (source site web uniquement).
-- **Reprendre la photo de mon CV** (source CV PDF avec photo trouvée uniquement).
-- **Partager une autre photo** : demander le chemin d'un fichier image (PNG, JPEG ou WebP, 20 Mio maximum) et vérifier avec Read qu'il s'agit bien d'une image.
-- **Sans photo**.
-- **Garder la photo actuelle** (ajout d'une version à un artefact dont la version affichée a un `profile.photoAssetId` renseigné uniquement).
+- **Use my photo from the website** (website source only).
+- **Use the photo from my resume** (PDF source with a photo found only).
+- **Share another photo**: ask for the path of an image file (PNG, JPEG or WebP, 20 MiB maximum) and check with Read that it really is an image.
+- **No photo**.
+- **Keep the current photo** (adding a version to an artifact whose displayed version has a `profile.photoAssetId` set only).
 
-Obtention du fichier :
+Getting the file:
 
-- **Photo du site** : lire l'attribut `src` de l'image avec `javascript_tool`, puis la télécharger avec `curl` dans un dossier neuf du scratchpad, en demandant la plus grande taille disponible. Si le téléchargement échoue, le dire et reproposer « Partager une autre photo » ou « Sans photo ».
-- **Photo du CV** : l'image extraite ci-dessus.
+- **Website photo**: read the image's `src` attribute with `javascript_tool`, then download it with `curl` into a new scratchpad folder, asking for the largest available size. If the download fails, say so and offer "Share another photo" or "No photo" again.
+- **Resume photo**: the image extracted above.
 
-Garder le fichier en local : il est envoyé à l'étape 4, une fois l'artefact publié. Ne jamais utiliser une photo trouvée ailleurs que dans la source choisie ou fournie par l'utilisateur. Avec « Sans photo », ne rien envoyer et mettre `photoAssetId` à `null`.
+Keep the file locally: it is uploaded in step 4, once the artifact is published. Never use a photo found anywhere other than the chosen source or provided by the user. With "No photo", upload nothing and set `photoAssetId` to `null`.
 
-### 4. Création de l'artefact
+### 4. Creating the artifact
 
-Charger les skills `artifact-capabilities` puis `artifact-design` si ce n'est pas déjà fait.
+Load the `artifact-capabilities` then `artifact-design` skills if not already done.
 
-Publier avec l'outil Artifact le fichier `skills/thejobfather/assets/profile.html` de ce plugin (chemin sous `${CLAUDE_PLUGIN_ROOT}`), sans le modifier :
+Publish with the Artifact tool the file `skills/thejobfather/assets/profile.html` of this plugin (path under `${CLAUDE_PLUGIN_ROOT}`), without modifying it:
 
-- `capabilities`: `{"db": {"rules": [{"path": "", "read": "owner", "write": "owner"}]}, "assets": {}, "downloads": true}`. Les données sont personnelles, seul le propriétaire lit et écrit. `assets` stocke la photo de profil, `downloads` permet l'export PDF.
+- `capabilities`: `{"db": {"rules": [{"path": "", "read": "owner", "write": "owner"}]}, "assets": {}, "downloads": true}`. The data is personal, only the owner reads and writes. `assets` stores the profile photo, `downloads` enables the PDF export.
 - `icon`: `"profile"`.
-- `description`: « Profil professionnel et base de données de la recherche d'emploi. »
-- En cas d'ajout d'une version (étape 1), passer l'`url` existante : la page est republiée à jour, les données ne bougent pas.
+- `description`: "Professional profile and job search database."
+- When adding a version (step 1), pass the existing `url`: the page is republished up to date, the data does not move.
 
-La page s'abonne à la base et affiche un état vide tant qu'elle ne contient aucune version.
+The page subscribes to the database and shows an empty state as long as it contains no version.
 
-Si une photo a été choisie à l'étape 3 bis, l'envoyer ensuite dans l'espace d'assets de l'artefact : appel Artifact avec l'`url` de l'artefact, `asset: true` et `file_path` du fichier image. Garder l'`id` retourné pour l'étape 5. Ne supprimer une ancienne photo que si l'utilisateur le demande.
+If a photo was chosen in step 3 bis, then upload it to the artifact's asset store: Artifact call with the artifact's `url`, `asset: true` and the image's `file_path`. Keep the returned `id` for step 5. Only delete an old photo if the user asks.
 
-### 5. Création de la version
+### 5. Creating the version
 
-Le contenu d'un CV est un seul document `versions/<id>`, décrit dans `references/schema.md`.
+The content of a resume is a single document `versions/<id>`, described in `references/schema.md`.
 
-1. Lister la collection `versions` avec `ArtifactData` (le charger via ToolSearch s'il est différé) pour choisir l'identifiant : `v<YYYYMMDD>-<n>`, la date du jour et `n` = 1 + le plus grand numéro déjà pris ce jour-là. `name` = drapeau de la langue + espace + identifiant (`🇬🇧 v20261025-1`).
-2. Construire le document complet en un fichier JSON dans le scratchpad : `name`, `lang: "en"`, `kind: "import"`, `parent: null`, `createdAt`, `labels: {}`, `titles: {}`, `profile` (avec `photoAssetId` : l'`id` de l'asset, ou `null` sans photo), et les collections `experiences`, `projects`, `education`, `certifications`, `skills`, `languages`, `hobbies` sous forme d'objets indexés par identifiant (`exp-01`, `skill-01-<slug>`, `lang-01-<slug>`...).
-3. Écrire ce fichier avec `ArtifactData` `set` (`collection: "versions"`, `doc_id`, `file_path`).
-4. Écrire `meta/import` (`set` : il remplace le précédent, ce qui remet `dismissed` à zéro) avec `sourceType`, `sourceRef`, `photoSource`, `importedAt`, `counts` et `warnings`.
-5. Rendre la nouvelle version affichée : lire `settings/layout`. S'il existe, `update` avec `if_version` et `{"active": "<id>"}` seulement. Sinon, `set` avec `{"active": "<id>"}`. Ne jamais toucher aux autres champs : ils appartiennent à la page.
+1. List the `versions` collection with `ArtifactData` (load it with ToolSearch if deferred) to choose the identifier: `v<YYYYMMDD>-<n>`, today's date and `n` = 1 + the highest number already taken that day. `name` = language flag + space + identifier (`🇬🇧 v20261025-1`).
+2. Build the complete document as a JSON file in the scratchpad: `name`, `lang: "en"`, `kind: "import"`, `parent: null`, `createdAt`, `labels: {}`, `titles: {}`, `profile` (with `photoAssetId`: the asset's `id`, or `null` without a photo), and the collections `experiences`, `projects`, `education`, `certifications`, `skills`, `languages`, `hobbies` as objects indexed by identifier (`exp-01`, `skill-01-<slug>`, `lang-01-<slug>`...).
+3. Write this file with `ArtifactData` `set` (`collection: "versions"`, `doc_id`, `file_path`).
+4. Write `meta/import` (`set`: it replaces the previous one, which resets `dismissed`) with `sourceType`, `sourceRef`, `photoSource`, `importedAt`, `counts` and `warnings`.
+5. Make the new version the displayed one: read `settings/layout`. If it exists, `update` with `if_version` and only `{"active": "<id>"}`. Otherwise `set` with `{"active": "<id>"}`. Never touch the other fields: they belong to the page.
 
-Ne jamais modifier ni supprimer une version existante : un import crée toujours une nouvelle version. Les modifications faites à la main dans l'artefact restent dans leur version.
+Never modify or delete an existing version: an import always creates a new version. Edits made by hand in the artifact stay in their version.
 
-### 6. Vérification et fin
+### 6. Verification and wrap-up
 
-1. Relire le document `versions/<id>` et comparer le nombre d'éléments de chaque collection à `counts`. Corriger tout écart.
-2. Enregistrer `{ "artifactUrl": "<url>" }` dans `~/.thejobfather/config.json` (créer le dossier si besoin).
-3. Répondre à l'utilisateur : le lien de l'artefact, le nom de la version créée, le nombre d'éléments importés par catégorie, et la liste des avertissements à vérifier. Une courte phrase, sans récapituler la fiche. Rappeler que le CV est en anglais et que `/thejobfather:thejobfather translate` crée une version dans une autre langue.
+1. Re-read the `versions/<id>` document and compare the number of items in each collection with `counts`. Fix any discrepancy.
+2. Save `{ "artifactUrl": "<url>" }` to `~/.thejobfather/config.json` (create the folder if needed).
+3. Reply to the user: the artifact link, the name of the version created, the number of items imported per category, and the list of warnings to check. One short sentence, without recapping the resume. Remind them that the resume is in English and that `/thejobfather:thejobfather translate` creates a version in another language.
 
 ## `translate`
 
-Objectif : traduire une version du CV dans la langue choisie, en **créant une nouvelle version**. Rien n'est remplacé : la version d'origine et toutes les autres restent intactes, et l'utilisateur les retrouve dans le menu « Version » de l'artefact (lire, supprimer, copier).
+Goal: translate a version of the resume into the chosen language, by **creating a new version**. Nothing is replaced: the original version and all the others stay intact, and the user finds them in the artifact's "Version" menu (read, delete, copy).
 
-1. Lire `~/.thejobfather/config.json`. Sans `artifactUrl`, dire de lancer `init` d'abord et s'arrêter.
-2. Langue : le reste de `$ARGUMENTS`, sinon AskUserQuestion « Dans quelle langue traduire le CV ? » (français, espagnol, allemand, et « Other » pour toute autre). En déduire un code court (`fr`, `es`, `de`, `pt`, `it`, `nl`...).
-3. Lire avec `ArtifactData` (le charger via ToolSearch s'il est différé) `settings/layout` et la collection `versions`. La version source est celle indiquée par `settings/layout.active`, à défaut la plus récente. Si sa langue est déjà la langue demandée, le dire et s'arrêter. Si une autre version existe déjà dans la langue demandée, le signaler et demander avec AskUserQuestion s'il faut quand même en créer une nouvelle.
-4. Préparer le nouveau document dans un fichier JSON du scratchpad, à partir d'une copie de la version source :
-   - `name` = drapeau + espace + identifiant, `lang` = le code choisi, `kind: "translation"`, `parent` = l'identifiant de la source, `createdAt` = maintenant. Identifiant : `v<YYYYMMDD>-<n>`, voir `references/schema.md`.
-   - `labels` = tous les libellés de la table de `references/schema.md` traduits (y compris `today`, les mois au pluriel et au singulier), `titles` = les titres personnalisés traduits s'il y en a, sinon `{}`.
-   - **à traduire** : `profile.headline`, `profile.summary`, `experiences` (`title`, `companyDescription`, `employmentType`, `description`, `groups[].label`, `groups[].items`, `highlights`), `projects` (`role`, `description`, `highlights`), `education` (`degree`, `field`, `description`), `skills` (`name`, `category`, `level`), `languages` (`name`, `level`), `hobbies` (`name`, `description`).
-   - **à laisser tel quel** : `fullName`, `age`, lieux, entreprises, écoles, organismes, noms de projets, technologies, intitulés de certifications, liens, e-mail, téléphone, dates, `photoAssetId`, identifiants des éléments. Les intitulés de poste usuels en anglais (Scrum Master, Head of Agile, Senior Engineering Manager...) restent en anglais quand les professionnels de la langue cible les gardent tels quels.
-   - Traduction fidèle : pas d'ajout, pas de suppression, pas de reformulation flatteuse. Pas de retour à la ligne dur dans une valeur. Si la langue accorde les mots selon le genre, ne pas deviner celui de l'utilisateur : employer des formulations neutres.
-5. Écrire le fichier avec `ArtifactData` `set` sur `versions/<id>`. Puis rendre la nouvelle version affichée : `update` de `settings/layout` avec `if_version` et `{"active": "<id>"}` seulement.
-6. Relire la nouvelle version et vérifier que le nombre d'éléments de chaque collection est le même que dans la source.
-7. Répondre : le lien de l'artefact, le nom de la nouvelle version et la version dont elle est issue, et ce qui a été volontairement laissé tel quel (noms propres, certifications, intitulés de poste). Une courte phrase.
+1. Read `~/.thejobfather/config.json`. Without `artifactUrl`, tell the user to run `init` first and stop.
+2. Language: the arguments after `translate`, otherwise AskUserQuestion "Which language should the resume be translated into?" (French, Spanish, German, and "Other" for any other). Derive a short code from it (`fr`, `es`, `de`, `pt`, `it`, `nl`...).
+3. Read with `ArtifactData` (load it with ToolSearch if deferred) `settings/layout` and the `versions` collection. The source version is the one given by `settings/layout.active`, otherwise the most recent. If its language is already the requested language, say so and stop. If another version already exists in the requested language, point it out and ask with AskUserQuestion whether to create a new one anyway.
+4. Prepare the new document in a scratchpad JSON file, from a copy of the source version:
+   - `name` = flag + space + identifier, `lang` = the chosen code, `kind: "translation"`, `parent` = the source's identifier, `createdAt` = now. Identifier: `v<YYYYMMDD>-<n>`, see `references/schema.md`.
+   - `labels` = all the labels of the table in `references/schema.md`, translated (including `today`, and the plural and singular of months), `titles` = the custom titles, translated if there are any, otherwise `{}`.
+   - **to translate**: `profile.headline`, `profile.summary`, `experiences` (`title`, `companyDescription`, `employmentType`, `description`, `groups[].label`, `groups[].items`, `highlights`), `projects` (`role`, `description`, `highlights`), `education` (`degree`, `field`, `description`), `skills` (`name`, `category`, `level`), `languages` (`name`, `level`), `hobbies` (`name`, `description`).
+   - **to leave as is**: `fullName`, `age`, places, companies, schools, organizations, project names, technologies, certification titles, links, e-mail, phone, dates, `photoAssetId`, item identifiers. Common English job titles (Scrum Master, Head of Agile, Senior Engineering Manager...) stay in English when professionals in the target language keep them as they are.
+   - Faithful translation: no additions, no removals, no flattering rewording. No hard line breaks in a value. If the language inflects words by gender, do not guess the user's: use neutral wording.
+5. Write the file with `ArtifactData` `set` on `versions/<id>`. Then make the new version the displayed one: `update` of `settings/layout` with `if_version` and only `{"active": "<id>"}`.
+6. Re-read the new version and check that the number of items in each collection is the same as in the source.
+7. Reply: the artifact link, the name of the new version and the version it comes from, and what was deliberately left as is (proper nouns, certifications, job titles). One short sentence.
 
 ## `ats_score`
 
-Objectif : estimer la compatibilité ATS d'une version du CV avec un score sur 100, et proposer des améliorations concrètes. Il n'existe pas de score ATS universel : le barème est le nôtre, il est décrit avec ses sources dans [references/ats.md](references/ats.md). Le lire avant d'expliquer un résultat.
+Goal: estimate the ATS compatibility of a version of the resume with a score out of 100, and suggest concrete improvements. There is no universal ATS score: the scoring scale is ours, and it is described with its sources in [references/ats.md](references/ats.md). Read it before explaining a result.
 
-Deux modes :
+Two modes:
 
-- **générique** (sans offre) : lisibilité par un parseur et qualité du contenu ;
-- **ciblé** (avec une offre) : en plus, couverture des mots-clés de l'offre, qui pèsent 40 points. C'est le score qui compte pour une candidature précise.
+- **generic** (no job posting): readability by a parser and content quality;
+- **targeted** (with a job posting): in addition, coverage of the posting's keywords, which weigh 40 points. This is the score that matters for a specific application.
 
-1. Lire `~/.thejobfather/config.json`. Sans `artifactUrl`, dire de lancer `init` d'abord et s'arrêter.
-2. Offre : le reste de `$ARGUMENTS` (URL, chemin de fichier ou texte collé). S'il est vide, demander avec AskUserQuestion : « Quel score calculer ? » avec « Générique (sans offre) » et « Ciblé sur une offre » (l'URL, le chemin ou le texte arrive par « Other »). Pour une URL, utiliser WebFetch ; si la page est protégée ou vide (LinkedIn par exemple), passer par Claude in Chrome comme pour `init`, ou demander à l'utilisateur de coller le texte. Si l'argument contient un chemin se terminant par `.pdf`, c'est l'export PDF du CV à vérifier (étape 5), pas l'offre.
-3. Lire avec `ArtifactData` (le charger via ToolSearch s'il est différé), avec `out_dir` dans le scratchpad : `settings/layout` (version affichée dans `active`, ordre et masquage des rubriques) puis la version affichée dans `versions/<active>`, à défaut la plus récente. Dire quelle version est évaluée (son `name`).
-4. Avec une offre, écrire dans le scratchpad un fichier `keywords.json` : une liste de 15 à 40 objets `{"term", "kind", "required", "variants"}`.
-   - `kind` : `hard` (outils, technologies, méthodes, compétences métier), `title` (intitulé du poste visé), `education` (diplôme ou certification exigés), `soft` (compétences comportementales), `other`.
-   - `required` : `true` quand l'offre dit requis, indispensable, must, ou que le terme figure dans la liste des prérequis.
-   - `variants` : uniquement de vrais synonymes que l'offre ou le métier emploient (acronyme et forme développée, singulier et pluriel irrégulier, équivalent dans l'autre langue de l'offre). Rien d'autre.
-   - Ne mettre que des termes présents dans l'offre. Pas de verbes génériques ni de formules creuses (« dynamique », « passionné »).
-5. Si l'utilisateur a un export PDF du CV, ajouter `--pdf <chemin>` : cela vérifie ce qu'un parseur extrait vraiment du fichier (le bouton « Export PDF » de l'artefact le produit). Sinon, ne pas insister : le dire dans le rapport comme une vérification non faite.
-6. Lancer : `python3 -I ${CLAUDE_PLUGIN_ROOT}/skills/thejobfather/scripts/ats_score.py <version.json> --settings <layout.json> [--keywords <keywords.json>] [--pdf <cv.pdf>]`. Le script écrit un rapport JSON (score, `groups`, `checks` avec leurs `findings`, `top_gaps`, `keywords`). Ne jamais recalculer le score à la main : le rapporter tel quel.
-7. Répondre en français, de façon concise :
-   - le score, son libellé, le mode (générique ou ciblé) et la version évaluée ;
-   - un tableau par catégorie (lisibilité, contenu, mots-clés si ciblé) avec les points ;
-   - **5 à 7 améliorations maximum**, classées par points récupérables (`top_gaps`), chacune avec ce qui ne va pas, où, et une proposition concrète : une phrase réécrite, un titre à renommer, un ordre à changer. Écrire les propositions dans la langue du CV ;
-   - en mode ciblé : le taux de couverture, les mots-clés trouvés (et où) et manquants. Pour chaque manque, dire si le CV montre une expérience qui le justifie (alors proposer où l'écrire, avec les mots de l'offre) ou si c'est un vrai manque (le dire, ne rien inventer, suggérer de ne l'ajouter que si c'est vrai) ;
-   - une mise en garde d'une ligne : c'est une estimation, aucun ATS ne publie de score universel, et les recruteurs lisent aussi le CV.
-8. Proposer ensuite d'appliquer les améliorations qui ne touchent qu'au texte et à l'ordre des rubriques. Avec AskUserQuestion (choix multiple), laisser l'utilisateur cocher celles à appliquer. Pour celles retenues, créer une **nouvelle version** (`kind: "copy"`, `parent` = la version évaluée, même langue, identifiant et nom selon [references/schema.md](references/schema.md), comme pour `translate`) et la rendre affichée via `settings/layout.active`. Ne jamais modifier la version évaluée. L'ordre des rubriques est un réglage commun à toutes les versions (`settings/layout.order`) : ne le changer qu'avec l'accord explicite de l'utilisateur, et le dire. N'ajouter aucun fait absent du CV : une amélioration qui demande une information que seul l'utilisateur connaît (un chiffre, un outil) lui est posée en question.
-9. Après application, relancer le script sur la nouvelle version et montrer le score avant et après. Si rien n'est appliqué, terminer sur le rapport.
+1. Read `~/.thejobfather/config.json`. Without `artifactUrl`, tell the user to run `init` first and stop.
+2. Job posting: the arguments after `ats_score` (URL, file path or pasted text). If empty, ask with AskUserQuestion: "Which score should be computed?" with "Generic (no job posting)" and "Targeted at a job posting" (the URL, path or text comes through "Other"). For a URL, use WebFetch; if the page is protected or empty (LinkedIn for example), go through Claude in Chrome as for `init`, or ask the user to paste the text. If the arguments contain a path ending in `.pdf`, it is the PDF export of the resume to check (step 5), not the job posting.
+3. Read with `ArtifactData` (load it with ToolSearch if deferred), with `out_dir` in the scratchpad: `settings/layout` (displayed version in `active`, order and hiding of sections), then the displayed version in `versions/<active>`, otherwise the most recent. Say which version is evaluated (its `name`).
+4. With a job posting, write a `keywords.json` file in the scratchpad: a list of 15 to 40 objects `{"term", "kind", "required", "variants"}`.
+   - `kind`: `hard` (tools, technologies, methods, professional skills), `title` (targeted job title), `education` (required degree or certification), `soft` (soft skills), `other`.
+   - `required`: `true` when the posting says required, essential, must, or when the term is in the list of prerequisites.
+   - `variants`: only real synonyms that the posting or the profession uses (acronym and expanded form, irregular singular and plural, equivalent in the posting's other language). Nothing else.
+   - Only include terms present in the posting. No generic verbs or empty phrases ("dynamic", "passionate").
+5. If the user has a PDF export of the resume, add `--pdf <path>`: it checks what a parser really extracts from the file (the artifact's "Export PDF" button produces it). Otherwise, do not insist: mention it in the report as a check not done.
+6. Run: `python3 -I ${CLAUDE_PLUGIN_ROOT}/skills/thejobfather/scripts/ats_score.py <version.json> --settings <layout.json> [--keywords <keywords.json>] [--pdf <resume.pdf>]`. The script writes a JSON report (score, `groups`, `checks` with their `findings`, `top_gaps`, `keywords`). Never recompute the score by hand: report it as is.
+7. Reply concisely, in the user's language:
+   - the score, its label, the mode (generic or targeted) and the evaluated version;
+   - a table by category (readability, content, keywords if targeted) with the points;
+   - **5 to 7 improvements at most**, ranked by recoverable points (`top_gaps`), each with what is wrong, where, and a concrete proposal: a rewritten sentence, a title to rename, an order to change. Write the proposals in the language of the resume;
+   - in targeted mode: the coverage rate, the keywords found (and where) and missing. For each missing one, say whether the resume shows an experience that justifies it (then propose where to write it, using the posting's words) or whether it is a real gap (say so, invent nothing, suggest adding it only if it is true);
+   - a one-line caveat: it is an estimate, no ATS publishes a universal score, and recruiters also read the resume.
+8. Then offer to apply the improvements that only touch the text and the order of sections. With AskUserQuestion (multiple choice), let the user tick the ones to apply. For those chosen, create a **new version** (`kind: "copy"`, `parent` = the evaluated version, same language, identifier and name as in [references/schema.md](references/schema.md), as for `translate`) and make it the displayed one via `settings/layout.active`. Never modify the evaluated version. The order of sections is a setting shared by all versions (`settings/layout.order`): only change it with the user's explicit agreement, and say so. Add no fact absent from the resume: an improvement that needs information only the user knows (a figure, a tool) is put to them as a question.
+9. After applying, run the script again on the new version and show the score before and after. If nothing is applied, end on the report.

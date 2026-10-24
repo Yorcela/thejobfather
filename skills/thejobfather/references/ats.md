@@ -1,63 +1,63 @@
-# Score ATS : ce qu'on sait, ce qu'on mesure
+# ATS score: what is known, what we measure
 
-## Ce que les sources établissent
+## What the sources establish
 
-- **Il n'existe pas de score ATS universel.** Aucun éditeur d'ATS ne publie de barème commun. Les « scores sur 100 » des outils (Jobscan, ATS Resume AI et autres) sont des estimations propres à chaque outil, utiles comme indication, pas comme prédiction du résultat chez un employeur. Les poids et seuils publiés par ces outils sont des choix de l'éditeur.
-- **Le parsing passe avant tout.** L'ATS extrait du fichier des champs (nom, e-mail, téléphone, dernier poste et employeur, années d'expérience, formation, compétences). Un champ mal lu reste vide, et un recruteur qui filtre dessus ne verra pas le candidat. Mises en page à colonnes, tableaux, zones de texte, en-têtes et pieds de page, images de texte et titres de rubrique originaux sont les causes les plus citées d'échec.
-- **Les recruteurs cherchent par mots-clés** (compétences, intitulés), souvent de façon littérale d'après les guides tiers : « GA4 » et « Google Analytics » peuvent être deux termes différents, un acronyme non développé peut passer à côté. Les termes placés dans l'expérience et le titre pèsent plus qu'une simple liste de compétences. Le bourrage de mots-clés est repéré par les recruteurs comme par les outils.
-- **Un score ne rejette pas automatiquement.** Greenhouse indique que son Talent Matching ne rejette et ne fait avancer aucun candidat, qu'il classe selon des critères que l'équipe calibre (compétences requises, expérience, intitulés) et rapproche des termes voisins d'une même compétence. Les rejets automatiques viennent de règles réglées par le recruteur, comme une réponse « non » à une question d'autorisation de travail. L'idée d'un seuil secret (« 75 % rejetés ») est contestée : le plus souvent le CV est stocké mais n'apparaît pas aux recherches du recruteur.
-- **Jobscan compare le CV à une offre.** Le « match rate » (0 à 100 %) compare compétences techniques, niveau d'études (si l'offre en exige un), intitulé de poste, compétences comportementales et autres mots-clés, dans cet ordre de priorité. Le nombre de mots et les résultats chiffrés ne comptent pas dans ce taux. L'objectif conseillé est d'au moins 75 %, sans chercher 100 % (texte artificiel).
-- **Format de fichier : pas de consensus.** Certains guides préfèrent le DOCX, d'autres un PDF texte. Le point commun : le texte doit être sélectionnable (pas une image), la mise en page sur une colonne, et le mieux est de suivre la consigne de l'offre.
-- **Autres usages validés par plusieurs guides** : dates dans un format unique et en ordre antichronologique, coordonnées dans le corps du document, intitulés de rubrique standard, rubrique Expérience en premier après le profil.
+- **There is no universal ATS score.** No ATS vendor publishes a common scoring scale. The "scores out of 100" of tools (Jobscan, ATS Resume AI and others) are estimates specific to each tool, useful as an indication, not as a prediction of the outcome at a given employer. The weights and thresholds those tools publish are the vendor's own choices.
+- **Parsing comes first.** The ATS extracts fields from the file (name, e-mail, phone, latest job title and employer, years of experience, education, skills). A badly read field stays empty, and a recruiter who filters on it will not see the candidate. Multi-column layouts, tables, text boxes, headers and footers, text as images and original section titles are the most cited causes of failure.
+- **Recruiters search by keywords** (skills, titles), often literally according to third-party guides: "GA4" and "Google Analytics" can be two different terms, and an unexpanded acronym can be missed. Terms placed in the experience and the title weigh more than a simple skills list. Keyword stuffing is spotted by recruiters as well as by tools.
+- **A score does not reject automatically.** Greenhouse states that its Talent Matching neither rejects nor advances any candidate, that it ranks according to criteria the team calibrates (required skills, experience, titles) and maps related terms to the same skill. Automatic rejections come from rules set by the recruiter, such as a "no" answer to a work-authorization question. The idea of a secret threshold ("75% rejected") is disputed: most of the time the resume is stored but does not show up in the recruiter's searches.
+- **Jobscan compares the resume to a job posting.** The "match rate" (0 to 100%) compares hard skills, education level (if the posting requires one), job title, soft skills and other keywords, in that order of priority. Word count and measurable results do not count in this rate. The recommended target is at least 75%, without aiming for 100% (artificial text).
+- **File format: no consensus.** Some guides prefer DOCX, others a text-based PDF. The common ground: the text must be selectable (not an image), the layout single-column, and it is best to follow the posting's instructions.
+- **Other practices backed by several guides**: dates in a single format and in reverse chronological order, contact details in the body of the document, standard section titles, Experience section first after the profile.
 
-Limites de ces sources : la plupart sont des blogs d'éditeurs d'outils de CV, pas des documentations d'ATS. Le barème ci-dessous est donc **notre** barème, construit sur ce consensus. Il mesure la lisibilité et la qualité du CV, et la couverture des mots-clés d'une offre. Il ne prédit pas le résultat chez un employeur donné.
+Limits of these sources: most are blogs from resume-tool vendors, not ATS documentation. The scale below is therefore **our** scale, built on this consensus. It measures the readability and quality of the resume, and the coverage of a job posting's keywords. It does not predict the outcome at a given employer.
 
-## Barème (100 points)
+## Scoring scale (100 points)
 
-Sans offre, le score est **générique** : lisibilité (30) et contenu (30), ramenés sur 100. Avec une offre, il est **ciblé** : lisibilité (30), contenu (30) et mots-clés (40), ce qui reflète le poids des mots-clés dans les recherches et dans le match rate. Quand le PDF n'est pas fourni, ses 3 points sont retirés du total, pas comptés comme perdus.
+Without a job posting, the score is **generic**: readability (30) and content (30), scaled to 100. With a job posting, it is **targeted**: readability (30), content (30) and keywords (40), which reflects the weight of keywords in searches and in the match rate. When the PDF is not provided, its 3 points are removed from the total, not counted as lost.
 
-### Lisibilité par un parseur (30)
+### Readability by a parser (30)
 
-| Contrôle | Pts | Règle |
+| Check | Pts | Rule |
 |---|---|---|
-| Coordonnées | 6 | nom (2), e-mail valide (2), téléphone d'au moins 8 chiffres (1), lieu (1) |
-| Titres de rubrique standard | 4 | chaque titre affiché est dans la liste des intitulés reconnus (Profile, Experience, Education, Skills... et équivalents français) ; un titre inconnu vaut la moitié |
-| Expériences complètes | 6 | intitulé, entreprise, début, fin ou « en cours » pour chaque poste |
-| Dates | 5 | format lisible, pas de date sans mois (−1 par poste, max −3), pas de fin avant le début (−3) ; un trou de plus de 6 mois est signalé, sans pénalité |
-| Texte propre | 3 | pas de retour à la ligne dur dans une puce, pas de caractère exotique ou d'emoji |
-| Ordre des rubriques | 3 | ordre attendu : Profil, Expérience, Projets, Éducation, Compétences, Hobbies ; retire des points au prorata des inversions |
-| Extraction du PDF (optionnel) | 3 | coordonnées en haut du texte extrait (1), rubriques retrouvées dans l'ordre (1), pas de caractères corrompus ni de puce isolée (1). Un PDF sans texte extractible est signalé comme grave |
+| Contact details | 6 | name (2), valid e-mail (2), phone with at least 8 digits (1), location (1) |
+| Standard section titles | 4 | each displayed title is in the list of recognized headings (Profile, Experience, Education, Skills... and French equivalents); an unknown title is worth half |
+| Complete experiences | 6 | title, company, start, end or "current" for each job |
+| Dates | 5 | readable format, no date without a month (−1 per job, max −3), no end before start (−3); a gap of more than 6 months is flagged, without penalty |
+| Clean text | 3 | no hard line break in a bullet, no exotic character or emoji |
+| Section order | 3 | expected order: Profile, Experience, Projects, Education, Skills, Hobbies; removes points in proportion to the inversions |
+| PDF extraction (optional) | 3 | contact details at the top of the extracted text (1), sections found in order (1), no corrupted characters or lone bullet (1). A PDF without extractable text is flagged as serious |
 
-### Qualité du contenu (30)
+### Content quality (30)
 
-| Contrôle | Pts | Règle |
+| Check | Pts | Rule |
 |---|---|---|
-| Résumé | 4 | de 30 à 150 mots (moitié des points de 15 à 29 ou de 151 à 220) |
-| Puces par poste | 6 | de 3 à 12 puces pour chaque poste (un ancien poste de plus de 10 ans peut en avoir moins) ; au-delà de 12, demi-points |
-| Puces lisibles | 4 | part des puces de 8 à 40 mots ; les puces de plus de 45 mots sont citées |
-| Résultats chiffrés | 8 | part des puces contenant un chiffre, points pleins à partir de 40 % |
-| Compétences | 4 | au moins 8 compétences listées |
-| Formation | 2 | une formation (2) ou seulement des certifications (1) |
-| Longueur | 2 | de 350 à 1 000 mots au total (1 point de 250 à 349 ou de 1 001 à 1 400) |
+| Summary | 4 | 30 to 150 words (half the points for 15 to 29 or 151 to 220) |
+| Bullets per job | 6 | 3 to 12 bullets for each job (a job older than 10 years may have fewer); above 12, half points |
+| Readable bullets | 4 | share of bullets of 8 to 40 words; bullets over 45 words are cited |
+| Quantified results | 8 | share of bullets containing a number, full points from 40% |
+| Skills | 4 | at least 8 skills listed |
+| Education | 2 | a degree (2) or only certifications (1) |
+| Length | 2 | 350 to 1,000 words in total (1 point for 250 to 349 or 1,001 to 1,400) |
 
-### Mots-clés de l'offre (40, avec offre uniquement)
+### Job posting keywords (40, with a job posting only)
 
-Les termes sont extraits de l'offre (voir `SKILL.md`), puis cherchés dans le CV sans tenir compte de la casse ni des accents, avec le pluriel simple et les variantes déclarées.
+Terms are extracted from the posting (see `SKILL.md`), then searched in the resume ignoring case and accents, with simple plurals and the declared variants.
 
-- **Poids par type**, d'après l'ordre de priorité de Jobscan : compétences techniques 3, intitulé de poste 3, niveau d'études 2, compétences comportementales 1, autres 1. Un terme « requis » compte une fois et demie.
-- **Où il est trouvé** : dans l'intitulé, le résumé ou l'expérience, il compte 1 ; seulement dans la liste de compétences ou ailleurs, 0,7.
-- **Couverture** = somme pondérée des termes trouvés sur la somme des poids. Points = 40 × couverture. Objectif conseillé : 75 % ou plus.
-- **Bourrage** : un terme cité plus de 15 fois est signalé.
+- **Weight by type**, following Jobscan's priority order: hard skills 3, job title 3, education level 2, soft skills 1, others 1. A "required" term counts one and a half times.
+- **Where it is found**: in the title, summary or experience, it counts 1; only in the skills list or elsewhere, 0.7.
+- **Coverage** = weighted sum of the terms found over the sum of the weights. Points = 40 × coverage. Recommended target: 75% or more.
+- **Stuffing**: a term mentioned more than 15 times is flagged.
 
-### Lecture du score
+### Reading the score
 
-85 et plus : excellent. 70 à 84 : bon. 55 à 69 : à travailler. Moins de 55 : faible. Un score générique de 90 ne dit rien sur une offre précise : c'est le score ciblé qui compte pour postuler.
+85 and above: excellent. 70 to 84: good. 55 to 69: needs work. Below 55: weak. A generic score of 90 says nothing about a specific posting: the targeted score is the one that matters when applying.
 
 ## Sources
 
-- Greenhouse, [Talent Matching FAQ](https://support.greenhouse.io/hc/en-us/articles/41131886674075-Talent-Matching-FAQ) : pas de rejet ni d'avancement automatique, catégories de correspondance, termes voisins rattachés à une même compétence.
-- Greenhouse, [Search resumes for keywords](https://support.greenhouse.io/hc/en-us/articles/115004600186-Search-resumes-for-keywords) : recherche en texte intégral dans les candidatures (la page ne détaille pas le mode de correspondance).
-- Jobscan, [Jobscan Tutorial](https://www.jobscan.co/jobscan-tutorial) : ce que compare le match rate, ordre de priorité des mots-clés, objectif de 75 %, nombre de mots et résultats chiffrés exclus du taux.
-- ATS Verification, [How ATS scoring works](https://atsverification.com/blog/how-ats-scoring-works/) : champs extraits, filtrage des recruteurs par champs et mots-clés, formats qui cassent le parsing, absence de score universel (article d'un éditeur d'outil).
-- ATS Resume AI, [Resume ATS scoring criteria](https://www.atsresumeai.com/blog/resume-ats-score) : exemple de grille pondérée (barème propre à l'éditeur, qui reconnaît lui-même l'absence de standard).
-- Guides de mise en forme : [University at Buffalo](https://management.buffalo.edu/career-resource-center/students/preparation/tools/correspondence/resume/electronic.html), [Adobe Express](https://www.adobe.com/express/discover/tips/ats-resume-tips), [Scale.jobs](https://scale.jobs/blog/ats-resume-format-works-2026) : une colonne, pas de tableaux ni de zones de texte, titres standard, dates cohérentes, coordonnées dans le corps du document.
+- Greenhouse, [Talent Matching FAQ](https://support.greenhouse.io/hc/en-us/articles/41131886674075-Talent-Matching-FAQ): no automatic rejection or advancement, match categories, related terms mapped to the same skill.
+- Greenhouse, [Search resumes for keywords](https://support.greenhouse.io/hc/en-us/articles/115004600186-Search-resumes-for-keywords): full-text search across applications (the page does not detail the matching mode).
+- Jobscan, [Jobscan Tutorial](https://www.jobscan.co/jobscan-tutorial): what the match rate compares, keyword priority order, 75% target, word count and measurable results excluded from the rate.
+- ATS Verification, [How ATS scoring works](https://atsverification.com/blog/how-ats-scoring-works/): extracted fields, recruiters filtering by fields and keywords, formats that break parsing, absence of a universal score (article by a tool vendor).
+- ATS Resume AI, [Resume ATS scoring criteria](https://www.atsresumeai.com/blog/resume-ats-score): example of a weighted grid (the vendor's own scale, which itself acknowledges the absence of a standard).
+- Formatting guides: [University at Buffalo](https://management.buffalo.edu/career-resource-center/students/preparation/tools/correspondence/resume/electronic.html), [Adobe Express](https://www.adobe.com/express/discover/tips/ats-resume-tips), [Scale.jobs](https://scale.jobs/blog/ats-resume-format-works-2026): single column, no tables or text boxes, standard titles, consistent dates, contact details in the body of the document.
