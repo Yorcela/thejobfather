@@ -1,6 +1,6 @@
 ---
 name: thejobfather
-description: Assistant de recherche d'emploi. Sous-commande disponible : `init`, qui importe le profil de l'utilisateur (CV PDF ou profil LinkedIn) dans la base de données d'un artefact. À utiliser quand l'utilisateur tape /thejobfather ou parle d'initialiser son profil de recherche d'emploi.
+description: Assistant de recherche d'emploi. Sous-commande disponible : `init`, qui importe le profil de l'utilisateur (CV PDF ou site web comme LinkedIn, via Claude in Chrome) dans la base de données d'un artefact. À utiliser quand l'utilisateur tape /thejobfather ou parle d'initialiser son profil de recherche d'emploi.
 argument-hint: init
 ---
 
@@ -28,16 +28,18 @@ Lire `~/.thejobfather/config.json` s'il existe (clé `artifactUrl`). S'il existe
 Poser la question avec AskUserQuestion : « D'où voulez-vous importer votre profil ? »
 
 - **CV au format PDF** : demander le chemin du fichier (champ « Other » ou message suivant).
-- **Profil LinkedIn** : demander l'URL du profil, puis voir « Source LinkedIn » plus bas.
+- **Site web (LinkedIn par exemple)** : demander l'URL de la page de profil, puis voir « Source site web » plus bas.
 
 ### 3. Extraction
 
 **CV PDF.** Lire le fichier avec l'outil Read (paramètre `pages` par tranches de 20 pages si besoin). Si le PDF est illisible (scan sans texte), le dire et demander un autre fichier.
 
-**Source LinkedIn.** LinkedIn n'a pas d'API publique et bloque la lecture automatisée. Essayer dans cet ordre :
+**Source site web (LinkedIn par exemple).** Ces sites n'ont pas d'API publique et bloquent la lecture automatisée. La récupération passe par **Claude in Chrome** (outils `mcp__claude-in-chrome__*`, à charger via ToolSearch s'ils sont différés), car la session de l'utilisateur y est déjà ouverte. Ne pas utiliser le navigateur intégré ni WebFetch pour cette source.
 
-1. Si les outils du navigateur sont disponibles, ouvrir l'URL dans le navigateur de l'utilisateur (Claude in Chrome en priorité, car sa session LinkedIn y est déjà ouverte), lire la page avec `get_page_text`, et déplier les sections « Afficher tout » pour obtenir les expériences, formations et compétences complètes. Ne jamais saisir d'identifiants. Si LinkedIn demande une connexion, s'arrêter et passer à l'option 2.
-2. Sinon, demander à l'utilisateur de télécharger son profil : sur LinkedIn, bouton « Ressources » ou « Plus » puis « Enregistrer au format PDF ». Traiter ce fichier comme un CV PDF.
+1. Demander explicitement à l'utilisateur de passer par Claude in Chrome pour faciliter la récupération : lui dire d'ouvrir Chrome avec l'extension Claude in Chrome activée et d'être connecté au site concerné. Attendre sa confirmation (AskUserQuestion : « Claude in Chrome est prêt » ou « Je préfère un export PDF »).
+2. Si les outils Claude in Chrome ne sont pas disponibles ou ne se connectent pas, l'indiquer, rappeler comment l'installer (extension Claude in Chrome depuis le Chrome Web Store, puis connexion à Claude Code), et proposer de réessayer ou de passer à l'option 4.
+3. Une fois connecté : ouvrir l'URL dans un nouvel onglet, lire la page avec `get_page_text`, et déplier les sections du type « Afficher tout » pour obtenir les expériences, formations et compétences complètes. Ne jamais saisir d'identifiants. Si le site demande une connexion, s'arrêter, demander à l'utilisateur de se connecter lui-même dans Chrome, puis reprendre.
+4. En dernier recours, demander à l'utilisateur d'exporter son profil en PDF (sur LinkedIn : bouton « Ressources » ou « Plus » puis « Enregistrer au format PDF ») et traiter ce fichier comme un CV PDF.
 
 Ne pas utiliser de données trouvées ailleurs sur le web.
 
