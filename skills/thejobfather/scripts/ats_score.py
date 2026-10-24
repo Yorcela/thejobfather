@@ -237,7 +237,7 @@ def main():
                 inv.append((visible[i], visible[j]))
     max_inv = len(visible) * (len(visible) - 1) / 2
     if inv:
-        fnd.append(f("medium", "Unconventional section order: " + "; ".join("%s before %s" % x for x in inv), "ATS and recruiters expect Profile, then Experience, Education, Skills. Reorder in Customize > Sections.", "settings.order"))
+        fnd.append(f("medium", "Unconventional section order: " + "; ".join("%s before %s" % x for x in inv), "ATS and recruiters expect Profile, then Experience, Education, Skills. Reorder in Customize mode, with the arrows next to each section title.", "settings.order"))
     R.add("order", "parsing", "Conventional section order", 3, 3 * (1 - len(inv) / max_inv) if max_inv else 3, fnd, {"visible_order": visible})
 
     pdf_report = None

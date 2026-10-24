@@ -2,13 +2,15 @@
 
 The database is the one of the "The Job Father" artifact (`db` capability). A document is a JSON object. Document paths have an even number of segments (`versions/v20261025-1`), collections an odd number.
 
-Three places:
+Places:
 
 | Path | Role | Written by |
 |---|---|---|
 | `versions/<id>` | a complete resume (one version) | `init`, `translate`, the page |
 | `settings/layout` | display shared by all versions (section order, colors) and the displayed version | the page; commands only write `active` |
 | `meta/import` | trace of the last import and warnings | `init`, the page (`dismissed`) |
+| `settings/preferences` | the user's job preferences, used by `match` | the page ("Preferences" button); commands only read it |
+| `answers/<id>` | answers the user gave to `match` questions, kept for a while | `match`; the page (to forget one) |
 
 There are no longer top-level `profile`, `experiences`, etc. collections: the whole content of a resume lives in its `versions/<id>` document.
 
@@ -108,6 +110,41 @@ Months are formatted according to `lang` (`en`: "Sept. 2024", other languages: b
 Display shared by all versions: `order` (`string[]` of sections: `profile`, `skills`, `experiences`, `projects`, `education`, `hobbies`), `hidden` (`string[]`), `theme` (`{accent, title, ink, paper, bg}` as `#rrggbb`), `font` (`modern` | `classic` | `neutral`).
 
 `active`: identifier of the displayed version. Commands may write this single field (read, change `active`, write back, or `update` if it exists), never the rest.
+
+## `settings/preferences`
+
+The user's job preferences, shared by all versions. Every field is optional; a missing field means "no preference". Commands only read this document.
+
+| Field | Type | Note |
+|---|---|---|
+| `roles` | `[{title, contracts, salary, dailyRate}]` | the roles the user is looking for, each with its own terms. `contracts`: accepted contract types for this role among `permanent`, `fixed-term`, `freelance`, `internship`, `apprenticeship` (several possible, missing means any). `salary` (optional, for employment): `{min, max, currency, period}`, numbers, `currency` such as `EUR`, `period` is `year` or `month`. `dailyRate` (optional, asked when `freelance` is accepted, the TJM): `{min, max, currency}`, numbers, per day |
+| `locations` | `[{place, workModes, onsiteDaysMax}]` | where the user wants to work. `place` is a city, region, country or "Remote"; `workModes` lists the accepted modes among `remote`, `hybrid`, `onsite` (several possible, missing means any); `onsiteDaysMax` (0 to 5) only for hybrid |
+| `relocation` | boolean | `true` if open to relocation |
+| `sectors` | `{prefer: string[], avoid: string[]}` | whitelist and blacklist of sectors |
+| `companies` | `{prefer: string[], avoid: string[]}` | companies to join, companies to avoid |
+| `companySizes` | `string[]` | `startup` (under 50), `scale-up` (50 to 500), `midsize` (500 to 5,000), `large` (over 5,000) |
+| `languages` | `string[]` | working languages |
+| `mustHave`, `niceToHave` | `string[]` | free-text criteria, one per entry |
+| `dealBreakers` | `string[]` | free-text conditions that rule a job out |
+| `notes` | string | anything else |
+| `updatedAt` | string | ISO date |
+
+## `answers/<id>`
+
+One document per topic the user answered about in `match`, so the same question is not asked again while the answer still holds. Identifier: `<kind>-<slug of the topic>` (`sector-gambling`, `skill-kubernetes`, `salary-engineering-manager`). A new answer on the same topic replaces the old one. The rules for reusing them are in [match.md](match.md).
+
+| Field | Type | Note |
+|---|---|---|
+| `kind` | string | `sector`, `company`, `role`, `location`, `work_mode`, `salary`, `skill`, `experience` or `other` |
+| `topic` | string | what the answer is about ("gambling", "Kubernetes", "Engineering Manager") |
+| `verdict` | string | `refused`, `accepted`, `lacks`, `partial` or `has` |
+| `statement` | string | the answer in a sentence, as shown to the user ("No Kubernetes experience in production") |
+| `detail` | object | optional. For a refused salary: `{salary: {max_seen, currency, period, role}}`, the highest pay that was refused |
+| `from` | `{url, title, company}` | the posting that raised the question |
+| `createdAt` | string | ISO date |
+| `expiresAt` | string | ISO date, computed with `scripts/answers.py ttl <verdict>`: 7 days for `refused` and `accepted`, 90 for `lacks` and `partial`, 365 for `has` |
+
+An answer whose `expiresAt` is in the past is ignored by `match` and hidden by the page.
 
 ## `meta/import`
 
