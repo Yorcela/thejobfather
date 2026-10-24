@@ -1,7 +1,7 @@
 ---
 name: thejobfather
-description: Assistant de recherche d'emploi. Sous-commande disponible : `init`, qui importe le profil de l'utilisateur (CV PDF ou site web comme LinkedIn, via Claude in Chrome) dans la base de données d'un artefact. À utiliser quand l'utilisateur tape /thejobfather ou parle d'initialiser son profil de recherche d'emploi.
-argument-hint: init
+description: Assistant de recherche d'emploi. Sous-commandes : `init`, qui importe le profil de l'utilisateur (CV PDF ou site web comme LinkedIn, via Claude in Chrome) dans la base de données d'un artefact, en anglais par défaut ; `translate`, qui traduit ce profil dans la langue de son choix. À utiliser quand l'utilisateur tape /thejobfather, parle d'initialiser son profil de recherche d'emploi ou de traduire son CV.
+argument-hint: init | translate [langue]
 ---
 
 # The Job Father
@@ -9,7 +9,8 @@ argument-hint: init
 Point d'entrée du plugin. Le premier argument est la sous-commande : `$ARGUMENTS`
 
 - `init` : voir ci-dessous.
-- vide ou inconnue : dire en une phrase que seule `init` existe pour l'instant et proposer de la lancer.
+- `translate` : voir tout en bas. Le reste de l'argument est la langue demandée.
+- vide ou inconnue : dire en une phrase que `init` et `translate` existent et proposer de lancer `init`.
 
 Répondre en français.
 
@@ -46,9 +47,35 @@ Ne pas utiliser de données trouvées ailleurs sur le web.
 **Règles d'extraction** (les deux sources) :
 
 - Ne reprendre que ce que la source dit. Ne rien déduire, ne rien embellir, ne pas inventer de dates, de chiffres ni de niveaux.
-- Ce qui est ambigu ou illisible va dans `meta/import.warnings`, pas dans une valeur devinée.
-- Garder les textes dans leur langue d'origine.
+- Ce qui est ambigu ou illisible va dans `meta/import.warnings`, pas dans une valeur devinée. Les avertissements sont affichés tels quels dans la page : les écrire en anglais.
+- L'âge, s'il est écrit dans la source, va dans `profile/me.age` (nombre). Ne jamais le calculer à partir d'une date de naissance.
+- Le CV est en anglais par défaut. Si la source est dans une autre langue, traduire fidèlement en anglais (sans embellir ni condenser), en laissant tels quels les noms propres, entreprises, écoles, produits, technologies et intitulés officiels de certifications. Noter dans `meta/import.warnings` « Translated from <language> to English ». Les dates restent au format `YYYY-MM`, la page se charge de l'affichage.
+- Recoller les lignes coupées naturellement. Une source PDF ou web coupe ses phrases à la largeur de la page : ces retours ne sont pas des paragraphes. Un paragraphe ou une puce est une seule chaîne sans retour à la ligne. Ne séparer par une ligne vide que de vrais paragraphes (`summary`, `description`).
 - Si le nom complet n'est pas trouvé, arrêter et le dire : la source n'est probablement pas un profil.
+- Reprendre la structure de la source. Quand un poste range ses puces sous des sous-titres (ex. « Responsabilités », « Activités », « Résultats »), les garder dans `groups`. Quand l'entreprise est accompagnée d'une description, la mettre dans `companyDescription`. Les entreprises ou projets personnels et entrepreneuriaux vont dans `projects` (avec `role`), pas dans `experiences`.
+- Les loisirs, hobbies ou centres d'intérêt vont dans `hobbies`. Ne rien créer si la source n'en a pas.
+
+### 3 bis. Photo de profil
+
+La photo est facultative et toujours le choix de l'utilisateur. Avant de poser la question, repérer ce qui est disponible :
+
+- **Source site web** : la photo de profil du site est disponible. La repérer dans la page déjà ouverte avec Claude in Chrome (`find` ou `read_page`), en prenant l'image principale de l'en-tête du profil et non celles des suggestions ou des contacts.
+- **Source CV PDF** : chercher une photo dans le PDF, par exemple avec `pdfimages -png -f 1 -l 1 <cv.pdf> <préfixe>` (ou, à défaut, Python avec PyMuPDF lancé avec `-I`), en écrivant les images dans le dossier scratchpad. Regarder les candidates avec Read et ne retenir qu'un portrait. Si aucune photo n'est trouvée, ne pas proposer cette option.
+
+Poser la question avec AskUserQuestion : « Quelle photo utiliser pour votre profil ? » avec les options qui s'appliquent :
+
+- **Reprendre ma photo du site** (source site web uniquement).
+- **Reprendre la photo de mon CV** (source CV PDF avec photo trouvée uniquement).
+- **Partager une autre photo** : demander le chemin d'un fichier image (PNG, JPEG ou WebP, 20 Mio maximum) et vérifier avec Read qu'il s'agit bien d'une image.
+- **Sans photo**.
+- **Garder la photo actuelle** (mise à jour d'un profil dont `profile/me.photoAssetId` est renseigné uniquement).
+
+Obtention du fichier :
+
+- **Photo du site** : lire l'attribut `src` de l'image avec `javascript_tool`, puis la télécharger avec `curl` dans un dossier neuf du scratchpad, en demandant la plus grande taille disponible. Si le téléchargement échoue, le dire et reproposer « Partager une autre photo » ou « Sans photo ».
+- **Photo du CV** : l'image extraite ci-dessus.
+
+Garder le fichier en local : il est envoyé à l'étape 4, une fois l'artefact publié. Ne jamais utiliser une photo trouvée ailleurs que dans la source choisie ou fournie par l'utilisateur. Avec « Sans photo », ne rien envoyer et mettre `photoAssetId` à `null`.
 
 ### 4. Création de l'artefact
 
@@ -56,25 +83,44 @@ Charger les skills `artifact-capabilities` puis `artifact-design` si ce n'est pa
 
 Publier avec l'outil Artifact le fichier `skills/thejobfather/assets/profile.html` de ce plugin (chemin sous `${CLAUDE_PLUGIN_ROOT}`), sans le modifier :
 
-- `capabilities`: `{"db": {"rules": [{"path": "", "read": "owner", "write": "owner"}]}}`. Les données sont personnelles, seul le propriétaire lit et écrit.
+- `capabilities`: `{"db": {"rules": [{"path": "", "read": "owner", "write": "owner"}]}, "assets": {}}`. Les données sont personnelles, seul le propriétaire lit et écrit. `assets` stocke la photo de profil.
 - `icon`: `"profile"`.
 - `description`: « Profil professionnel et base de données de la recherche d'emploi. »
 - En cas de mise à jour (étape 1), passer l'`url` existante.
 
 La page s'abonne à la base et affiche un état vide tant qu'elle ne contient rien.
 
+Si une photo a été choisie à l'étape 3 bis, l'envoyer ensuite dans l'espace d'assets de l'artefact : appel Artifact avec l'`url` de l'artefact, `asset: true` et `file_path` du fichier image. Garder l'`id` retourné pour l'étape 5. En mise à jour, ne supprimer l'ancienne photo que si l'utilisateur le demande.
+
 ### 5. Remplissage de la base
 
 Écrire les documents avec l'outil `ArtifactData` (le charger via ToolSearch s'il est différé), en une seule action `batch` quand c'est possible. Respecter exactement les chemins et champs de `references/schema.md` :
 
-- `profile/me`
-- `experiences/exp-NN`, `education/edu-NN`, `skills/skill-<slug>`, `languages/lang-<slug>`, `certifications/cert-NN`, `projects/proj-NN`
-- `meta/import` en dernier, avec `sourceType`, `sourceRef`, `importedAt`, `counts` et `warnings`.
+- `profile/me` (avec `photoAssetId` : l'`id` de l'asset, ou `null` sans photo)
+- `experiences/exp-NN`, `education/edu-NN`, `skills/skill-NN-<slug>`, `languages/lang-<slug>`, `certifications/cert-NN`, `projects/proj-NN`, `hobbies/hobby-NN`
+- `meta/import` en dernier, avec `sourceType`, `sourceRef`, `photoSource`, `importedAt`, `counts` et `warnings`.
 
-En cas de mise à jour, utiliser `set` sur les mêmes identifiants et supprimer les documents de l'ancien import qui n'existent plus dans la nouvelle source.
+Ne jamais écrire `settings/layout` en entier : ce document appartient à la page (ordre des rubriques, couleurs). Seule exception en mise à jour : si son `lang` n'est pas `en`, le lire, mettre `lang` à `"en"`, supprimer `labels`, et le réécrire sans toucher au reste, puisque le contenu importé est en anglais.
+
+En cas de mise à jour, utiliser `set` sur les mêmes identifiants et supprimer les documents de l'ancien import qui n'existent plus dans la nouvelle source. Prévenir l'utilisateur que les modifications faites à la main dans l'artefact sur ces éléments seront remplacées (sa personnalisation de l'affichage reste intacte).
 
 ### 6. Vérification et fin
 
 1. Faire un `list` de chaque collection écrite et comparer les nombres à `counts`. Corriger tout écart.
 2. Enregistrer `{ "artifactUrl": "<url>" }` dans `~/.thejobfather/config.json` (créer le dossier si besoin).
-3. Répondre à l'utilisateur : le lien de l'artefact, le nombre d'éléments importés par catégorie, et la liste des avertissements à vérifier. Une courte phrase, sans récapituler la fiche.
+3. Répondre à l'utilisateur : le lien de l'artefact, le nombre d'éléments importés par catégorie, et la liste des avertissements à vérifier. Une courte phrase, sans récapituler la fiche. Rappeler que le CV est en anglais et que `/thejobfather:thejobfather translate` le traduit dans une autre langue.
+
+## `translate`
+
+Objectif : traduire tout le contenu de la fiche, ses titres de rubriques et ses dates dans la langue choisie, dans le même artefact. La traduction remplace le contenu actuel : le dire à l'utilisateur et lui conseiller de revenir à la langue d'origine avec `init` plutôt que de retraduire plusieurs fois de suite.
+
+1. Lire `~/.thejobfather/config.json`. Sans `artifactUrl`, dire de lancer `init` d'abord et s'arrêter.
+2. Langue : le reste de `$ARGUMENTS`, sinon AskUserQuestion « Dans quelle langue traduire le CV ? » (français, espagnol, allemand, et « Other » pour toute autre). En déduire un code court (`fr`, `es`, `de`, `pt`, `it`, `nl`...). Si la langue est déjà `settings/layout.lang`, le dire et s'arrêter.
+3. Lire avec `ArtifactData` (le charger via ToolSearch s'il est différé) `profile/me`, `settings/layout` et toutes les collections de [references/schema.md](references/schema.md).
+4. Traduire, en gardant les mêmes identifiants et tous les autres champs inchangés :
+   - **à traduire** : `headline`, `summary`, `experiences` (`title`, `companyDescription`, `employmentType`, `description`, `groups[].label`, `groups[].items`, `highlights`), `projects` (`role`, `description`, `highlights`), `education` (`degree`, `field`, `description`), `skills` (`name`, `category`, `level`), `languages` (`name`, `level`), `hobbies` (`name`, `description`).
+   - **à laisser tel quel** : `fullName`, lieux, entreprises, écoles, organismes, noms de projets, technologies, intitulés de certifications, liens, e-mail, téléphone, dates, `photoAssetId`.
+   - Traduction fidèle : pas d'ajout, pas de suppression, pas de reformulation flatteuse. Pas de retour à la ligne dur dans une valeur.
+5. Écrire les documents traduits avec `set` (une action `batch`). Puis mettre à jour `settings/layout` en lecture-modification-écriture : `lang` = le code choisi, `labels` = tous les libellés de la table de `references/schema.md` traduits (y compris « today » : `today`, et les mois au pluriel et au singulier), `titles` : traduire les titres personnalisés s'il y en a, sinon laisser vide. Ne pas toucher à `order`, `hidden`, `theme` ni `font`.
+6. Vérifier avec un `list` de chaque collection que les nombres de documents n'ont pas changé.
+7. Répondre : le lien de l'artefact, la langue appliquée, et ce qui a été volontairement laissé tel quel (noms propres, certifications). Une courte phrase.
