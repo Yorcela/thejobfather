@@ -29,7 +29,9 @@ Importe votre profil dans la base de données d'un artefact Claude.
 
 La fiche s'affiche comme un CV, dans cet ordre par défaut : profil, compétences, expérience professionnelle, projets personnels (si vous en avez), éducation & certifications, hobbies. Les rubriques vides ne sont pas affichées.
 
-Le bouton « Customize » de l'artefact active le mode édition :
+Une barre de navigation reste affichée en haut de l'artefact, alignée à gauche, avec trois liens : « Resume », « My offers » et « Preferences » (le lien actif est souligné), et rien d'autre. Le menu des versions et « Export PDF » ne s'affichent que sur la page du CV, au-dessus de la fiche. Le mode d'édition est toujours actif sur cette page, et le panneau « Customize » est collé à droite de la feuille A4 (210 mm). Toutes les pages ont la même largeur, celle de la feuille et du panneau ensemble, qui se réduit quand l'écran est plus étroit : le panneau passe alors sous la feuille.
+
+Sur la page du CV, le mode édition est actif en permanence :
 
 - **Édition sur place** : cliquez sur n'importe quel texte du CV (nom, coordonnées, résumé, postes, dates, puces, compétences, formations, hobbies, titres de rubrique) pour le modifier directement. Entrée ou un clic ailleurs enregistre, Échap annule. Vider une puce, une compétence, une langue ou un lien la supprime. Des liens « + bullet », « + skill », « + experience »... ajoutent des éléments, et un « × » (à confirmer par un second clic) supprime un poste, un projet, une formation ou une catégorie. La photo se change d'un clic.
 - **Rubriques** : une fois en mode édition, chaque titre de rubrique a des flèches pour la déplacer et un bouton pour la masquer ou la réafficher. Cliquer sur le titre le renomme.
@@ -80,7 +82,7 @@ Suivi des réponses : la commande cherche dans votre Gmail (connecteur Gmail de 
 
 ### Préférences d'emploi
 
-Le bouton « Preferences » de l'artefact affiche, à la place du CV, un formulaire pour saisir ce que vous cherchez (« Back to resume » pour revenir au CV). Tout est facultatif, et les préférences sont communes à toutes les versions du CV :
+Le lien « Preferences » de l'artefact affiche, à la place du CV, une page pour saisir ce que vous cherchez : un sommaire à gauche (rôles et salaire, lieux, secteurs et entreprises, préférences, réponses mémorisées) et une carte par thème, avec des pastilles à cocher pour les contrats et les modes de travail, et un bouton « Save changes ». Tout est facultatif, et les préférences sont communes à toutes les versions du CV :
 
 - **Rôles, contrats et rémunération :** chaque rôle visé a ses propres types de contrat acceptés (CDI, CDD, freelance, stage, alternance, plusieurs possibles) et sa rémunération souhaitée : une fourchette de salaire (minimum et maximum, par an ou par mois) pour un contrat salarié, et, si le freelance est coché, une fourchette de TJM (taux journalier).
 - **Lieux et mode de travail :** pour chaque lieu (ville, région, pays ou « Remote »), les modes acceptés (remote, hybride, sur site, plusieurs possibles) et, si l'hybride est coché, le nombre maximum de jours sur site par semaine. Une case indique l'ouverture à la mobilité.
@@ -96,6 +98,8 @@ Chaque CV est une version, nommée avec le drapeau de sa langue : « 🇫🇷 v2
 - lire une version : cliquez dessus, la fiche et l'export PDF suivent ;
 - la supprimer (en deux clics, sauf la dernière) ;
 - enregistrer une copie de la version affichée.
+
+Le menu n'affiche que les 5 dernières versions. Son bouton « View more » ouvre la page « CV versions » : un tableau paginé (20 versions par page) de toutes les versions, avec les colonnes Version, Language, Type, Employer, Date et Actions. Les colonnes Language, Type, Employer et Date se filtrent par l'icône d'entonnoir de leur en-tête (la date par une période), Version et Date se trient, et « Reset filters » efface les filtres. Un clic sur le nom d'une version la lit, et chacune peut être supprimée.
 
 Les modifications faites dans la page (édition sur place) s'appliquent à la version affichée. L'ordre des rubriques, les couleurs et la police sont communs à toutes les versions.
 

@@ -47,19 +47,28 @@
 body {
   background: var(--bg); color: var(--ink);
   font: 15px/1.55 var(--font-body);
-  padding-block: 20px 56px;
+  padding-block: 0 56px;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
 }
-@media (min-width: 1180px) { body.customizing { padding-right: calc(392px + env(safe-area-inset-right, 0px)); } }
 h1, h2, h3, h4, p, ul { margin: 0; }
 h1, h3 { font-family: var(--font-display); text-wrap: balance; }
 button, input, select, textarea { font: inherit; color: inherit; }
 a { color: var(--accent); overflow-wrap: anywhere; }
 button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, a:focus-visible { outline: 2px solid var(--ui-accent); outline-offset: 2px; }
 
-.page { max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
-.bar { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+.page { width: min(calc(210mm + 20px + 340px), 100%); margin: 14px auto 0; display: flex; flex-direction: column; gap: 14px; }
+.topnav { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 35; background: var(--ui-bg); box-shadow: 0 0 0 100vmax var(--ui-bg); clip-path: inset(0 -100vmax); padding-block: 10px; }
+.topnav::after { content: ""; position: absolute; left: -100vmax; right: -100vmax; bottom: 0; height: 1px; background: var(--ui-line); }
+.topin { width: min(calc(210mm + 20px + 340px), 100%); margin: 0 auto; display: flex; align-items: center; justify-content: flex-start; gap: 8px 12px; flex-wrap: wrap; }
+.navlinks { display: flex; gap: 2px; flex-wrap: wrap; }
+.navlinks a { padding: 6px 12px; border-radius: 8px; color: var(--ui-muted); text-decoration: none; font-size: 14px; font-weight: 600; }
+.navlinks a:hover { background: var(--ui-field); color: var(--ui-ink); }
+.navlinks a[aria-current="page"] { color: var(--ui-accent); box-shadow: inset 0 -2px 0 var(--ui-accent); border-radius: 8px 8px 0 0; }
+.cvrow { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; }
+.cvmain { flex: 0 1 210mm; min-width: 0; display: flex; flex-direction: column; gap: 14px; }
+.tools { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; justify-content: flex-end; }
+[hidden] { display: none !important; }
 .vwrap { position: relative; }
 .vmenu { position: absolute; top: calc(100% + 6px); right: 0; z-index: 30; width: min(380px, calc(100vw - 32px)); background: var(--ui-bg); color: var(--ui-ink); border: 1px solid var(--ui-line); border-radius: 10px; box-shadow: 0 10px 30px rgba(0, 0, 0, .22); padding: 6px; display: flex; flex-direction: column; gap: 2px; }
 .vitem { display: flex; align-items: center; gap: 6px; }
@@ -67,7 +76,10 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .vpick:hover, .vpick[aria-checked="true"] { background: var(--ui-field); }
 .vpick b { font-weight: 600; overflow-wrap: anywhere; }
 .vpick span { font-size: 12px; color: var(--ui-muted); }
-.vfoot { border-top: 1px solid var(--ui-line); margin-top: 4px; padding: 6px 4px 2px; }
+.vfoot { border-top: 1px solid var(--ui-line); margin-top: 4px; padding: 6px 4px 2px; display: flex; align-items: center; gap: 8px; }
+.vfoot .sp { flex: 1; }
+.vrow { display: flex; align-items: center; }
+.vrow .mtop { flex: 1; min-width: 0; }
 .btn {
   display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 8px;
   border: 1px solid var(--ui-line); background: var(--ui-bg); color: var(--ui-ink); cursor: pointer; font-size: 14px; font-weight: 500;
@@ -141,13 +153,11 @@ h4 { margin-top: 6px; font-size: 11.5px; font-weight: 700; letter-spacing: .12em
 .empty code { font-size: 13px; }
 .placeholder { padding: 12px 14px; border: 1px dashed var(--line); border-radius: 8px; color: var(--muted); font-size: 14px; }
 
-/* Tiroir de personnalisation */
+/* Panneau de personnalisation, collé à droite de la feuille A4 */
 .panel {
-  position: fixed; top: 0; right: 0; bottom: 0; width: min(380px, 100%); z-index: 20;
-  background: var(--ui-bg); color: var(--ui-ink); border-left: 1px solid var(--ui-line);
-  box-shadow: -8px 0 28px rgba(0, 0, 0, .18);
-  display: flex; flex-direction: column;
-  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) 0;
+  flex: 1 1 300px; max-width: 340px; min-width: 0; position: sticky; top: 64px; max-height: calc(100vh - 80px);
+  background: var(--ui-bg); color: var(--ui-ink); border: 1px solid var(--ui-line); border-radius: 12px;
+  display: flex; flex-direction: column; overflow: hidden;
 }
 .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 14px 16px 8px; }
 .panel-head strong { font-family: var(--font-display); font-size: 17px; }
@@ -213,7 +223,6 @@ textarea.ie-input { overflow: hidden; }
 .photo-wrap .ie-x { position: absolute; top: -6px; right: -6px; background: var(--paper); border: 1px solid var(--line); border-radius: 50%; width: 22px; height: 22px; padding: 0; opacity: 1; }
 .formpage { width: 100%; background: var(--ui-bg); color: var(--ui-ink); border: 1px solid var(--ui-line); border-radius: 12px; padding: clamp(18px, 4vw, 36px); display: flex; flex-direction: column; gap: 14px; }
 /* Mes offres */
-.page.wide { max-width: 1280px; }
 .formpage.offers h3 { font-family: var(--font-display); font-size: 16px; padding-top: 6px; }
 .formpage.offers h4 { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ui-muted); margin-top: 6px; }
 .logo { flex: none; width: 36px; height: 36px; border-radius: 8px; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; background: #fff; border: 1px solid var(--ui-line); }
@@ -278,21 +287,87 @@ textarea.ie-input { overflow: hidden; }
 .od { display: flex; flex-direction: column; gap: 12px; }
 .tl { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 8px; }
 details > summary { cursor: pointer; padding: 4px 0; }
+/* Préférences : sommaire latéral et cartes */
+.pfpage { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 24px; align-items: start; width: 100%; }
+.pftoc { position: sticky; top: 72px; display: flex; flex-direction: column; gap: 2px; }
+.pfkicker { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.pftoc a { padding: 6px 8px; border-radius: 8px; color: var(--ink); text-decoration: none; font-size: 13.5px; font-weight: 600; }
+.pftoc a:hover { background: var(--accent-soft); }
+.pftoc .btn.primary { margin-top: 12px; justify-content: center; box-shadow: 0 4px 12px color-mix(in srgb, var(--ui-accent) 30%, transparent); }
+.pfmain { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.pfmain h2 { font-family: var(--font-display); font-size: 28px; line-height: 1.15; color: var(--ink); text-transform: none; letter-spacing: 0; }
+.pfsub { color: var(--muted); }
+.pcard { background: var(--ui-bg); color: var(--ui-ink); border: 1px solid var(--ui-line); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 12px; scroll-margin-top: 72px; }
+.pcard h3 { font-family: var(--font-display); font-size: 17px; }
+.pcard .psub { color: var(--ui-muted); font-size: 13px; margin-top: -6px; }
+.pcard .grp { background: var(--ui-field); border-radius: 10px; padding: 12px 14px 14px; position: relative; gap: 10px; }
+.pcard .grp > .note { text-transform: uppercase; font-size: 11px; font-weight: 700; letter-spacing: .06em; }
+.pcard .grp > input[type="text"]:first-child { font-weight: 700; width: calc(100% - 84px); }
+.pcard .grp .rm { position: absolute; top: 10px; right: 12px; border: 0; background: none; color: var(--s-low); font-weight: 700; padding: 2px 6px; }
+.pcard .add { border: 1px dashed var(--ui-line); background: none; color: var(--ui-muted); border-radius: 10px; padding: 9px; cursor: pointer; font-weight: 600; width: 100%; }
+.pcard .add:hover { border-color: var(--ui-accent); color: var(--ui-accent); }
+.pfpage .checks { gap: 6px; }
+.pfpage .check { position: relative; padding: 5px 12px; border-radius: 999px; background: color-mix(in srgb, var(--ui-muted) 14%, var(--ui-bg)); color: var(--ui-muted); font-size: 13px; font-weight: 600; cursor: pointer; }
+.pfpage .check input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.pfpage .check:has(input:checked) { background: var(--ui-accent); color: var(--ui-on-accent); }
+.pfpage .check:has(input:focus-visible) { outline: 2px solid var(--ui-accent); outline-offset: 2px; }
+.pfpage .check:has(input:disabled) { opacity: .5; }
+.salgrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.salgrid > .note { grid-column: 1 / -1; }
+.salgrid .pair { display: contents; }
+.pf-bottom { display: none; }
+@media (max-width: 720px) {
+  .pfpage { grid-template-columns: minmax(0, 1fr); }
+  .pftoc { position: static; flex-direction: row; flex-wrap: wrap; }
+  .pftoc .btn.primary { display: none; margin-top: 0; }
+  .pf-bottom { display: flex; }
+  .salgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+/* Page des versions : tableau */
+.vpage { width: 100%; }
+.vhead { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+.vtable { width: 100%; border-collapse: separate; border-spacing: 0; border: 1px solid var(--ui-line); border-radius: 10px; font-size: 14px; }
+.vtable th, .vtable td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--ui-line); vertical-align: middle; }
+.vtable thead th { background: var(--ui-field); font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ui-muted); position: relative; white-space: nowrap; }
+.vtable thead th:first-child { border-top-left-radius: 9px; } .vtable thead th:last-child { border-top-right-radius: 9px; }
+.vtable tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--ui-field) 55%, var(--ui-bg)); }
+.vtable tbody tr:last-child td { border-bottom: 0; }
+.vth { display: flex; align-items: center; gap: 6px; }
+.vsort, .vfilter { border: 0; background: none; color: inherit; font: inherit; letter-spacing: inherit; text-transform: inherit; cursor: pointer; padding: 0; display: inline-flex; align-items: center; }
+.vfilter { padding: 2px 3px; border-radius: 4px; opacity: .7; }
+.vfilter:hover, .vfilter.on { opacity: 1; color: var(--ui-accent); }
+.vpop { position: absolute; top: calc(100% - 4px); left: 8px; z-index: 20; min-width: 190px; padding: 10px; background: var(--ui-bg); color: var(--ui-ink); border: 1px solid var(--ui-line); border-radius: 10px; box-shadow: 0 8px 24px rgba(0, 0, 0, .18); display: flex; flex-direction: column; gap: 8px; text-transform: none; letter-spacing: 0; font-weight: 500; font-size: 13.5px; }
+.vopen { border: 0; background: none; padding: 0; font: inherit; font-weight: 700; color: var(--ui-ink); cursor: pointer; }
+.vopen:hover { color: var(--ui-accent); text-decoration: underline; }
+.vcheck { margin-left: 8px; color: var(--ui-accent); font-weight: 700; }
+.vdate { color: var(--ui-muted); white-space: nowrap; }
+.vact { text-align: right !important; }
+.vact .btn.danger { color: var(--s-low); border-color: color-mix(in srgb, var(--s-low) 40%, var(--ui-line)); font-weight: 600; }
+.vtype { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; background: color-mix(in srgb, var(--ui-muted) 14%, var(--ui-bg)); color: var(--ui-muted); }
+.vtype.t-adaptation { background: color-mix(in srgb, var(--s-high) 16%, var(--ui-bg)); color: var(--s-high); }
+.vtype.t-copy { background: color-mix(in srgb, var(--s-good) 16%, var(--ui-bg)); color: var(--s-good); }
+.vtype.t-translation { background: color-mix(in srgb, var(--s-mid) 18%, var(--ui-bg)); color: var(--s-mid); }
+@media (max-width: 760px) { .vtwrap { overflow-x: auto; } .vtable { min-width: 640px; } }
 </style>
 
+<header class="topnav"><div class="topin">
+  <nav class="navlinks" id="nav" aria-label="Sections" hidden><a id="navresume" href="#resume">Resume</a><a id="offers" href="#offers">My offers</a><a id="prefs" href="#preferences">Preferences</a></nav>
+</div></header>
 <div class="page">
-  <div class="bar"><div class="vwrap"><button id="versions" class="btn" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="vmenu" hidden></button><div id="vmenu" class="vmenu" role="menu" aria-label="Versions" hidden></div></div><button id="export" class="btn" type="button" hidden>Export PDF</button><button id="offers" class="btn" type="button" hidden>My offers</button><button id="prefs" class="btn" type="button" hidden>Preferences</button><button id="toggle" class="btn" type="button" aria-expanded="false" aria-controls="panel" hidden>Customize</button></div>
+  <div id="cvrow" class="cvrow"><div class="cvmain">
+  <div class="tools" id="cvbar"><div class="vwrap"><button id="versions" class="btn" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="vmenu" hidden></button><div id="vmenu" class="vmenu" role="menu" aria-label="Versions" hidden></div></div><button id="export" class="btn" type="button" hidden>Export PDF</button></div>
   <div id="empty" class="empty">
     <h1>Loading profile</h1>
     <p>Reading the database...</p>
   </div>
   <div id="warnings" class="warnings" hidden></div>
   <main id="sheet" class="sheet" hidden></main>
+  </div><aside id="panel" class="panel" aria-label="Customization"></aside></div>
   <section id="prefsView" class="prefs-view" hidden></section>
   <section id="offersView" class="prefs-view" hidden></section>
+  <section id="versionsView" class="prefs-view" hidden></section>
 </div>
 
-<aside id="panel" class="panel" aria-label="Customization" hidden></aside>
 <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
 <script>
@@ -328,7 +403,7 @@ details > summary { cursor: pointer; padding: 4px 0; }
   }
 
   var db = null, assetsApi = null, downloadsApi = null;
-  var state = { profile: null, meta: null, settings: norm(null), data: {}, versions: {}, version: null, activeId: null, panelOpen: false, tab: "sections", prefs: null, answers: {}, matches: {}, offers: {}, offersTab: "matches", offerOpen: null, openMatch: null, addingOffer: false, view: "resume" };
+  var state = { profile: null, meta: null, settings: norm(null), data: {}, versions: {}, version: null, activeId: null, panelOpen: true, tab: "sections", prefs: null, answers: {}, vf: { lang: "", type: "", employer: "", from: "", to: "", sort: "date", dir: "desc", page: 1, open: null }, matches: {}, offers: {}, offersTab: "matches", offerOpen: null, openMatch: null, addingOffer: false, view: "resume" };
   COLLS.forEach(function (c) { state.data[c] = []; });
 
   var $ = function (id) { return document.getElementById(id); };
@@ -513,6 +588,7 @@ details > summary { cursor: pointer; padding: 4px 0; }
     db.doc("versions/" + id).delete().then(function () { toast("Version deleted."); }).catch(saveFail);
   }
 
+  var MENU_MAX = 5, PAGE_SIZE = 20;
   var menuOpen = false;
   function onMenuClick(e) {
     var b = $("versions");
@@ -537,7 +613,7 @@ details > summary { cursor: pointer; padding: 4px 0; }
   function renderMenu() {
     var m = $("vmenu"), list = versionList();
     clear(m);
-    list.forEach(function (v) {
+    list.slice(0, MENU_MAX).forEach(function (v) {
       var row = h("div", "vitem"), pick = h("button", "vpick");
       pick.type = "button"; pick.setAttribute("role", "menuitemradio");
       var on = v._id === state.activeId;
@@ -562,6 +638,8 @@ details > summary { cursor: pointer; padding: 4px 0; }
     });
     var foot = h("div", "vfoot");
     foot.appendChild(btn("Save a copy of this version", "small", function () { closeMenu(); copyVersion(); }));
+    foot.appendChild(h("span", "sp"));
+    foot.appendChild(btn("View more", "small", function () { closeMenu(); openVersions(); }));
     m.appendChild(foot);
   }
 
@@ -980,26 +1058,29 @@ details > summary { cursor: pointer; padding: 4px 0; }
 
   /* Préférences dans le corps de la page, à la place du CV */
   function syncView() {
-    var prefs = state.view === "prefs", offers = state.view === "offers";
+    var prefs = state.view === "prefs", offers = state.view === "offers", vers = state.view === "versions";
     $("prefsView").hidden = !prefs;
     $("offersView").hidden = !offers;
-    $("prefs").textContent = prefs ? "Back to resume" : "Preferences";
-    $("offers").textContent = offers ? "Back to resume" : "My offers";
-    document.querySelector(".page").classList.toggle("wide", offers);
-    if (prefs || offers) {
+    $("cvbar").hidden = state.view !== "resume";
+    $("versionsView").hidden = !vers;
+    var cur = state.view === "resume" ? "navresume" : (prefs ? "prefs" : (offers ? "offers" : ""));
+    ["navresume", "offers", "prefs"].forEach(function (id) { if (id === cur) $(id).setAttribute("aria-current", "page"); else $(id).removeAttribute("aria-current"); });
+    if (prefs || offers || vers) {
       $("sheet").hidden = true; $("warnings").hidden = true; $("empty").hidden = true;
-      $("export").hidden = true; $("toggle").hidden = true;
-    } else if (db) { $("toggle").hidden = false; }
+      $("export").hidden = true;
+    }
+    $("cvrow").hidden = state.view !== "resume";
   }
   function leaveView() {
     state.view = "resume";
-    clear($("prefsView")); clear($("offersView"));
+    clear($("prefsView")); clear($("offersView")); clear($("versionsView"));
     render();
     window.scrollTo(0, 0);
   }
   var leavePrefs = leaveView;
-  function togglePrefs() { if (state.view === "prefs") leaveView(); else openPreferencesEditor(); }
-  function toggleOffers() { if (state.view === "offers") leaveView(); else openOffers(); }
+  function goResume() { if (state.view !== "resume") leaveView(); }
+  function goPrefs() { if (state.view !== "prefs") openPreferencesEditor(); }
+  function goOffers() { if (state.view !== "offers") openOffers(); }
 
   function render() {
     var ae = document.activeElement;
@@ -1199,51 +1280,71 @@ details > summary { cursor: pointer; padding: 4px 0; }
   }
 
   /* cfg : title, fields, values, validate(values) -> message, onSave(values) -> Promise */
+  var PREF_SECTIONS = {
+    "Roles, contracts and wanted pay": ["pf-roles", "\uD83D\uDCBC", "Roles, contracts & pay", "Roles you're open to, each with its accepted contract types and wanted pay.", "Roles & pay"],
+    "Locations and work mode": ["pf-locations", "\uD83D\uDCCD", "Locations & work mode", "Where you want to work, and in which mode. Several modes possible per location.", "Locations"],
+    "Sectors and companies": ["pf-sectors", "\uD83C\uDFE2", "Sectors & companies", "The sectors and companies you want, and the ones to avoid.", "Sectors & companies"],
+    "Other": ["pf-other", "\uD83D\uDCDD", "Preferences", "Working languages, must-haves, nice-to-haves and deal-breakers.", "Preferences"],
+    "Answers I am remembering": ["pf-answers", "\uD83E\uDDE0", "Remembered matches", "Your answers to the match command are kept for a while, so you are not asked twice. Forget any that no longer holds.", "Remembered matches"]
+  };
+  /* cfg : title, fields, values, validate(values) -> message, onSave(values) -> Promise */
   function showPrefsForm(cfg) {
     var mount = $("prefsView");
     clear(mount);
     var idp = "pf-" + Date.now().toString(36) + "-";
-    var form = h("form", "formpage");
-    form.appendChild(h("h2", null, cfg.title));
-    var ctl = {}, pairBox = null;
+    var form = h("form", "pfpage");
+    var toc = h("aside", "pftoc"), main = h("div", "pfmain");
+    toc.appendChild(h("div", "pfkicker", "Job preferences"));
+    main.appendChild(h("h2", null, cfg.title));
+    main.appendChild(h("p", "pfsub", "Tell us what you're looking for so we only bring you matches worth your time."));
+    var ctl = {}, pairBox = null, card = null;
     cfg.fields.forEach(function (f) {
+      if (f.t === "sub") {
+        var m = PREF_SECTIONS[f.l] || ["pf-" + slug(f.l), "", f.l, "", f.l];
+        card = h("section", "pcard"); card.id = m[0]; pairBox = null;
+        card.appendChild(h("h3", null, (m[1] ? m[1] + " " : "") + m[2]));
+        if (m[3]) card.appendChild(h("p", "psub", m[3]));
+        main.appendChild(card);
+        var a = h("a", null, (m[1] ? m[1] + " " : "") + m[4]); a.href = "#" + m[0];
+        a.addEventListener("click", function (e) { e.preventDefault(); var t = $(m[0]); if (t) t.scrollIntoView({ behavior: "smooth", block: "start" }); });
+        toc.appendChild(a);
+        return;
+      }
       var c;
       if (f.t === "answers") c = answersControl(f);
       else if (f.t === "roles") c = rolesControl(f, cfg.values[f.k], idp);
       else if (f.t === "places") c = placesControl(f, cfg.values[f.k], idp);
-      else if (f.t === "note") c = { el: h("p", "note", f.l), get: function () { return null; } };
-      else if (f.t === "sub") c = { el: h("div", "sub", f.l), get: function () { return null; } };
       else c = control(f, cfg.values[f.k], idp);
       ctl[f.k] = c;
+      var host = card || main;
       if (f.half) {
-        if (!pairBox) { pairBox = h("div", "pair"); form.appendChild(pairBox); }
+        if (!pairBox) { pairBox = h("div", "pair"); host.appendChild(pairBox); }
         pairBox.appendChild(c.el);
         if (f.halfEnd) pairBox = null;
-      } else { pairBox = null; form.appendChild(c.el); }
+      } else { pairBox = null; host.appendChild(c.el); }
     });
     var err = h("div", "err"); err.setAttribute("role", "alert"); err.hidden = true;
-    form.appendChild(err);
-    var actions = h("div", "actions");
-    var save = h("button", "btn primary", "Save"); save.type = "submit";
-    actions.appendChild(save); actions.appendChild(btn("Back to resume", "", leavePrefs));
+    main.appendChild(err);
+    var save = h("button", "btn primary", "Save changes"); save.type = "submit";
+    toc.appendChild(save);
+    var bottom = h("div", "pf-bottom"), save2 = h("button", "btn primary", "Save changes"); save2.type = "submit";
+    bottom.appendChild(save2); main.appendChild(bottom);
     function busy(b) { Array.prototype.forEach.call(form.querySelectorAll("button, input, textarea, select"), function (x) { x.disabled = b; }); }
     function fail(e) { busy(false); err.hidden = false; err.textContent = "Could not save: " + (e && e.message ? e.message : "unknown error"); }
-    form.appendChild(actions);
+    form.appendChild(toc); form.appendChild(main);
     form.addEventListener("submit", function (ev) {
       ev.preventDefault();
       var v = {};
-      cfg.fields.forEach(function (f) { v[f.k] = ctl[f.k].get(); });
+      cfg.fields.forEach(function (f) { if (ctl[f.k]) v[f.k] = ctl[f.k].get(); });
       var msg = cfg.validate ? cfg.validate(v) : "";
       if (msg) { err.hidden = false; err.textContent = msg; err.scrollIntoView({ block: "center" }); return; }
       err.hidden = true; busy(true);
-      cfg.onSave(v).then(function () { toast("Saved."); leavePrefs(); }, fail);
+      cfg.onSave(v).then(function () { busy(false); toast("Saved."); }, fail);
     });
     mount.appendChild(form);
     state.view = "prefs";
     render();
     window.scrollTo(0, 0);
-    var first = form.querySelector("input, textarea");
-    if (first) first.focus();
   }
 
   /* ---------- Préférences d'emploi (settings/preferences) : utilisées par la commande match ---------- */
@@ -1277,21 +1378,20 @@ details > summary { cursor: pointer; padding: 4px 0; }
   /* un rôle visé : contrats acceptés pour ce rôle, fourchette de salaire, et TJM si le freelance est coché */
   function rolesControl(f, value, idp) {
     var wrapEl = h("div", "field"), list = h("div", "stack"), rows = [], seq = 0;
-    wrapEl.appendChild(h("div", "lab", f.l));
     function addRow(r) {
       r = r || {};
       var s = r.salary || {}, dr = r.dailyRate || {}, base = idp + f.k + "-" + (seq++), box = h("div", "grp");
       var rec = {
         title: plainInput(base + "-t", r.title, "Job title (e.g. Engineering Manager)", "Job title"),
         contracts: [], freelance: null,
-        min: plainInput(base + "-min", s.min, "Minimum salary", "Minimum salary"),
-        max: plainInput(base + "-max", s.max, "Maximum salary", "Maximum salary"),
+        min: plainInput(base + "-min", s.min, "Min. salary", "Minimum salary"),
+        max: plainInput(base + "-max", s.max, "Max. salary", "Maximum salary"),
         currency: plainSelect(base + "-cur", CURRENCIES, s.currency || "EUR", "Salary currency"),
         period: plainSelect(base + "-per", SALARY_PERIODS, s.period || "year", "Salary period"),
-        tjmMin: plainInput(base + "-tmin", dr.min, "Minimum daily rate (TJM)", "Minimum daily rate"),
-        tjmMax: plainInput(base + "-tmax", dr.max, "Maximum daily rate (TJM)", "Maximum daily rate"),
+        tjmMin: plainInput(base + "-tmin", dr.min, "Min. daily rate", "Minimum daily rate"),
+        tjmMax: plainInput(base + "-tmax", dr.max, "Max. daily rate", "Maximum daily rate"),
         tjmCur: plainSelect(base + "-tcur", CURRENCIES, dr.currency || "EUR", "Daily rate currency"),
-        salaryBox: h("div", "stack"), tjmBox: h("div", "stack")
+        salaryBox: h("div", "stack salgrid"), tjmBox: h("div", "stack salgrid")
       };
       var checks = h("div", "checks");
       CONTRACTS.forEach(function (c) {
@@ -1304,7 +1404,7 @@ details > summary { cursor: pointer; padding: 4px 0; }
       var p1 = h("div", "pair"), p2 = h("div", "pair"), p3 = h("div", "pair");
       p1.appendChild(rec.min); p1.appendChild(rec.max); p2.appendChild(rec.currency); p2.appendChild(rec.period);
       p3.appendChild(rec.tjmMin); p3.appendChild(rec.tjmMax);
-      rec.salaryBox.appendChild(h("div", "note", "Wanted salary for this role")); rec.salaryBox.appendChild(p1); rec.salaryBox.appendChild(p2);
+      rec.salaryBox.appendChild(h("div", "note", "Wanted pay")); rec.salaryBox.appendChild(p1); rec.salaryBox.appendChild(p2);
       rec.tjmBox.appendChild(h("div", "note", "Wanted daily rate (TJM) when freelance")); rec.tjmBox.appendChild(p3); rec.tjmBox.appendChild(rec.tjmCur);
       /* salaire : si un contrat salarié est coché ou si aucun ne l'est ; TJM : si le freelance est coché */
       function sync() {
@@ -1314,14 +1414,14 @@ details > summary { cursor: pointer; padding: 4px 0; }
       }
       rec.contracts.forEach(function (c) { c[1].addEventListener("change", sync); });
       sync();
-      var rm = btn("Remove this role", "small", function () { rows.splice(rows.indexOf(rec), 1); list.removeChild(box); });
-      box.appendChild(rec.title); box.appendChild(h("div", "note", "Contract types you accept for this role"));
+      var rm = btn("Remove", "small rm", function () { rows.splice(rows.indexOf(rec), 1); list.removeChild(box); });
+      box.appendChild(rec.title); box.appendChild(h("div", "note", "Contract types accepted"));
       box.appendChild(checks); box.appendChild(rec.salaryBox); box.appendChild(rec.tjmBox); box.appendChild(rm);
       rows.push(rec); list.appendChild(box);
     }
     arr(value).forEach(addRow);
     wrapEl.appendChild(list);
-    wrapEl.appendChild(btn("Add a role", "small", function () { addRow(null); }));
+    wrapEl.appendChild(btn("+ Add a role", "add", function () { addRow(null); }));
     return {
       el: wrapEl,
       get: function () {
@@ -1342,7 +1442,6 @@ details > summary { cursor: pointer; padding: 4px 0; }
   /* un lieu, avec les modes de travail acceptés ici (plusieurs possibles) et le maximum de jours sur site pour l'hybride */
   function placesControl(f, value, idp) {
     var wrapEl = h("div", "field"), list = h("div", "stack"), rows = [], seq = 0;
-    wrapEl.appendChild(h("div", "lab", f.l));
     function addRow(r) {
       r = r || {};
       var base = idp + f.k + "-" + (seq++), box = h("div", "grp"), checks = h("div", "checks");
@@ -1360,14 +1459,14 @@ details > summary { cursor: pointer; padding: 4px 0; }
       });
       function sync() { rec.days.disabled = !rec.hybrid.checked; }
       rec.hybrid.addEventListener("change", sync); sync();
-      var rm = btn("Remove this location", "small", function () { rows.splice(rows.indexOf(rec), 1); list.removeChild(box); });
-      box.appendChild(rec.place); box.appendChild(h("div", "note", "Work modes you accept here")); box.appendChild(checks);
-      box.appendChild(h("div", "note", "Max on-site days per week (hybrid only)")); box.appendChild(rec.days); box.appendChild(rm);
+      var rm = btn("Remove", "small rm", function () { rows.splice(rows.indexOf(rec), 1); list.removeChild(box); });
+      box.appendChild(rec.place); box.appendChild(h("div", "note", "Work modes accepted")); box.appendChild(checks);
+      box.appendChild(h("div", "note", "Max on-site days / week (hybrid only)")); box.appendChild(rec.days); box.appendChild(rm);
       rows.push(rec); list.appendChild(box);
     }
     arr(value).forEach(addRow);
     wrapEl.appendChild(list);
-    wrapEl.appendChild(btn("Add a location", "small", function () { addRow(null); }));
+    wrapEl.appendChild(btn("+ Add a location", "add", function () { addRow(null); }));
     return {
       el: wrapEl,
       get: function () {
@@ -1383,7 +1482,6 @@ details > summary { cursor: pointer; padding: 4px 0; }
   var VERDICTS = { refused: "Refused", accepted: "Accepted", lacks: "Does not have", partial: "Partly has", has: "Has" };
   function answersControl(f) {
     var wrapEl = h("div", "field"), list = h("div", "stack"), now = new Date().toISOString();
-    wrapEl.appendChild(h("div", "note", f.l));
     var rows = Object.keys(state.answers).map(function (id) { return Object.assign({ _id: id }, state.answers[id]); })
       .filter(function (a) { return String(a.expiresAt || "") > now; })
       .sort(function (a, b) { return String(a.expiresAt).localeCompare(String(b.expiresAt)); });
@@ -1392,7 +1490,7 @@ details > summary { cursor: pointer; padding: 4px 0; }
       var box = h("div", "grp");
       box.appendChild(h("div", null, a.statement || a.topic || a._id));
       box.appendChild(h("div", "note", [VERDICTS[a.verdict] || a.verdict, a.kind, "kept until " + String(a.expiresAt).slice(0, 10)].filter(Boolean).join(" · ")));
-      box.appendChild(btn("Forget", "small", function () {
+      box.appendChild(btn("Forget", "small rm", function () {
         db.doc("answers/" + a._id).delete().then(function () {
           list.removeChild(box); empty(); toast("Forgotten.");
         }).catch(saveFail);
@@ -1406,7 +1504,6 @@ details > summary { cursor: pointer; padding: 4px 0; }
 
   function openPreferencesEditor() {
     if (!db) return;
-    if (state.panelOpen) setPanel(false);
     var p = state.prefs || {}, sec = p.sectors || {}, co = p.companies || {};
     showPrefsForm({
       title: "Job preferences",
@@ -1496,14 +1593,7 @@ details > summary { cursor: pointer; padding: 4px 0; }
   }
 
   /* ---------- Panneau Customize : apparence ---------- */
-  function setPanel(open) {
-    state.panelOpen = open;
-    $("panel").hidden = !open;
-    document.body.classList.toggle("customizing", open);
-    $("toggle").setAttribute("aria-expanded", open ? "true" : "false");
-    if (open) renderPanel();
-    render();
-  }
+  document.body.classList.add("customizing");
   function colorValue(k) {
     var v = state.settings.theme[k] || getComputedStyle(document.documentElement).getPropertyValue("--" + k).trim();
     return isHex(v) ? v : "#000000";
@@ -1513,7 +1603,6 @@ details > summary { cursor: pointer; padding: 4px 0; }
     clear(p);
     var head = h("div", "panel-head");
     head.appendChild(h("strong", null, "Customize"));
-    head.appendChild(btn("Close", "small", function () { setPanel(false); $("toggle").focus(); }));
     p.appendChild(head);
     var body = h("div", "panel-body");
     lookTab(body);
@@ -2280,9 +2369,153 @@ details > summary { cursor: pointer; padding: 4px 0; }
     }
     mount.appendChild(wrap);
   }
+  /* ---------- Toutes les versions : liste paginée, filtres et tri ---------- */
+  function versionCompany(v) { return (v.target && v.target.company) || ""; }
+  function typeLabel(v) { return KINDS[v.kind] || "Version"; }
+  function versionName(v) {
+    var n = String(versionLabel(v)).replace(/\s+·\s+.*$/, "");
+    return /^v\d/.test(n) ? n : n.replace(/^\S+\s+/, "");
+  }
+  function freshFilters(keep) { return { lang: "", type: "", employer: "", from: "", to: "", sort: keep ? keep.sort : "date", dir: keep ? keep.dir : "desc", page: 1, open: null }; }
+  function filteredVersions() {
+    var f = state.vf, rows = versionList().filter(function (v) {
+      var d = day(v.createdAt);
+      if (f.lang && (v.lang || "") !== f.lang) return false;
+      if (f.type && typeLabel(v) !== f.type) return false;
+      if (f.from && d < f.from) return false;
+      if (f.to && d > f.to) return false;
+      if (f.employer === "__none") return !versionCompany(v);
+      if (f.employer && versionCompany(v) !== f.employer) return false;
+      return true;
+    });
+    rows.sort(function (a, b) {
+      var c = f.sort === "version" ? versionName(a).localeCompare(versionName(b), undefined, { numeric: true })
+        : String(a.createdAt || a._id).localeCompare(String(b.createdAt || b._id));
+      return f.dir === "asc" ? c : -c;
+    });
+    return rows;
+  }
+  function funnelIcon() {
+    var ns = "http://www.w3.org/2000/svg", svg = document.createElementNS(ns, "svg"), path = document.createElementNS(ns, "path");
+    svg.setAttribute("viewBox", "0 0 24 24"); svg.setAttribute("width", "12"); svg.setAttribute("height", "12"); svg.setAttribute("aria-hidden", "true");
+    path.setAttribute("d", "M3 4h18l-7 8.5V19l-4 2v-8.5z"); path.setAttribute("fill", "currentColor");
+    svg.appendChild(path);
+    return svg;
+  }
+  function renderVersions(force) {
+    var mount = $("versionsView"), ae = document.activeElement;
+    if (!force && ae && mount.contains(ae) && ae.tagName === "INPUT") return;
+    clear(mount);
+    var f = state.vf, all = versionList(), rows = filteredVersions();
+    var pages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
+    if (f.page > pages) f.page = pages;
+    function redo(resetPage) { if (resetPage) f.page = 1; f.open = null; renderVersions(true); }
+
+    var wrap = h("div", "pfmain vpage");
+    var head = h("div", "vhead"), tt = h("div", "vtitle");
+    tt.appendChild(h("h2", null, "CV versions"));
+    tt.appendChild(h("p", "pfsub", "Every resume version you've generated, with its language, type and employer."));
+    head.appendChild(tt);
+    head.appendChild(btn("Back to resume", "small", leaveView));
+    wrap.appendChild(head);
+
+    var card = h("section", "pcard");
+    var meta = h("div", "actions");
+    meta.appendChild(h("span", "sp"));
+    meta.appendChild(h("span", "note", rows.length + " of " + all.length + " version" + (all.length > 1 ? "s" : "")));
+    card.appendChild(meta);
+
+    var langs = {}, types = {}, companies = {};
+    all.forEach(function (v) { langs[v.lang || ""] = true; types[typeLabel(v)] = true; if (versionCompany(v)) companies[versionCompany(v)] = true; });
+    var filterState = { lang: !!f.lang, type: !!f.type, employer: !!f.employer, date: !!(f.from || f.to) };
+
+    function popover(key) {
+      var box = h("div", "vpop");
+      if (key === "lang") {
+        var ls = plainSelect("vf-lang", [["", "All languages"]].concat(Object.keys(langs).sort().map(function (l) { return [l, flagOf(l) + " " + langName(l)]; })), f.lang, "Language");
+        ls.addEventListener("change", function () { f.lang = ls.value; redo(true); }); box.appendChild(ls);
+      } else if (key === "type") {
+        var ts = plainSelect("vf-type", [["", "All types"]].concat(Object.keys(types).sort().map(function (t) { return [t, t]; })), f.type, "Type");
+        ts.addEventListener("change", function () { f.type = ts.value; redo(true); }); box.appendChild(ts);
+      } else if (key === "employer") {
+        var es = plainSelect("vf-emp", [["", "All employers"], ["__none", "No employer"]].concat(Object.keys(companies).sort().map(function (c) { return [c, c]; })), f.employer, "Employer");
+        es.addEventListener("change", function () { f.employer = es.value; redo(true); }); box.appendChild(es);
+      } else {
+        var from = plainInput("vf-from", f.from, "", "From date"); from.type = "date";
+        var to = plainInput("vf-to", f.to, "", "To date"); to.type = "date";
+        from.addEventListener("change", function () { f.from = from.value; redo(true); });
+        to.addEventListener("change", function () { f.to = to.value; redo(true); });
+        box.appendChild(labeled("From", from, "vf-from")); box.appendChild(labeled("To", to, "vf-to"));
+      }
+      return box;
+    }
+    function th(label, opts) {
+      var c = h("th"); c.scope = "col";
+      var row = h("div", "vth");
+      if (opts.sort) {
+        var sb = h("button", "vsort", label + (f.sort === opts.sort ? (f.dir === "asc" ? " ▲" : " ▼") : " ⇅")); sb.type = "button";
+        sb.setAttribute("aria-label", "Sort by " + label.toLowerCase());
+        sb.addEventListener("click", function () { if (f.sort === opts.sort) f.dir = f.dir === "asc" ? "desc" : "asc"; else { f.sort = opts.sort; f.dir = opts.sort === "date" ? "desc" : "asc"; } redo(true); });
+        row.appendChild(sb);
+      } else row.appendChild(h("span", null, label));
+      if (opts.filter) {
+        var fb = h("button", "vfilter" + (filterState[opts.filter] ? " on" : "")); fb.type = "button";
+        fb.setAttribute("aria-label", "Filter by " + label.toLowerCase()); fb.setAttribute("aria-expanded", f.open === opts.filter ? "true" : "false");
+        fb.appendChild(funnelIcon());
+        fb.addEventListener("click", function () { f.open = f.open === opts.filter ? null : opts.filter; renderVersions(true); });
+        row.appendChild(fb);
+      }
+      c.appendChild(row);
+      if (opts.filter && f.open === opts.filter) c.appendChild(popover(opts.filter));
+      return c;
+    }
+    var table = h("table", "vtable"), thead = h("thead"), hr = h("tr");
+    hr.appendChild(th("Version", { sort: "version" })); hr.appendChild(th("Language", { filter: "lang" })); hr.appendChild(th("Type", { filter: "type" }));
+    hr.appendChild(th("Employer", { filter: "employer" })); hr.appendChild(th("Date", { sort: "date", filter: "date" })); hr.appendChild(th("Actions", {}));
+    thead.appendChild(hr); table.appendChild(thead);
+    var tbody = h("tbody");
+    rows.slice((f.page - 1) * PAGE_SIZE, f.page * PAGE_SIZE).forEach(function (v) {
+      var tr = h("tr"), on = v._id === state.activeId, td;
+      td = h("td"); var open = h("button", "vopen", versionName(v)); open.type = "button";
+      open.addEventListener("click", function () { selectVersion(v._id); leaveView(); });
+      td.appendChild(open); if (on) { var ck = h("span", "vcheck", "✓"); ck.title = "Displayed version"; td.appendChild(ck); }
+      tr.appendChild(td);
+      td = h("td", null, flagOf(v.lang) + " " + langName(v.lang)); tr.appendChild(td);
+      td = h("td"); td.appendChild(h("span", "vtype t-" + (KINDS[v.kind] ? v.kind === "migration" ? "import" : v.kind : "import"), typeLabel(v))); tr.appendChild(td);
+      tr.appendChild(h("td", null, versionCompany(v) || "—"));
+      tr.appendChild(h("td", "vdate", day(v.createdAt)));
+      td = h("td", "vact");
+      var del = twoClick("Delete", "Confirm", function () { deleteVersion(v._id); });
+      if (all.length < 2) { del.disabled = true; del.title = "A resume needs at least one version"; }
+      td.appendChild(del); tr.appendChild(td);
+      tbody.appendChild(tr);
+    });
+    if (!rows.length) { var er = h("tr"), ec = h("td", "note", "No version matches these filters."); ec.colSpan = 6; er.appendChild(ec); tbody.appendChild(er); }
+    table.appendChild(tbody);
+    var holder = h("div", "vtwrap"); holder.appendChild(table); card.appendChild(holder);
+
+    var foot = h("div", "actions");
+    if (f.lang || f.type || f.employer || f.from || f.to) foot.appendChild(btn("Reset filters", "small", function () { state.vf = freshFilters(f); renderVersions(true); }));
+    foot.appendChild(h("span", "sp"));
+    if (pages > 1) {
+      var prev = btn("← Previous", "small", function () { f.page--; renderVersions(true); }); prev.disabled = f.page <= 1;
+      var next = btn("Next →", "small", function () { f.page++; renderVersions(true); }); next.disabled = f.page >= pages;
+      foot.appendChild(prev); foot.appendChild(h("span", "note", "Page " + f.page + " of " + pages)); foot.appendChild(next);
+    }
+    card.appendChild(foot);
+    wrap.appendChild(card);
+    mount.appendChild(wrap);
+  }
+  function openVersions() {
+    if (!db) return;
+    state.view = "versions";
+    render();
+    renderVersions();
+    window.scrollTo(0, 0);
+  }
+
   function openOffers() {
     if (!db) return;
-    if (state.panelOpen) setPanel(false);
     state.view = "offers";
     render();
     renderOffers();
@@ -2290,19 +2523,20 @@ details > summary { cursor: pointer; padding: 4px 0; }
   }
 
   applyTheme();
-  $("toggle").addEventListener("click", function () { setPanel(!state.panelOpen); });
   $("export").addEventListener("click", exportPdf);
   $("versions").addEventListener("click", toggleMenu);
-  $("prefs").addEventListener("click", togglePrefs);
-  $("offers").addEventListener("click", toggleOffers);
+  function navTo(fn) { return function (e) { e.preventDefault(); if (db) fn(); }; }
+  $("navresume").addEventListener("click", navTo(goResume));
+  $("prefs").addEventListener("click", navTo(goPrefs));
+  $("offers").addEventListener("click", navTo(goOffers));
   window.claude.use("assets").then(function (a) { assetsApi = a; }, function () { assetsApi = null; });
   window.claude.use("downloads").then(function (a) { downloadsApi = a; if (db) render(); }, function () { downloadsApi = null; });
   window.claude.use("db").then(function (store) {
     if (!store) { showError("Open this artifact signed in to your account to view your profile."); return; }
     db = store;
-    $("toggle").hidden = false;
-    $("prefs").hidden = false;
-    $("offers").hidden = false;
+    $("nav").hidden = false;
+    var wanted = (location.hash || "").replace("#", "");
+    if (wanted === "offers") setTimeout(openOffers, 0); else if (wanted === "preferences") setTimeout(openPreferencesEditor, 0);
     var onErr = function () { showError("Could not read the database. Reload the page."); };
     db.doc("meta/import").onSnapshot(function (s) { state.meta = s.exists ? s.data() : null; render(); }, onErr);
     db.doc("settings/preferences").onSnapshot(function (s) { state.prefs = s.exists ? s.data() : null; }, onErr);
@@ -2331,6 +2565,7 @@ details > summary { cursor: pointer; padding: 4px 0; }
       snap.docs.forEach(function (d) { state.versions[d.id] = d.data(); });
       recompute(); applyTheme(); render();
       if (menuOpen) renderMenu();
+      if (state.view === "versions") renderVersions();
       if (state.panelOpen && !panelBusy()) renderPanel();
     }, onErr);
   }, function () { showError("Database capability unavailable."); });
