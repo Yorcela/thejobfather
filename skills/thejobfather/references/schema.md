@@ -31,6 +31,7 @@ Identifier: `v<YYYYMMDD>-<n>`, the creation date and `n` = 1 + the highest numbe
 | Field | Type | Note |
 |---|---|---|
 | `name` | string | language flag, space, identifier: `🇫🇷 v20261025-1` |
+|  |  | an adaptation adds the company of the posting: `🇬🇧 v20261025-3 · Joko` |
 | `lang` | string | short code of the content language: `en`, `fr`, `es`... |
 | `kind` | `"import"` \| `"translation"` \| `"copy"` \| `"adaptation"` \| `"migration"` | how the version came to be (`adaptation`: tailored to a job posting by `adapt`) |
 | `parent` | string \| null | identifier of the version it comes from (translation, copy, adaptation) |

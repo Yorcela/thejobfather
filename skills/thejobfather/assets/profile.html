@@ -544,7 +544,7 @@ details > summary { cursor: pointer; padding: 4px 0; }
       pick.setAttribute("aria-checked", on ? "true" : "false");
       pick.appendChild(h("b", null, versionLabel(v) + (on ? "  \u2713" : "")));
       var when = v.createdAt ? String(v.createdAt).slice(0, 10) : "";
-      pick.appendChild(h("span", null, [langName(v.lang), KINDS[v.kind] || "Version", v.target && v.target.company, when].filter(Boolean).join(" \u00B7 ")));
+      pick.appendChild(h("span", null, [langName(v.lang), KINDS[v.kind] || "Version", when].filter(Boolean).join(" \u00B7 ")));
       pick.addEventListener("click", function () { selectVersion(v._id); });
       row.appendChild(pick);
       var del = btn("Delete", "small danger"), armed = false, timer = null;
