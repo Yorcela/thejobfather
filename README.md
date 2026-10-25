@@ -19,7 +19,7 @@ claude --plugin-dir .
 
 ### `/thejobfather:thejobfather` ou `help`
 
-Sans argument, ou avec `help` (ou un mot inconnu), la commande affiche un menu cliquable : on choisit d'abord un groupe (CV et profil, Candidatures, Recherche et suivi), puis la commande, qui se lance aussitôt.
+Sans argument, ou avec `help` (ou un mot inconnu), la commande affiche la liste complète des commandes, avec une explication pour chacune.
 
 ### `/thejobfather:thejobfather init`
 
