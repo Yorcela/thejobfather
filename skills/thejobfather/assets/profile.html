@@ -398,10 +398,14 @@ textarea.inl { resize: vertical; }
 .irow .lost { font-size: 12px; font-weight: 700; color: var(--s-low); }
 .qa { position: relative; display: flex; flex-direction: column; gap: 2px; padding: 8px 10px; border: 1px solid var(--ui-line); border-radius: 10px; background: var(--ui-field); }
 .qa .qaq { font-weight: 700; width: calc(100% - 70px); }
+.qa .chip.draft { align-self: flex-start; margin: 2px 0 0 7px; }
+.qa .note { margin-left: 7px; }
 .qa .rm { position: absolute; top: 8px; right: 10px; border: 0; background: none; color: var(--s-low); font-weight: 700; }
 
 /* Mobile : pas de double-tap zoom ni de halo gris, rien ne déborde, le contenu garde la largeur de l'écran */
 html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+/* le fond et le filet du bandeau haut débordent volontairement (100vmax) : sans cela la page défile de plus d'un écran vers la droite */
+html, body { overflow-x: clip; }
 a, button, summary, select, label, input { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 .page > *, .prefs-view, .formpage, .vgrid, .vtwrap { min-width: 0; max-width: 100%; }
 .fab, .scrim, .panel-close { display: none; }
@@ -2247,109 +2251,8 @@ a, button, summary, select, label, input { touch-action: manipulation; -webkit-t
     c.appendChild(ul);
     return c;
   }
-  function cardOf(i) {
-    var c = h("div", "ic-card");
-    c.appendChild(h("b", null, i.label));
-    var tags = [];
-    if (i.kind === "nice") tags.push("nice to have"); else if (i.kind === "must") tags.push("must");
-    if (i.source && i.source !== "cv") tags.push(i.source);
-    if (tags.length) c.appendChild(h("span", "tags", tags.join(" · ")));
-    if (i.detail) c.appendChild(h("span", "why", i.detail));
-    var lost = Number(i.lost) || 0;
-    if (lost >= 0.5) c.appendChild(h("span", "lost", "−" + Math.round(lost) + " pt" + (Math.round(lost) > 1 ? "s" : "")));
-    return c;
-  }
   /* trois colonnes par groupe : atteint, partiel ou à clarifier, manquant */
-  function tri(rows, names) {
-    var cols = [["good", names[0], ["met", "ok"]], ["mid", names[1], ["partial", "unknown"]], ["bad", names[2], ["missing", "conflict"]]];
-    var g = h("div", "tri");
-    cols.forEach(function (c) {
-      var mine = rows.filter(function (i) { return c[2].indexOf(i.status) >= 0; });
-      var col = h("section", "tcol " + c[0]);
-      col.appendChild(h("h5", null, c[1] + " (" + mine.length + ")"));
-      mine.forEach(function (i) { col.appendChild(cardOf(i)); });
-      if (!mine.length) col.appendChild(h("p", "note", "—"));
-      g.appendChild(col);
-    });
-    return g;
-  }
   /* l'analyse complète d'un matching : score, groupes, exigences et préférences en trois colonnes, attention et atouts */
-  function analysisNode(m) {
-    var box = h("div", "analysis"), hero = h("div", "hero " + scoreClass(m.score));
-    var ring = h("div", "ring"); ring.style.setProperty("--p", String(m.score));
-    ring.appendChild(h("span", null, String(m.score)));
-    hero.appendChild(ring);
-    var side = h("div", "hside");
-    side.appendChild(h("strong", "hlabel", (m.label || "").replace(/^./, function (c) { return c.toUpperCase(); })));
-    side.appendChild(h("span", "note", [m.mode === "requirements" ? "Requirements only" : "Requirements and preferences", m.versionName, day(m.createdAt)].filter(Boolean).join(" · ")));
-    var g = m.groups || {};
-    if (g.requirements) side.appendChild(bar("Requirements", g.requirements.points, g.requirements.max, "s-fill"));
-    if (g.preferences) side.appendChild(bar("Preferences", g.preferences.points, g.preferences.max, "s-fill"));
-    hero.appendChild(side);
-    box.appendChild(hero);
-    if (m.summary) box.appendChild(h("p", "summary", m.summary));
-    if (arr(m.dealBreakers).length) {
-      var db1 = h("div", "an-warn");
-      db1.appendChild(h("strong", null, "Deal-breaker" + (m.capped ? " — score capped at 25" : "")));
-      arr(m.dealBreakers).forEach(function (d) { db1.appendChild(h("div", null, [d.type, d.text, d.detail].filter(Boolean).join(" — "))); });
-      box.appendChild(db1);
-    }
-    var two = h("div", "duo");
-    two.appendChild(bulletsCol("What to put forward", "good", m.next && m.next.highlights, "✓"));
-    two.appendChild(bulletsCol("Points of attention", "bad", m.attention, "!"));
-    box.appendChild(two);
-    var items = arr(m.items);
-    var reqs = items.filter(function (i) { return i.group === "requirements"; }), prefs = items.filter(function (i) { return i.group === "preferences"; });
-    if (reqs.length) { box.appendChild(h("h4", "gh", "Requirements of the posting")); box.appendChild(tri(reqs, ["Met", "Partial or unclear", "Missing"])); }
-    if (prefs.length) { box.appendChild(h("h4", "gh", "Your preferences")); box.appendChild(tri(prefs, ["Fits", "Partial or unclear", "Conflict"])); }
-    function list(title, a) {
-      if (!arr(a).length) return;
-      box.appendChild(h("h4", "gh", title));
-      var ul = h("ul", "plain");
-      arr(a).forEach(function (t) { ul.appendChild(h("li", null, t)); });
-      box.appendChild(ul);
-    }
-    list("Questions for the recruiter", m.next && m.next.recruiterQuestions);
-    list("Saved answers relied on", m.answersUsed);
-    return box;
-  }
-
-  function matchesTab(wrap) {
-    var list = matchList();
-    if (!list.length) {
-      wrap.appendChild(h("p", "note", "No matching yet."));
-      return;
-    }
-    var box = h("div", "stack");
-    list.forEach(function (m) {
-      var open = state.openMatch === m._id, row = h("article", "mrow"), p = m.posting || {};
-      var top = h("button", "mtop"); top.type = "button"; top.setAttribute("aria-expanded", open ? "true" : "false");
-      var off = state.offers[m.offerId];
-      top.appendChild(logoNode(off || { company: p.company }));
-      top.appendChild(scoreChip(m.score));
-      var main = h("span", "mmain");
-      main.appendChild(h("b", null, (p.title || "Offer") + (p.company ? " · " + p.company : "")));
-      main.appendChild(h("span", "note", [m.versionName, day(m.createdAt), m.label].filter(Boolean).join(" · ")));
-      top.appendChild(main);
-      if (off) top.appendChild(h("span", "chip", statusLabel(off.status)));
-      top.addEventListener("click", function () { state.openMatch = open ? null : m._id; renderOffers(); });
-      row.appendChild(top);
-      if (open) {
-        row.appendChild(analysisNode(m));
-        var act = h("div", "actions");
-        if (safeUrl(m.url)) { var a = h("a", "btn small", "Open the posting"); a.href = m.url; a.target = "_blank"; a.rel = "noopener noreferrer"; act.appendChild(a); }
-        if (off) act.appendChild(btn("Open the application", "small", function () { state.offerOpen = m.offerId; renderOffers(); window.scrollTo(0, 0); }));
-        act.appendChild(h("span", "sp"));
-        act.appendChild(twoClick("Delete this matching", "Confirm deletion", function () {
-          db.doc("matches/" + m._id).delete().then(function () { state.openMatch = null; toast("Matching deleted."); }).catch(saveFail);
-        }));
-        row.appendChild(act);
-      }
-      box.appendChild(row);
-    });
-    wrap.appendChild(box);
-  }
-
   /* ligne d'ajout en bas du tableau : l'adresse de l'annonce suffit, l'analyse est demandée à la commande match */
   function planeIcon() {
     var ns = "http://www.w3.org/2000/svg", svg = document.createElementNS(ns, "svg"), path = document.createElementNS(ns, "path");
@@ -2378,7 +2281,7 @@ a, button, summary, select, label, input { touch-action: manipulation; -webkit-t
         if (state.offers[id]) { toast("This offer is already tracked."); return null; }
         return db.doc("offers/" + id).set({ url: u, urlKey: normUrl(u), title: "", company: "", status: "not_applied", statusUpdatedAt: now, createdAt: now, analysisRequested: now, formQA: [], events: [], emails: [] })
           .then(function () {
-            var cmd = "/thejobfather:thejobfather match " + u, say = function (ok) { toast(ok ? "Added. The command to run the analysis is copied: paste it in Claude Code." : "Added. Run /thejobfather:thejobfather match in Claude Code to analyze it."); };
+            var cmd = "/thejobfather:thejobfather intake " + u, say = function (ok) { toast(ok ? "Added. The command for the full analysis is copied: paste it in Claude Code." : "Added. Run /thejobfather:thejobfather intake in Claude Code to analyze it."); };
             try { navigator.clipboard.writeText(cmd).then(function () { say(true); }, function () { say(false); }); } catch (e) { say(false); }
           });
       }).catch(saveFail).then(function () { go.disabled = false; });
@@ -2858,16 +2761,28 @@ a, button, summary, select, label, input { touch-action: manipulation; -webkit-t
     /* formulaire de candidature */
     var fc = section("od-form", "✍️", "Application form", "The questions and the answers you gave, to say the same thing during a call.");
     var qaBox = h("div", "stack"), qaRows = [];
-    function commitQA() { saveOffer(id, { formQA: qaRows.map(function (r) { return { q: r.q.value.trim(), a: r.a.value.trim() }; }).filter(function (x) { return x.q || x.a; }) }); }
-    function addQA(q, ans) {
-      var r = h("div", "qa"), rec = { q: inl(plainInput("qa-q-" + Date.now() + "-" + qaRows.length, q, "Question", "Question")), a: inl(document.createElement("textarea")) };
+    function commitQA() {
+      saveOffer(id, { formQA: qaRows.map(function (r) {
+        var x = { q: r.q.value.trim(), a: r.a.value.trim() };
+        if (r.draft) x.draft = true;
+        if (r.options) x.options = r.options;
+        if (r.required) x.required = true;
+        return x;
+      }).filter(function (x) { return x.q || x.a; }) });
+    }
+    function addQA(q, ans, meta) {
+      meta = meta || {};
+      var r = h("div", "qa"), rec = { draft: !!meta.draft, options: meta.options, required: !!meta.required, q: inl(plainInput("qa-q-" + Date.now() + "-" + qaRows.length, q, "Question", "Question")), a: inl(document.createElement("textarea")) };
       rec.q.classList.add("qaq"); rec.a.value = ans || ""; rec.a.placeholder = "Your answer"; rec.a.rows = 3; rec.a.setAttribute("aria-label", "Answer");
-      rec.q.addEventListener("change", commitQA); rec.a.addEventListener("change", commitQA);
+      function edited() { rec.draft = false; commitQA(); }
+      rec.q.addEventListener("change", edited); rec.a.addEventListener("change", edited);
       var rm = btn("Remove", "small rm", function () { qaRows.splice(qaRows.indexOf(rec), 1); qaBox.removeChild(r); commitQA(); });
       r.appendChild(rec.q); r.appendChild(rec.a); r.appendChild(rm);
+      if (rec.draft) r.appendChild(h("span", "chip draft", ans ? "Draft answer, not validated yet" : "To answer"));
+      if (arr(rec.options).length) r.appendChild(h("span", "note", "Options: " + arr(rec.options).join(" \u00B7 ")));
       qaRows.push(rec); qaBox.appendChild(r);
     }
-    arr(o.formQA).forEach(function (x) { addQA(x.q, x.a); });
+    arr(o.formQA).forEach(function (x) { addQA(x.q, x.a, x); });
     fc.appendChild(qaBox);
     fc.appendChild(btn("+ Add a question", "add", function () { addQA("", ""); }));
     var cl = inl(document.createElement("textarea")); cl.id = "od-cover"; cl.rows = 5; cl.value = o.coverLetter || ""; cl.placeholder = "Cover letter or message sent with the application";
@@ -2941,20 +2856,10 @@ a, button, summary, select, label, input { touch-action: manipulation; -webkit-t
     offersDirty = false;
     clear(mount);
     if (state.offerOpen && state.offers[state.offerOpen]) { offerDetail(mount, state.offerOpen); return; }
+    state.offerOpen = null;
     var wrap = h("div", "formpage offers");
     wrap.appendChild(h("h2", null, "My offers"));
-    {
-      state.offerOpen = null;
-      var tabs = h("div", "tabs"); tabs.setAttribute("role", "tablist");
-      [["matches", "Matchings (" + Object.keys(state.matches).length + ")"], ["apps", "Applications (" + Object.keys(state.offers).length + ")"]].forEach(function (t) {
-        var b = h("button", "tab", t[1]); b.type = "button"; b.setAttribute("role", "tab");
-        b.setAttribute("aria-selected", state.offersTab === t[0] ? "true" : "false");
-        b.addEventListener("click", function () { state.offersTab = t[0]; renderOffers(); });
-        tabs.appendChild(b);
-      });
-      wrap.appendChild(tabs);
-      if (state.offersTab === "matches") matchesTab(wrap); else appsTab(wrap);
-    }
+    appsTab(wrap);
     mount.appendChild(wrap);
   }
   /* ---------- Toutes les versions : liste paginée, filtres et tri ---------- */
