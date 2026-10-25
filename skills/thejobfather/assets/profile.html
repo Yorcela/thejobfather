@@ -2297,6 +2297,23 @@ a, button, summary, select, label, input { touch-action: manipulation; -webkit-t
   function hostOf(u) { try { return new URL(u).hostname.replace(/^www\./, ""); } catch (e) { return "Untitled offer"; } }
   function monthAgo() { return new Date(Date.now() - 30 * 86400000).toLocaleDateString("en-CA"); }
   function ofDefaults() { return { status: "", from: monthAgo(), to: "", sort: "applied", dir: "desc", hideDone: true, page: 1, open: null }; }
+  var MODE_LABEL = { remote: "Remote", hybrid: "Hybrid", onsite: "On-site" };
+  function offerMode(o) {
+    var m = String(o.workMode || "").toLowerCase();
+    if (!m) {
+      var t = String(o.location || "").toLowerCase();
+      m = /hybri/.test(t) ? "hybrid" : /remote|distance|t\u00e9l\u00e9travail|teletravail/.test(t) ? "remote" : /sur site|on-?site|pr\u00e9sentiel/.test(t) ? "onsite" : "";
+    }
+    return MODE_LABEL[m] ? m : "";
+  }
+  function offerHq(o) {
+    if (o.hq) return String(o.hq);
+    var c = o.companyId && state.companies[o.companyId];
+    if (!c) return "";
+    if (c.hq) return String(c.hq);
+    var a = (c.identity && c.identity.address) || "", m = /\b\d{4,5}\s+([^,]+)/.exec(a);
+    return m ? m[1].trim() : "";
+  }
   function bestScore(id) { var ms = offerMatches(id); return ms.length ? Math.max.apply(null, ms.map(function (m) { return m.score; })) : null; }
   function filteredApps() {
     var f = state.of, order = OFFER_STATUSES.map(function (x) { return x[0]; });
@@ -2314,6 +2331,8 @@ a, button, summary, select, label, input { touch-action: manipulation; -webkit-t
       if (f.sort === "score") { var b = bestScore(o._id); return b == null ? -1 : b; }
       if (f.sort === "status") return order.indexOf(o.status || "not_applied");
       if (f.sort === "applied") return String(o.appliedAt || day(o.createdAt));
+      if (f.sort === "mode") return offerMode(o) || "~";
+      if (f.sort === "hq") return String(offerHq(o) || "~").toLowerCase();
       return String(o.createdAt || "");
     }
     rows.sort(function (a, b) {
@@ -2359,7 +2378,7 @@ a, button, summary, select, label, input { touch-action: manipulation; -webkit-t
       if (opts.sort) {
         var sb = h("button", "vsort", label + (f.sort === opts.sort ? (f.dir === "asc" ? " ▲" : " ▼") : " ⇅")); sb.type = "button";
         sb.setAttribute("aria-label", "Sort by " + label.toLowerCase());
-        sb.addEventListener("click", function () { if (f.sort === opts.sort) f.dir = f.dir === "asc" ? "desc" : "asc"; else { f.sort = opts.sort; f.dir = opts.sort === "company" || opts.sort === "status" ? "asc" : "desc"; } redo(true); });
+        sb.addEventListener("click", function () { if (f.sort === opts.sort) f.dir = f.dir === "asc" ? "desc" : "asc"; else { f.sort = opts.sort; f.dir = opts.sort === "company" || opts.sort === "status" || opts.sort === "mode" || opts.sort === "hq" ? "asc" : "desc"; } redo(true); });
         row.appendChild(sb);
       } else row.appendChild(h("span", null, label));
       if (opts.filter) {
@@ -2374,8 +2393,8 @@ a, button, summary, select, label, input { touch-action: manipulation; -webkit-t
       return c;
     }
     var table = h("table", "vtable"), thead = h("thead"), hr = h("tr");
-    hr.appendChild(th("Company", { sort: "company" })); hr.appendChild(th("Job title", {})); hr.appendChild(th("Status", { sort: "status", filter: "status" }));
-    hr.appendChild(th("Score", { sort: "score" })); hr.appendChild(th("Resume sent", {})); hr.appendChild(th("Applied", { sort: "applied" })); hr.appendChild(th("Added", { sort: "added", filter: "added" }));
+    hr.appendChild(th("Company", { sort: "company" })); hr.appendChild(th("Job title", {})); hr.appendChild(th("Mode", { sort: "mode" })); hr.appendChild(th("HQ", { sort: "hq" })); hr.appendChild(th("Status", { sort: "status", filter: "status" }));
+    hr.appendChild(th("Score", { sort: "score" })); hr.appendChild(th("Added", { sort: "added", filter: "added" }));
     thead.appendChild(hr); table.appendChild(thead);
     var tbody = h("tbody");
     rows.slice((f.page - 1) * PAGE_SIZE, f.page * PAGE_SIZE).forEach(function (o) {
@@ -2386,6 +2405,8 @@ a, button, summary, select, label, input { touch-action: manipulation; -webkit-t
       open.addEventListener("click", function (e) { e.stopPropagation(); openOffer(); });
       td.appendChild(logoNode(o)); td.appendChild(open); tr.appendChild(td);
       tr.appendChild(h("td", null, o.title || hostOf(o.url)));
+      var md = offerMode(o); td = h("td"); if (md) td.appendChild(h("span", "chip", MODE_LABEL[md])); else td.textContent = "—"; tr.appendChild(td);
+      tr.appendChild(h("td", null, offerHq(o) || "—"));
       td = h("td");
       var st = plainSelect("st-" + o._id, OFFER_STATUSES, o.status || "not_applied", "Status of " + (o.company || "this offer"));
       st.className = "vtype vsel st-" + (o.status || "not_applied");
@@ -2394,15 +2415,12 @@ a, button, summary, select, label, input { touch-action: manipulation; -webkit-t
       if (o.newReply) { var nr = h("span", "chip st-ok newreply", "New reply"); td.appendChild(document.createTextNode(" ")); td.appendChild(nr); }
       tr.appendChild(td);
       var sc = bestScore(o._id); td = h("td"); if (sc != null) td.appendChild(scoreChip(sc)); else if (o.analysisRequested) td.appendChild(h("span", "chip", "Analysis pending")); else td.textContent = "—"; tr.appendChild(td);
-      var cv = o.cvVersionId && state.versions[o.cvVersionId];
-      tr.appendChild(h("td", null, cv ? versionName(Object.assign({ _id: o.cvVersionId }, cv)) : "—"));
-      tr.appendChild(h("td", "vdate", o.appliedAt || "—"));
       tr.appendChild(h("td", "vdate", day(o.createdAt)));
       tbody.appendChild(tr);
     });
     if (!rows.length) { var er = h("tr"), ec = h("td", "note", all.length ? "No application matches these filters." : "No offer yet."); ec.colSpan = 7; er.appendChild(ec); tbody.appendChild(er); }
     table.appendChild(tbody);
-    cardLabels(table, ["", "", "Status", "Score", "Resume sent", "Applied", "Added"]);
+    cardLabels(table, ["", "", "Mode", "HQ", "Status", "Score", "Added"]);
     var holder = h("div", "vtwrap"); holder.appendChild(table); card.appendChild(holder);
     var foot = h("div", "actions");
     var doneCount = all.filter(function (o) { return DONE_STATUSES.indexOf(o.status || "not_applied") >= 0; }).length;
