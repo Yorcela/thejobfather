@@ -8,6 +8,7 @@ Places:
 |---|---|---|
 | `versions/<id>` | a complete resume (one version) | `init`, `translate`, the page |
 | `settings/layout` | display shared by all versions (section order, colors) and the displayed version | the page; commands only write `active` |
+| `companies/<companyId>` | the research on one company, shared by all its offers | `company`; the page (to ask for it) |
 | `preps/<offerId>` | the interview preparation of one offer | `prepare`; the page (to ask for it) |
 | `meta/import` | trace of the last import and warnings | `init`, the page (`dismissed`) |
 | `meta/mailcheck` | `{at, newReplies}`: the last run of the mail check routine | `mail_synch auto` |
@@ -183,19 +184,42 @@ Written by `scripts/offers.py build`, never by hand. The page "My offers" lists 
 | `logoAssetId` | string | optional, `id` of the company logo in the artifact's assets (served under `/_blob/<id>`); the page shows the company's initials without one, and lets the user upload a logo |
 | `status` | string | `not_applied` (default), `applied`, `response`, `no_response`, `offer` (the company made an offer), `rejected` (by the company), `declined` (by the user) |
 | `statusUpdatedAt`, `createdAt` | string | ISO dates |
+| `companyId` | string | the company research that applies (`companies/<companyId>`), set by `company` |
+| `companyRequested` | string | ISO date, set by the page when the user asks for the company research; `company` without arguments picks these offers up first and removes the field once the research is saved |
 | `prepRequested` | string | ISO date, set by the page when the user asks for an interview preparation on this offer; `prepare` without arguments picks these offers up first and removes the field once the preparation is saved |
 | `analysisRequested` | string | ISO date, set by the page when the user pastes a job URL in "My offers" (the offer then has an empty `title` and `company`); `match` without arguments picks these offers up, and removes the field once the matching is saved |
 | `appliedAt` | string | `YYYY-MM-DD`, set when the status first becomes `applied` |
 | `cvVersionId` | string | the resume version sent (defaults to the version of the latest matching); the page can open it |
 | `formQA` | `[{q, a}]` | the application form: questions and the answers given, to say the same thing during a call |
 | `coverLetter`, `notes` | string | |
-| `events` | array | history: `{at, type: "status", from, to, by}` with `by` = `user` or `gmail`, or `{at, type: "apply", note}` when `apply` filled the form, or `{at, type: "prep", note}` when `prepare` saved a preparation |
+| `events` | array | history: `{at, type: "status", from, to, by}` with `by` = `user` or `gmail`, or `{at, type: "apply", note}` when `apply` filled the form, `{at, type: "prep", note}` when `prepare` saved a preparation, or `{at, type: "research", note}` when `company` saved the research |
 | `emails` | array | found by `track` and `mail_synch`: `{date, from, subject, kind, snippet, body, viewUrl}`, `kind` = `response`, `rejected`, `ack` or `sent`; `direction` is `"sent"` for a message the user wrote (with `to`, the recipient), absent for a message received; `snippet` at most 200 characters; `body` the plain-text message with its line breaks (at most 20,000 characters, cut with `[…]` beyond), shown in full in the application's history with clickable links; `viewUrl` the Gmail link that opens the message in a browser tab |
 | `source` | string | `"gmail"` when `mail_synch` found the application in the mailbox; absent otherwise. Such an offer may have an empty `url` and a `mail://<company>/<title>` `urlKey` |
 | `newReply`, `newReplyAt`, `suggestedStatus` | bool, string, string | set by `mail_synch auto` when a new reply was found: the page shows a count on "My offers" and a "New reply" tag until the user marks it as seen; `suggestedStatus` is `response` or `rejected`, never applied by itself |
 | `lastEmailCheck` | string | ISO date of the last `track` |
 
 When `match` runs again on a posting whose offer exists, the offer is kept as it is: status, form answers and history belong to the user.
+
+## `companies/<companyId>`
+
+Written by `company`. Identifier: `c-` plus the slug of the company name (`c-joko`). One document per company, linked from its offers by `offers/<offerId>.companyId`. The page shows it in the application's "Company research" section.
+
+| Field | Type | Note |
+|---|---|---|
+| `name`, `legalName`, `siren`, `website`, `country` | string | the entity checked against a register |
+| `createdAt`, `updatedAt` | string | ISO dates |
+| `identity` | object | `legalForm`, `created`, `address`, `headcount`, `sector`, `capital`, `status` (as published, including any collective proceedings) |
+| `verdict` | object | `overall` `{label, reason}` with label `promising`, `mixed`, `worrying` or `unknown`; `profitability` `{label, year, reason}` with label `profitable`, `break-even`, `loss-making` or `unknown`; `culture` (two or three sentences) |
+| `financials` | `[{year, revenue, netResult, headcount, source}]` | published accounts, one row per year, amounts as published |
+| `funding` | `[{date, round, amount, investors, source}]` | rounds and acquisitions found |
+| `news` | `[{date, title, url, source, why}]` | 5 to 8 recent items |
+| `reputation` | `[{source, rating, count, range, pros, cons, url, confidence}]` | one row per platform; `pros` and `cons` are `string[]` in the researcher's own words; `confidence` is `high`, `medium` or `low` |
+| `values` | object | `displayed` (`string[]`) and `themes` `[{theme, displayed, observed, verdict}]`, verdict `consistent`, `mixed`, `contradicted` or `unknown` |
+| `greenFlags`, `redFlags` | `string[]` | what matters for the role |
+| `forYou` | string | fit with the user's preferences and the saved matching |
+| `askThem` | `string[]` | questions worth asking the company |
+| `sources` | `[{label, url, readAt}]` | every page read |
+| `gaps` | `string[]` | what could not be found or checked |
 
 ## `preps/<offerId>`
 

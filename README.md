@@ -94,6 +94,18 @@ Règles de fond : **elle ne soumet jamais le formulaire**, c'est vous qui clique
 
 La commande garde l'onglet ouvert et enregistre en continu ce que contient le formulaire : si vous modifiez des réponses avant de soumettre, c'est la version finale qui est sauvegardée. Quand vous validez le formulaire, elle demande si vous l'avez soumis, puis enregistre dans « My offers », sur la candidature : toutes les questions et réponses (« Application form »), la lettre, la version du CV, un événement dans l'historique et, si vous avez soumis, le statut « Applied ». Les réponses qui valent au-delà de ce formulaire rejoignent vos réponses mémorisées.
 
+### `/thejobfather:thejobfather company [url]`
+
+Étudie l'entreprise derrière une offre enregistrée (sans adresse, la commande demande laquelle) et dit, avec ses sources, si elle a l'air d'un bon endroit pour vous. Elle vérifie d'abord la bonne entité légale, puis rassemble, en sources publiques uniquement :
+
+- **identité et comptes** : Pappers, societe.com ou Infogreffe (forme juridique, SIREN, création, effectif, capital, procédures collectives) et, année par année, chiffre d'affaires, résultat net et effectif ;
+- **trajectoire** : levées de fonds, rachats, vagues d'embauches ou de départs, d'après la presse et l'entreprise ;
+- **actualité** : les 5 à 8 articles récents qui comptent ;
+- **ce que l'entreprise dit d'elle** : site vitrine et page carrières (mission, valeurs affichées, processus de recrutement) ;
+- **ce que disent les gens** : Glassdoor, Welcome to the Jungle, Indeed, Trustpilot, avis Google, LinkedIn (avec leur session déjà ouverte dans Claude in Chrome si besoin, sans jamais saisir d'identifiant).
+
+Elle en tire la rentabilité (rentable, à l'équilibre, déficitaire ou inconnue, avec l'année des comptes), la culture, un tableau **valeurs affichées contre valeurs observées** thème par thème, les signaux positifs et les signaux d'alerte, et l'adéquation avec vos préférences (secteurs, taille, modes de travail). Chaque chiffre a sa source et un niveau de confiance, et ce qui n'a pas été trouvé est écrit noir sur blanc. Après votre accord, la recherche est enregistrée une fois par entreprise et affichée sur la candidature, section « Company research », où un bouton permet aussi de la demander. `prepare` s'en sert ensuite pour les réponses de motivation et les questions à poser.
+
 ### `/thejobfather:thejobfather prepare [url]`
 
 Prépare un entretien sur une offre enregistrée (sans adresse, la commande demande laquelle, en proposant d'abord celles où un entretien est probable). Elle vous demande de quel entretien il s'agit (appel recruteur, manager, technique, final), avec qui et quand, puis construit à partir de ce qu'elle sait réellement de vous (CV envoyé, réponses mémorisées, formulaire de candidature, matching, mails) :
@@ -144,7 +156,7 @@ Les modifications faites dans la page (édition sur place) s'appliquent à la ve
 ```
 .claude-plugin/plugin.json          manifeste du plugin
 .claude-plugin/marketplace.json     permet l'installation depuis ce dépôt
-skills/thejobfather/SKILL.md        commande /thejobfather et sous-commandes init, translate, ats_score, match, adapt, apply, prepare, mail_synch, track
+skills/thejobfather/SKILL.md        commande /thejobfather et sous-commandes init, translate, ats_score, match, adapt, apply, prepare, company, mail_synch, track
 skills/thejobfather/references/     schéma de la base de données, barèmes des scores ATS et de matching
 skills/thejobfather/scripts/        calcul des scores ATS et de matching, identifiants des offres
 skills/thejobfather/assets/         page de l'artefact
