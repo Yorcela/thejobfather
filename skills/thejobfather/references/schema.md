@@ -32,8 +32,9 @@ Identifier: `v<YYYYMMDD>-<n>`, the creation date and `n` = 1 + the highest numbe
 |---|---|---|
 | `name` | string | language flag, space, identifier: `🇫🇷 v20261025-1` |
 | `lang` | string | short code of the content language: `en`, `fr`, `es`... |
-| `kind` | `"import"` \| `"translation"` \| `"copy"` \| `"migration"` | how the version came to be |
-| `parent` | string \| null | identifier of the version it comes from (translation, copy) |
+| `kind` | `"import"` \| `"translation"` \| `"copy"` \| `"adaptation"` \| `"migration"` | how the version came to be (`adaptation`: tailored to a job posting by `adapt`) |
+| `parent` | string \| null | identifier of the version it comes from (translation, copy, adaptation) |
+| `target` | object | only for an adaptation: `{url, title, company}` of the job posting it was tailored to |
 | `createdAt` | string | ISO date |
 | `labels` | object | resume labels in this language, see below. `{}` for `en` and `fr` (values built into the page) |
 | `titles` | object | custom section titles `{section: title}`, `{}` by default |

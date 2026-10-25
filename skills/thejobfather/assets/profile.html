@@ -457,7 +457,7 @@ details > summary { cursor: pointer; padding: 4px 0; }
   function langName(lang) {
     try { return new Intl.DisplayNames(["en"], { type: "language" }).of(lang) || lang; } catch (e) { return lang; }
   }
-  var KINDS = { "import": "Imported", migration: "Imported", translation: "Translated", copy: "Copy" };
+  var KINDS = { "import": "Imported", migration: "Imported", translation: "Translated", copy: "Copy", adaptation: "Adapted" };
   function clone(o) { return JSON.parse(JSON.stringify(o)); }
   function versionLabel(v) { return v.name || (flagOf(v.lang) + " " + v._id); }
   function versionList() {
@@ -544,7 +544,7 @@ details > summary { cursor: pointer; padding: 4px 0; }
       pick.setAttribute("aria-checked", on ? "true" : "false");
       pick.appendChild(h("b", null, versionLabel(v) + (on ? "  \u2713" : "")));
       var when = v.createdAt ? String(v.createdAt).slice(0, 10) : "";
-      pick.appendChild(h("span", null, [langName(v.lang), KINDS[v.kind] || "Version", when].filter(Boolean).join(" \u00B7 ")));
+      pick.appendChild(h("span", null, [langName(v.lang), KINDS[v.kind] || "Version", v.target && v.target.company, when].filter(Boolean).join(" \u00B7 ")));
       pick.addEventListener("click", function () { selectVersion(v._id); });
       row.appendChild(pick);
       var del = btn("Delete", "small danger"), armed = false, timer = null;
