@@ -216,6 +216,12 @@ textarea.ie-input { overflow: hidden; }
 .page.wide { max-width: 1280px; }
 .formpage.offers h3 { font-family: var(--font-display); font-size: 16px; padding-top: 6px; }
 .formpage.offers h4 { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ui-muted); margin-top: 6px; }
+.logo { flex: none; width: 36px; height: 36px; border-radius: 8px; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; background: #fff; border: 1px solid var(--ui-line); }
+.logo img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.logo.ini { background: hsl(var(--hue, 200) 45% 88%); color: hsl(var(--hue, 200) 50% 25%); font: 700 13px var(--font-display); border-color: transparent; }
+.logo.big { width: 64px; height: 64px; border-radius: 12px; font-size: 20px; }
+.khead { display: flex; gap: 8px; align-items: flex-start; }
+.ktxt { display: flex; flex-direction: column; min-width: 0; }
 .score { display: inline-flex; align-items: center; justify-content: center; min-width: 38px; padding: 2px 8px; border-radius: 999px; border: 2px solid currentColor; font-weight: 700; font-size: 14px; flex: none; }
 .s-high { color: var(--s-high); } .s-good { color: var(--s-good); } .s-mid { color: var(--s-mid); } .s-low { color: var(--s-low); }
 .chip { display: inline-block; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--ui-line); font-size: 12px; background: var(--ui-field); color: var(--ui-muted); white-space: nowrap; }
@@ -225,17 +231,46 @@ textarea.ie-input { overflow: hidden; }
 .mmain { display: flex; flex-direction: column; flex: 1; min-width: 0; }
 .mrow > .analysis, .mrow > .actions { padding: 0 12px 12px; }
 .analysis { display: flex; flex-direction: column; gap: 8px; }
-.analysis ul { padding-left: 20px; display: flex; flex-direction: column; gap: 3px; }
-.an-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.analysis ul.plain { padding-left: 20px; }
+.hero { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; padding: 14px; border-radius: 12px; background: var(--ui-field); border: 1px solid var(--ui-line); }
+.ring { --p: 0; flex: none; width: 92px; height: 92px; border-radius: 50%; display: grid; place-items: center; background: conic-gradient(currentColor calc(var(--p) * 1%), var(--ui-line) 0); }
+.ring span { width: 70px; height: 70px; border-radius: 50%; display: grid; place-items: center; background: var(--ui-field); color: var(--ui-ink); font: 700 26px var(--font-display); }
+.hside { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 200px; }
+.hlabel { font-family: var(--font-display); font-size: 20px; color: currentColor; }
+.gbar { display: flex; flex-direction: column; gap: 3px; font-size: 13px; }
+.gtop { display: flex; justify-content: space-between; }
+.gtrack { height: 8px; border-radius: 99px; background: var(--ui-line); overflow: hidden; }
+.s-fill { display: block; height: 100%; background: currentColor; border-radius: 99px; }
+.summary { font-size: 15px; }
+.gh { margin-top: 8px; }
+.duo { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.bcol { padding: 10px 12px; border-radius: 10px; border: 1px solid; display: flex; flex-direction: column; gap: 6px; }
+.bcol h4 { margin: 0; color: inherit; }
+.bcol ul { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.bcol li { display: flex; gap: 8px; align-items: flex-start; }
+.bcol .ic { flex: none; font-weight: 800; }
+.good { color: var(--s-high); } .bad { color: var(--s-low); } .mid { color: var(--s-mid); }
+.bcol.good, .tcol.good { background: color-mix(in srgb, var(--s-high) 9%, var(--ui-bg)); border-color: color-mix(in srgb, var(--s-high) 45%, var(--ui-line)); }
+.bcol.bad, .tcol.bad { background: color-mix(in srgb, var(--s-low) 9%, var(--ui-bg)); border-color: color-mix(in srgb, var(--s-low) 45%, var(--ui-line)); }
+.tcol.mid { background: color-mix(in srgb, var(--s-mid) 9%, var(--ui-bg)); border-color: color-mix(in srgb, var(--s-mid) 45%, var(--ui-line)); }
+.bcol li span:last-child, .ic-card { color: var(--ui-ink); }
+.tri { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; align-items: start; }
+.tcol { padding: 8px; border-radius: 10px; border: 1px solid; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.tcol h5 { margin: 0; font-size: 13px; color: inherit; }
+.ic-card { display: flex; flex-direction: column; gap: 2px; padding: 7px 9px; border-radius: 8px; background: var(--ui-bg); border: 1px solid var(--ui-line); font-size: 13.5px; overflow-wrap: anywhere; }
+.ic-card .tags { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--ui-muted); }
+.ic-card .why { color: var(--ui-muted); font-size: 12.5px; }
+.ic-card .lost { align-self: flex-start; font-size: 12px; font-weight: 700; color: var(--s-low); }
+@media (max-width: 760px) { .duo, .tri { grid-template-columns: minmax(0, 1fr); } }
 .an-warn { padding: 8px 10px; border-radius: 8px; background: var(--warn-soft); color: var(--warn); }
-.an-table { display: flex; flex-direction: column; gap: 6px; }
-.an-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 2px 10px; align-items: baseline; }
-.an-row .why { grid-column: 2 / 4; color: var(--ui-muted); font-size: 13.5px; }
 .kanban { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(220px, 1fr); gap: 10px; overflow-x: auto; padding-bottom: 6px; align-items: start; }
 .kcol { display: flex; flex-direction: column; gap: 8px; padding: 8px; border: 1px solid var(--ui-line); border-radius: 8px; min-height: 120px; min-width: 0; }
 .kcol.over { border-color: var(--ui-accent); background: var(--ui-field); }
-.kcol h3 { font-size: 13px; padding: 0; }
+.kcol h3 { font-size: 13px; padding: 0 0 6px; color: var(--c); border-bottom: 2px solid var(--c); }
+.kcol { --c: var(--ui-muted); background: color-mix(in srgb, var(--c) 8%, var(--ui-bg)); border-color: color-mix(in srgb, var(--c) 35%, var(--ui-line)); }
+.kcol.k-applied { --c: var(--s-good); } .kcol.k-response { --c: var(--s-high); } .kcol.k-no_response { --c: var(--s-mid); } .kcol.k-rejected { --c: var(--s-low); } .kcol.k-declined { --c: #8a6fb0; }
 .kcard { display: flex; flex-direction: column; gap: 4px; padding: 8px; border: 1px solid var(--ui-line); border-radius: 8px; background: var(--ui-field); cursor: grab; overflow-wrap: anywhere; }
+.kcard { border-left: 4px solid var(--c); background: var(--ui-bg); }
 .kcard b { cursor: pointer; }
 .kmeta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .kcard select { font-size: 12.5px; padding: 3px 6px; }
@@ -1376,7 +1411,6 @@ details > summary { cursor: pointer; padding: 4px 0; }
     showPrefsForm({
       title: "Job preferences",
       fields: [
-        { k: "_n", t: "note", l: "Used by /thejobfather:thejobfather match to compare a job posting with what you are looking for. Everything is optional." },
         { k: "_s1", t: "sub", l: "Roles, contracts and wanted pay" },
         { k: "roles", l: "Roles you are looking for, each with its contract types and its pay (salary, or daily rate when freelance)", t: "roles" },
         { k: "_s2", t: "sub", l: "Locations and work mode" },
@@ -1482,15 +1516,12 @@ details > summary { cursor: pointer; padding: 4px 0; }
     head.appendChild(btn("Close", "small", function () { setPanel(false); $("toggle").focus(); }));
     p.appendChild(head);
     var body = h("div", "panel-body");
-    body.appendChild(h("p", "note", "Click any text on the resume to edit it: Enter or a click elsewhere saves, Esc cancels. Clear a bullet, a skill or a link to delete it. Use the arrows next to a section title to move the section, and Hide to leave it out."));
     lookTab(body);
     if (state.meta && arr(state.meta.dismissed).length) body.appendChild(btn("Show dismissed import warnings (" + state.meta.dismissed.length + ")", "", function () { setDismissed([]); }));
-    body.appendChild(h("p", "note", "To translate the resume, run /thejobfather:thejobfather translate in Claude Code: the translation is saved as a new version, nothing is replaced. Current language: " + curLang() + "."));
     p.appendChild(body);
   }
 
   function lookTab(body) {
-    body.appendChild(h("p", "note", "Colors apply to the resume, not to this panel."));
     body.appendChild(h("div", "lab", "Palettes"));
     var pr = h("div", "presets");
     PRESETS.forEach(function (ps) {
@@ -1860,6 +1891,24 @@ details > summary { cursor: pointer; padding: 4px 0; }
   }
   function statusLabel(s) { var f = OFFER_STATUSES.filter(function (x) { return x[0] === s; })[0]; return f ? f[1] : "Not applied"; }
   function scoreClass(n) { return n >= 80 ? "s-high" : n >= 65 ? "s-good" : n >= 50 ? "s-mid" : "s-low"; }
+  function initials(name) {
+    var w = String(name || "").trim().split(/\s+/).filter(Boolean);
+    return (w.length > 1 ? w[0][0] + w[1][0] : (w[0] || "?").slice(0, 2)).toUpperCase();
+  }
+  /* logo de l'entreprise (fichier de l'artefact) ; sans logo, ses initiales sur une couleur tirée du nom */
+  function logoNode(o, big) {
+    var name = (o && o.company) || "", w = h("span", "logo" + (big ? " big" : ""));
+    var hue = 0; for (var i = 0; i < name.length; i++) hue = (hue * 31 + name.charCodeAt(i)) % 360;
+    w.style.setProperty("--hue", String(hue));
+    function fallback() { clear(w); w.classList.add("ini"); w.textContent = initials(name); }
+    if (o && /^[0-9a-f]{32}$/.test(o.logoAssetId || "")) {
+      var img = document.createElement("img");
+      img.alt = name ? "Logo " + name : ""; img.src = "/_blob/" + o.logoAssetId;
+      img.addEventListener("error", fallback);
+      w.appendChild(img);
+    } else fallback();
+    return w;
+  }
   function scoreChip(n) { return h("span", "score " + scoreClass(n), String(n)); }
   function statusClass(s) { return s === "met" || s === "ok" ? "st-ok" : s === "partial" || s === "unknown" ? "st-mid" : "st-low"; }
   function day(iso) { return String(iso || "").slice(0, 10); }
@@ -1904,59 +1953,84 @@ details > summary { cursor: pointer; padding: 4px 0; }
   }
 
   /* l'analyse complète d'un matching : score, groupes, chaque exigence et chaque préférence avec sa preuve, points d'attention */
+  function bar(label, pts, max, cls) {
+    var w = h("div", "gbar"), top = h("div", "gtop");
+    top.appendChild(h("span", null, label)); top.appendChild(h("b", null, Math.round(pts) + " / " + max));
+    var tr = h("div", "gtrack"), fill = h("i", cls); fill.style.width = Math.max(0, Math.min(100, max ? pts / max * 100 : 0)) + "%";
+    tr.appendChild(fill); w.appendChild(top); w.appendChild(tr);
+    return w;
+  }
+  function bulletsCol(title, tone, a, icon) {
+    var c = h("section", "bcol " + tone), hd = h("h4", null, title);
+    c.appendChild(hd);
+    if (!arr(a).length) { c.appendChild(h("p", "note", "Nothing to report.")); return c; }
+    var ul = h("ul");
+    arr(a).forEach(function (t) { var li = h("li"); li.appendChild(h("span", "ic", icon)); li.appendChild(h("span", null, t)); ul.appendChild(li); });
+    c.appendChild(ul);
+    return c;
+  }
+  function cardOf(i) {
+    var c = h("div", "ic-card");
+    c.appendChild(h("b", null, i.label));
+    var tags = [];
+    if (i.kind === "nice") tags.push("nice to have"); else if (i.kind === "must") tags.push("must");
+    if (i.source && i.source !== "cv") tags.push(i.source);
+    if (tags.length) c.appendChild(h("span", "tags", tags.join(" · ")));
+    if (i.detail) c.appendChild(h("span", "why", i.detail));
+    var lost = Number(i.lost) || 0;
+    if (lost >= 0.5) c.appendChild(h("span", "lost", "−" + Math.round(lost) + " pt" + (Math.round(lost) > 1 ? "s" : "")));
+    return c;
+  }
+  /* trois colonnes par groupe : atteint, partiel ou à clarifier, manquant */
+  function tri(rows, names) {
+    var cols = [["good", names[0], ["met", "ok"]], ["mid", names[1], ["partial", "unknown"]], ["bad", names[2], ["missing", "conflict"]]];
+    var g = h("div", "tri");
+    cols.forEach(function (c) {
+      var mine = rows.filter(function (i) { return c[2].indexOf(i.status) >= 0; });
+      var col = h("section", "tcol " + c[0]);
+      col.appendChild(h("h5", null, c[1] + " (" + mine.length + ")"));
+      mine.forEach(function (i) { col.appendChild(cardOf(i)); });
+      if (!mine.length) col.appendChild(h("p", "note", "—"));
+      g.appendChild(col);
+    });
+    return g;
+  }
+  /* l'analyse complète d'un matching : score, groupes, exigences et préférences en trois colonnes, attention et atouts */
   function analysisNode(m) {
-    var box = h("div", "analysis"), head = h("div", "an-head");
-    head.appendChild(scoreChip(m.score));
-    head.appendChild(h("strong", null, m.label || ""));
-    head.appendChild(h("span", "note", [m.mode, m.versionName, day(m.createdAt)].filter(Boolean).join(" · ")));
-    box.appendChild(head);
+    var box = h("div", "analysis"), hero = h("div", "hero " + scoreClass(m.score));
+    var ring = h("div", "ring"); ring.style.setProperty("--p", String(m.score));
+    ring.appendChild(h("span", null, String(m.score)));
+    hero.appendChild(ring);
+    var side = h("div", "hside");
+    side.appendChild(h("strong", "hlabel", (m.label || "").replace(/^./, function (c) { return c.toUpperCase(); })));
+    side.appendChild(h("span", "note", [m.mode === "requirements" ? "Requirements only" : "Requirements and preferences", m.versionName, day(m.createdAt)].filter(Boolean).join(" · ")));
     var g = m.groups || {};
-    var gl = [];
-    if (g.requirements) gl.push("Requirements " + g.requirements.points + " / " + g.requirements.max);
-    if (g.preferences) gl.push("Preferences " + g.preferences.points + " / " + g.preferences.max);
-    if (gl.length) box.appendChild(h("p", "note", gl.join(" · ")));
-    if (m.summary) box.appendChild(h("p", null, m.summary));
+    if (g.requirements) side.appendChild(bar("Requirements", g.requirements.points, g.requirements.max, "s-fill"));
+    if (g.preferences) side.appendChild(bar("Preferences", g.preferences.points, g.preferences.max, "s-fill"));
+    hero.appendChild(side);
+    box.appendChild(hero);
+    if (m.summary) box.appendChild(h("p", "summary", m.summary));
     if (arr(m.dealBreakers).length) {
       var db1 = h("div", "an-warn");
-      db1.appendChild(h("strong", null, "Deal-breaker" + (m.capped ? " (score capped at 25)" : "")));
+      db1.appendChild(h("strong", null, "Deal-breaker" + (m.capped ? " — score capped at 25" : "")));
       arr(m.dealBreakers).forEach(function (d) { db1.appendChild(h("div", null, [d.type, d.text, d.detail].filter(Boolean).join(" — "))); });
       box.appendChild(db1);
     }
+    var two = h("div", "duo");
+    two.appendChild(bulletsCol("What to put forward", "good", m.next && m.next.highlights, "✓"));
+    two.appendChild(bulletsCol("Points of attention", "bad", m.attention, "!"));
+    box.appendChild(two);
     var items = arr(m.items);
-    [["requirements", "Requirements of the posting"], ["preferences", "Your preferences"]].forEach(function (grp) {
-      var rows = items.filter(function (i) { return i.group === grp[0]; });
-      if (!rows.length) return;
-      box.appendChild(h("h4", null, grp[1]));
-      var t = h("div", "an-table");
-      rows.forEach(function (i) {
-        var r = h("div", "an-row");
-        r.appendChild(h("span", "chip " + statusClass(i.status), i.status));
-        r.appendChild(h("span", null, i.label + (i.kind === "must" ? "" : (i.kind === "nice" ? " (nice to have)" : ""))));
-        r.appendChild(h("span", "note", i.points + " / " + i.max));
-        if (i.detail) r.appendChild(h("span", "why", i.detail + (i.source && i.source !== "cv" ? " [" + i.source + "]" : "")));
-        t.appendChild(r);
-      });
-      box.appendChild(t);
-    });
-    if (!items.length && (arr(m.strengths).length || arr(m.gaps).length)) {
-      [["Strengths", m.strengths], ["Gaps", m.gaps]].forEach(function (x) {
-        if (!arr(x[1]).length) return;
-        box.appendChild(h("h4", null, x[0]));
-        var ul = h("ul");
-        arr(x[1]).forEach(function (i) { ul.appendChild(h("li", null, i.label + (i.detail ? " — " + i.detail : ""))); });
-        box.appendChild(ul);
-      });
-    }
+    var reqs = items.filter(function (i) { return i.group === "requirements"; }), prefs = items.filter(function (i) { return i.group === "preferences"; });
+    if (reqs.length) { box.appendChild(h("h4", "gh", "Requirements of the posting")); box.appendChild(tri(reqs, ["Met", "Partial or unclear", "Missing"])); }
+    if (prefs.length) { box.appendChild(h("h4", "gh", "Your preferences")); box.appendChild(tri(prefs, ["Fits", "Partial or unclear", "Conflict"])); }
     function list(title, a) {
       if (!arr(a).length) return;
-      box.appendChild(h("h4", null, title));
-      var ul = h("ul");
+      box.appendChild(h("h4", "gh", title));
+      var ul = h("ul", "plain");
       arr(a).forEach(function (t) { ul.appendChild(h("li", null, t)); });
       box.appendChild(ul);
     }
-    list("Still unclear", arr(m.unclear).map(function (u) { return u.label + (u.detail ? " — " + u.detail : ""); }));
-    list("Points of attention", m.attention);
-    list("What to put forward", m.next && m.next.highlights);
     list("Questions for the recruiter", m.next && m.next.recruiterQuestions);
     list("Saved answers relied on", m.answersUsed);
     return box;
@@ -1965,20 +2039,20 @@ details > summary { cursor: pointer; padding: 4px 0; }
   function matchesTab(wrap) {
     var list = matchList();
     if (!list.length) {
-      wrap.appendChild(h("p", "note", "No matching saved yet. Run /thejobfather:thejobfather match <job posting URL> in Claude Code: each result is saved here with its full analysis."));
+      wrap.appendChild(h("p", "note", "No matching yet."));
       return;
     }
-    wrap.appendChild(h("p", "note", "One matching per resume version and job posting. Running match again on the same posting offers to review the previous result, or to compare again with a newer resume version."));
     var box = h("div", "stack");
     list.forEach(function (m) {
       var open = state.openMatch === m._id, row = h("article", "mrow"), p = m.posting || {};
       var top = h("button", "mtop"); top.type = "button"; top.setAttribute("aria-expanded", open ? "true" : "false");
+      var off = state.offers[m.offerId];
+      top.appendChild(logoNode(off || { company: p.company }));
       top.appendChild(scoreChip(m.score));
       var main = h("span", "mmain");
       main.appendChild(h("b", null, (p.title || "Offer") + (p.company ? " · " + p.company : "")));
       main.appendChild(h("span", "note", [m.versionName, day(m.createdAt), m.label].filter(Boolean).join(" · ")));
       top.appendChild(main);
-      var off = state.offers[m.offerId];
       if (off) top.appendChild(h("span", "chip", statusLabel(off.status)));
       top.addEventListener("click", function () { state.openMatch = open ? null : m._id; renderOffers(); });
       row.appendChild(top);
@@ -2007,8 +2081,11 @@ details > summary { cursor: pointer; padding: 4px 0; }
     function openIt() { state.offerOpen = o._id; renderOffers(); window.scrollTo(0, 0); }
     t.addEventListener("click", openIt);
     t.addEventListener("keydown", function (e) { if (e.key === "Enter") openIt(); });
-    c.appendChild(t);
-    if (o.company) c.appendChild(h("span", "note", o.company));
+    var head = h("div", "khead"), htxt = h("div", "ktxt");
+    htxt.appendChild(t);
+    if (o.company) htxt.appendChild(h("span", "note", o.company));
+    head.appendChild(logoNode(o)); head.appendChild(htxt);
+    c.appendChild(head);
     var meta = h("div", "kmeta");
     if (ms.length) meta.appendChild(scoreChip(ms[0].score));
     if (o.appliedAt) meta.appendChild(h("span", "note", "applied " + o.appliedAt));
@@ -2016,9 +2093,6 @@ details > summary { cursor: pointer; padding: 4px 0; }
     var cv = o.cvVersionId && state.versions[o.cvVersionId];
     if (cv) c.appendChild(h("span", "note", "CV: " + versionLabel(Object.assign({ _id: o.cvVersionId }, cv))));
     if (arr(o.emails).length) c.appendChild(h("span", "note", "✉ " + arr(o.emails).length + " e-mail" + (arr(o.emails).length > 1 ? "s" : "")));
-    var sel = plainSelect("mv-" + o._id, OFFER_STATUSES, o.status || "not_applied", "Move to");
-    sel.addEventListener("change", function () { setOfferStatus(o._id, sel.value); });
-    c.appendChild(sel);
     return c;
   }
 
@@ -2048,15 +2122,14 @@ details > summary { cursor: pointer; padding: 4px 0; }
 
   function kanbanTab(wrap) {
     var bar = h("div", "actions");
-    bar.appendChild(h("span", "note", "Drag a card to change its status, or use the menu on the card. Click a title to open the application."));
     bar.appendChild(h("span", "sp"));
     if (!state.addingOffer) bar.appendChild(btn("+ Add an offer", "small", function () { state.addingOffer = true; renderOffers(); }));
     wrap.appendChild(bar);
     if (state.addingOffer) addOfferForm(wrap);
     var rows = offerRows(), board = h("div", "kanban");
-    if (!rows.length) wrap.appendChild(h("p", "note", "No offer yet. Offers appear here when you run match, or add one yourself."));
+    if (!rows.length) wrap.appendChild(h("p", "note", "No offer yet."));
     OFFER_STATUSES.forEach(function (st) {
-      var col = h("section", "kcol"), mine = rows.filter(function (o) { return (o.status || "not_applied") === st[0]; });
+      var col = h("section", "kcol k-" + st[0]), mine = rows.filter(function (o) { return (o.status || "not_applied") === st[0]; });
       col.appendChild(h("h3", null, st[1] + " (" + mine.length + ")"));
       mine.forEach(function (o) { col.appendChild(offerCard(o)); });
       col.addEventListener("dragover", function (e) { e.preventDefault(); col.classList.add("over"); });
@@ -2076,6 +2149,19 @@ details > summary { cursor: pointer; padding: 4px 0; }
     wrap.appendChild(btn("← All offers", "small", function () { state.offerOpen = null; renderOffers(); }));
     var title = plainInput("od-title", o.title, "Job title", "Job title"), company = plainInput("od-company", o.company, "Company", "Company");
     bindSave(title, id, "title"); bindSave(company, id, "company");
+    var lg = h("div", "actions"), lgBox = h("span");
+    lgBox.appendChild(logoNode(o, true)); lg.appendChild(lgBox);
+    if (assetsApi) {
+      var file = document.createElement("input"); file.type = "file"; file.accept = "image/png,image/jpeg,image/webp,image/svg+xml"; file.hidden = true; file.setAttribute("aria-label", "Company logo file");
+      var pick = btn(o.logoAssetId ? "Change logo" : "Add a logo", "small", function () { file.click(); });
+      file.addEventListener("change", function () {
+        var f = file.files && file.files[0];
+        if (!f) return;
+        assetsApi.upload(f).then(function (r) { return saveOffer(id, { logoAssetId: r.id }); }).catch(saveFail);
+      });
+      lg.appendChild(pick); lg.appendChild(file);
+    }
+    box.appendChild(lg);
     var p1 = h("div", "pair");
     p1.appendChild(labeled("Job title", title, "od-title")); p1.appendChild(labeled("Company", company, "od-company"));
     box.appendChild(p1);
@@ -2105,7 +2191,7 @@ details > summary { cursor: pointer; padding: 4px 0; }
 
     var ms = offerMatches(id);
     box.appendChild(h("h3", null, "Matching analysis"));
-    if (!ms.length) box.appendChild(h("p", "note", "No matching saved for this offer. Run /thejobfather:thejobfather match with its address."));
+    if (!ms.length) box.appendChild(h("p", "note", "No matching for this offer."));
     ms.forEach(function (m, i) {
       var d = document.createElement("details"); if (i === 0) d.open = true;
       var s = document.createElement("summary");
@@ -2115,7 +2201,6 @@ details > summary { cursor: pointer; padding: 4px 0; }
     });
 
     box.appendChild(h("h3", null, "Application form"));
-    box.appendChild(h("p", "note", "Keep the questions of the form and the answers you gave, to say the same thing during a call."));
     var qaBox = h("div", "stack"), qaRows = [];
     function commitQA() {
       saveOffer(id, { formQA: qaRows.map(function (r) { return { q: r.q.value.trim(), a: r.a.value.trim() }; }).filter(function (x) { return x.q || x.a; }) });
@@ -2161,7 +2246,6 @@ details > summary { cursor: pointer; padding: 4px 0; }
       });
       box.appendChild(ul);
     } else { box.appendChild(h("p", "note", "Nothing yet.")); }
-    box.appendChild(h("p", "note", "To look for replies in your mailbox, run /thejobfather:thejobfather track in Claude Code (Gmail, read-only)." + (o.lastEmailCheck ? " Last check: " + day(o.lastEmailCheck) + "." : "")));
 
     var danger = h("div", "actions");
     danger.appendChild(twoClick("Delete this offer and its matchings", "Confirm deletion", function () {

@@ -176,6 +176,7 @@ Written by `scripts/offers.py build`, never by hand. The page "My offers" lists 
 | Field | Type | Note |
 |---|---|---|
 | `url`, `urlKey`, `title`, `company` | string | the page lets the user fix `title` and `company` |
+| `logoAssetId` | string | optional, `id` of the company logo in the artifact's assets (served under `/_blob/<id>`); the page shows the company's initials without one, and lets the user upload a logo |
 | `status` | string | `not_applied` (default), `applied`, `response`, `no_response`, `rejected` (by the company), `declined` (by the user) |
 | `statusUpdatedAt`, `createdAt` | string | ISO dates |
 | `appliedAt` | string | `YYYY-MM-DD`, set when the status first becomes `applied` |
