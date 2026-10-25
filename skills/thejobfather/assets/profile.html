@@ -2649,12 +2649,12 @@ textarea.inl { resize: vertical; }
     });
     arr(o.emails).forEach(function (mm) { tl.push({ at: mm.date, mail: mm }); });
     tl.forEach(function (e, n) { e.n = n; e.t = Date.parse(e.at) || 0; });
-    tl.sort(function (x, y) { return (y.t - x.t) || (y.n - x.n); });
+    tl.sort(function (x, y) { return (x.t - y.t) || (x.n - y.n); });
     if (tl.length) {
       var tul = h("ul", "tl");
       tl.forEach(function (e) {
         var li = h("li");
-        li.appendChild(h("span", "note", day(e.at) + "  "));
+        li.appendChild(h("span", "note", day(e.at) + (e.t ? " " + new Date(e.t).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "") + "  "));
         if (e.mail) li.appendChild(mailEntry(e.mail));
         else li.appendChild(document.createTextNode(e.text));
         tul.appendChild(li);
