@@ -354,9 +354,17 @@ details > summary { cursor: pointer; padding: 4px 0; }
 details.mail { flex: 1 1 100%; border: 1px solid var(--ui-line); border-radius: 10px; background: var(--ui-field); padding: 6px 10px; }
 details.mail > summary { cursor: pointer; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 details.mail .ph { flex: none; color: var(--ui-accent); }
+details.mail.sent { border-left: 3px solid var(--ui-accent); }
 .mailtools { margin: 8px 0; display: flex; gap: 8px; }
 .mailtools .btn { display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
 .mailbody { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 13.5px; line-height: 1.5; padding: 10px 12px; background: var(--ui-bg); border: 1px solid var(--ui-line); border-radius: 8px; max-height: 420px; overflow: auto; }
+details.pd { border: 1px solid var(--ui-line); border-radius: 10px; background: var(--ui-field); padding: 6px 10px; }
+details.pd > summary { cursor: pointer; display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+details.pd[open] > summary { margin-bottom: 6px; }
+details.pd h5 { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--ui-muted); margin: 8px 0 2px; }
+.prosetext { white-space: pre-wrap; overflow-wrap: anywhere; }
+.prepbox { padding: 12px 14px; border: 1px solid var(--ui-line); border-radius: 10px; background: var(--ui-field); display: flex; flex-direction: column; gap: 6px; }
+.watch { color: var(--s-mid); font-weight: 600; font-size: 13.5px; }
 .vtype.st-rejected { background: color-mix(in srgb, var(--s-low) 16%, var(--ui-bg)); color: var(--s-low); }
 .vtype.st-declined { background: color-mix(in srgb, #8a6fb0 18%, var(--ui-bg)); color: #8a6fb0; }
 @media (max-width: 760px) { .vtwrap { overflow-x: auto; } .vtable { min-width: 640px; } }
@@ -440,7 +448,7 @@ textarea.inl { resize: vertical; }
   }
 
   var db = null, assetsApi = null, downloadsApi = null;
-  var state = { profile: null, meta: null, settings: norm(null), data: {}, versions: {}, version: null, activeId: null, panelOpen: true, tab: "sections", prefs: null, answers: {}, of: ofDefaults(), vf: { lang: "", type: "", employer: "", from: "", to: "", sort: "date", dir: "desc", page: 1, open: null }, matches: {}, offers: {}, offersTab: "matches", offerOpen: null, openMatch: null, addingOffer: false, odTab: {}, odMatch: {}, view: "resume" };
+  var state = { profile: null, meta: null, settings: norm(null), data: {}, versions: {}, version: null, activeId: null, panelOpen: true, tab: "sections", prefs: null, answers: {}, of: ofDefaults(), vf: { lang: "", type: "", employer: "", from: "", to: "", sort: "date", dir: "desc", page: 1, open: null }, matches: {}, offers: {}, offersTab: "matches", offerOpen: null, openMatch: null, addingOffer: false, odTab: {}, odMatch: {}, preps: {}, view: "resume" };
   COLLS.forEach(function (c) { state.data[c] = []; });
 
   var $ = function (id) { return document.getElementById(id); };
@@ -2363,7 +2371,8 @@ textarea.inl { resize: vertical; }
   /* icônes Phosphor (régulier), tracés repris tels quels */
   var PH = {
     envelope: "M224,48H32a8,8,0,0,0-8,8V192a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A8,8,0,0,0,224,48Zm-96,85.15L52.57,64H203.43ZM98.71,128,40,181.81V74.19Zm11.84,10.85,12,11.05a8,8,0,0,0,10.82,0l12-11.05,58,53.15H52.57ZM157.29,128,216,74.18V181.82Z",
-    out: "M224,104a8,8,0,0,1-16,0V59.31l-66.34,66.35a8,8,0,0,1-11.32-11.32L196.69,48H152a8,8,0,0,1,0-16h56a8,8,0,0,1,8,8Zm-40,24a8,8,0,0,0-8,8v72H48V80h72a8,8,0,0,0,0-16H48A16,16,0,0,0,32,80V208a16,16,0,0,0,16,16H176a16,16,0,0,0,16-16V136A8,8,0,0,0,184,128Z"
+    plane: "M227.32,28.68a16,16,0,0,0-15.66-4.08l-.15,0L19.57,82.84a16,16,0,0,0-2.42,29.84l85.62,40.55,40.55,85.62A15.86,15.86,0,0,0,157.74,248q.69,0,1.38-.06a15.88,15.88,0,0,0,14-11.51l58.2-191.94c0-.05,0-.1,0-.15A16,16,0,0,0,227.32,28.68ZM157.83,231.85l-.05.14,0-.07-40.06-84.58,56.7-56.69a8,8,0,0,0-11.32-11.32L106.3,135.34,21.58,95.31l.14,0,.05,0L213.53,38.21h0l-.05.15Z",
+    out: "M224,104a8,8,0,0,1-16,0V59.31,0,0,1-16,0V59.31l-66.34,66.35a8,8,0,0,1-11.32-11.32L196.69,48H152a8,8,0,0,1,0-16h56a8,8,0,0,1,8,8Zm-40,24a8,8,0,0,0-8,8v72H48V80h72a8,8,0,0,0,0-16H48A16,16,0,0,0,32,80V208a16,16,0,0,0,16,16H176a16,16,0,0,0,16-16V136A8,8,0,0,0,184,128Z"
   };
   function phIcon(name, size) {
     var ns = "http://www.w3.org/2000/svg", svg = document.createElementNS(ns, "svg"), path = document.createElementNS(ns, "path");
@@ -2386,9 +2395,11 @@ textarea.inl { resize: vertical; }
   function mailEntry(mm) {
     var d = document.createElement("details"); d.className = "mail";
     var sm = document.createElement("summary");
-    sm.appendChild(phIcon("envelope", 18));
+    var sent = mm.direction === "sent";
+    sm.appendChild(phIcon(sent ? "plane" : "envelope", 18));
     sm.appendChild(h("b", null, " " + (mm.subject || "(no subject)")));
-    sm.appendChild(h("span", "note", "  — " + [mm.from, mm.kind].filter(Boolean).join(" · ")));
+    sm.appendChild(h("span", "note", "  — " + (sent ? ["You wrote", mm.to && "to " + mm.to] : [mm.from, mm.kind]).filter(Boolean).join(" · ")));
+    if (sent) d.classList.add("sent");
     d.appendChild(sm);
     var tools = h("div", "mailtools");
     if (safeUrl(mm.viewUrl)) {
@@ -2442,6 +2453,63 @@ textarea.inl { resize: vertical; }
     saveOffer(id, { analysisRequested: new Date().toISOString() }).then(function () {
       try { navigator.clipboard.writeText(cmd).then(function () { say(true); }, function () { say(false); }); } catch (e) { say(false); }
     });
+  }
+  /* préparation d'entretien (collection preps), écrite par la commande prepare */
+  function requestPrep(id, o) {
+    var cmd = "/thejobfather:thejobfather prepare" + (safeUrl(o.url) ? " " + o.url : ""), say = function (ok) { toast(ok ? "Marked for preparation. The command is copied: paste it in Claude Code." : "Marked for preparation. Run /thejobfather:thejobfather prepare in Claude Code."); };
+    saveOffer(id, { prepRequested: new Date().toISOString() }).then(function () {
+      try { navigator.clipboard.writeText(cmd).then(function () { say(true); }, function () { say(false); }); } catch (e) { say(false); }
+    });
+  }
+  function pdet(summary, tag, build) {
+    var d = document.createElement("details"); d.className = "pd";
+    var sm = document.createElement("summary");
+    sm.appendChild(h("b", null, summary));
+    if (tag) sm.appendChild(h("span", "chip", tag));
+    d.appendChild(sm);
+    build(d);
+    return d;
+  }
+  function prepBody(pr) {
+    var box = h("div", "stack");
+    var meta = [pr.stage, pr.interviewer, pr.date, pr.language].filter(Boolean);
+    if (meta.length) { var mrow = h("div", "irtags"); meta.forEach(function (t) { mrow.appendChild(h("span", "chip", t)); }); box.appendChild(mrow); }
+    if (pr.pitch) { var pb = h("div", "prepbox"); pb.appendChild(h("h4", null, "Your pitch")); pb.appendChild(h("p", "prosetext", pr.pitch)); box.appendChild(pb); }
+    function list(title, a) {
+      if (!arr(a).length) return;
+      var b = h("div", "prepbox"); b.appendChild(h("h4", null, title));
+      var ul = h("ul", "plain"); arr(a).forEach(function (t) { ul.appendChild(h("li", null, t)); }); b.appendChild(ul); box.appendChild(b);
+    }
+    if (arr(pr.questions).length) {
+      box.appendChild(h("h4", "gh", "Likely questions (" + pr.questions.length + ")"));
+      arr(pr.questions).forEach(function (q) {
+        box.appendChild(pdet(q.q, q.kind, function (d) {
+          if (q.why) d.appendChild(h("p", "note", "Why they ask: " + q.why));
+          d.appendChild(h("p", "prosetext", q.answer || ""));
+          if (arr(q.evidence).length) d.appendChild(h("p", "note", "Facts from: " + arr(q.evidence).join(" · ")));
+          if (q.watch) d.appendChild(h("p", "watch", "Watch out: " + q.watch));
+        }));
+      });
+    }
+    if (arr(pr.stories).length) {
+      box.appendChild(h("h4", "gh", "Stories to tell (" + pr.stories.length + ")"));
+      arr(pr.stories).forEach(function (st) {
+        box.appendChild(pdet(st.title, arr(st.usedFor).join(", "), function (d) {
+          [["Situation", st.situation], ["Action", st.action], ["Result", st.result]].forEach(function (x) { if (x[1]) { d.appendChild(h("h5", null, x[0])); d.appendChild(h("p", "prosetext", x[1])); } });
+        }));
+      });
+    }
+    if (arr(pr.gaps).length) {
+      box.appendChild(h("h4", "gh", "Weak points, honest answers"));
+      arr(pr.gaps).forEach(function (g) { box.appendChild(pdet(g.topic, "", function (d) { d.appendChild(h("p", "prosetext", g.answer || "")); })); });
+    }
+    list("Questions to ask them", pr.askThem);
+    list("Checklist", pr.checklist);
+    list("To confirm with you", pr.toConfirm);
+    if (pr.salary) { var sb = h("div", "prepbox"); sb.appendChild(h("h4", null, "About pay")); sb.appendChild(h("p", "prosetext", pr.salary)); box.appendChild(sb); }
+    if (arr(pr.practice).length) { var pl = arr(pr.practice).map(function (x) { return x.q + (x.note ? " — " + x.note : ""); }); list("Hard in the mock interview", pl); }
+    box.appendChild(h("p", "note", "Prepared on " + day(pr.createdAt) + ". Run /thejobfather:thejobfather prepare again to redo it or to practice."));
+    return box;
   }
   function offerDetail(mount, id) {
     var o = state.offers[id], ms = offerMatches(id), m = ms.filter(function (x) { return x._id === state.odMatch[id]; })[0] || ms[0];
@@ -2536,6 +2604,16 @@ textarea.inl { resize: vertical; }
       }
     }
 
+    /* préparation d'entretien */
+    var pr = state.preps[id];
+    var pc2 = section("od-prep", "\uD83C\uDFA4", "Interview preparation", pr ? "Questions with answers to say, stories, honest answers on the weak points, and questions to ask." : "Likely questions with answers built from your real experience, stories, honest answers on the weak points, and questions to ask back.");
+    if (pr) pc2.appendChild(prepBody(pr));
+    else {
+      pc2.appendChild(h("p", "note", o.prepRequested ? "Preparation requested on " + day(o.prepRequested) + ". Run the command in Claude Code to get it." : "No preparation yet for this offer."));
+      pc2.appendChild(btn(o.prepRequested ? "Copy the command again" : "Prepare the interview", "primary", function () { requestPrep(id, o); }));
+    }
+    add(pc2, "\uD83C\uDFA4", "Interview prep");
+
     /* formulaire de candidature */
     var fc = section("od-form", "✍️", "Application form", "The questions and the answers you gave, to say the same thing during a call.");
     var qaBox = h("div", "stack"), qaRows = [];
@@ -2570,7 +2648,8 @@ textarea.inl { resize: vertical; }
       tl.push({ at: e.at, text: text });
     });
     arr(o.emails).forEach(function (mm) { tl.push({ at: mm.date, mail: mm }); });
-    tl.sort(function (x, y) { return String(y.at || "").localeCompare(String(x.at || "")); });
+    tl.forEach(function (e, n) { e.n = n; e.t = Date.parse(e.at) || 0; });
+    tl.sort(function (x, y) { return (y.t - x.t) || (y.n - x.n); });
     if (tl.length) {
       var tul = h("ul", "tl");
       tl.forEach(function (e) {
@@ -2807,6 +2886,11 @@ textarea.inl { resize: vertical; }
     db.collection("matches").onSnapshot(function (snap) {
       state.matches = {};
       snap.docs.forEach(function (d) { state.matches[d.id] = d.data(); });
+      refreshOffers();
+    }, onErr);
+    db.collection("preps").onSnapshot(function (snap) {
+      state.preps = {};
+      snap.docs.forEach(function (d) { state.preps[d.id] = d.data(); });
       refreshOffers();
     }, onErr);
     db.collection("offers").onSnapshot(function (snap) {

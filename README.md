@@ -73,6 +73,8 @@ Elle montre ensuite ce qui va changer (langue, titre et résumé, puces déplac�
 
 Quand `match`, `adapt` ou `apply` est lancée sans URL, la commande demande de quelle offre il s'agit parmi celles déjà enregistrées (les plus récentes d'abord, une adresse ou un nom d'entreprise se saisissent via « Autre »). Pour `match`, les analyses demandées depuis le tableau passent en premier. Pour `apply`, seules les offres auxquelles vous n'avez pas encore postulé sont proposées.
 
+Avec `prepare <url>`, si l'adresse ne correspond à aucune candidature enregistrée, la commande demande laquelle choisir, ou crée la candidature à partir de l'adresse.
+
 Quand un matching donne moins de 70 sur 100, `match` demande si vous gardez l'annonce ou si elle passe directement en « Declined by me » dans le tableau des candidatures.
 
 ### Mes offres et suivi des candidatures
@@ -92,9 +94,21 @@ Règles de fond : **elle ne soumet jamais le formulaire**, c'est vous qui clique
 
 La commande garde l'onglet ouvert et enregistre en continu ce que contient le formulaire : si vous modifiez des réponses avant de soumettre, c'est la version finale qui est sauvegardée. Quand vous validez le formulaire, elle demande si vous l'avez soumis, puis enregistre dans « My offers », sur la candidature : toutes les questions et réponses (« Application form »), la lettre, la version du CV, un événement dans l'historique et, si vous avez soumis, le statut « Applied ». Les réponses qui valent au-delà de ce formulaire rejoignent vos réponses mémorisées.
 
+### `/thejobfather:thejobfather prepare [url]`
+
+Prépare un entretien sur une offre enregistrée (sans adresse, la commande demande laquelle, en proposant d'abord celles où un entretien est probable). Elle vous demande de quel entretien il s'agit (appel recruteur, manager, technique, final), avec qui et quand, puis construit à partir de ce qu'elle sait réellement de vous (CV envoyé, réponses mémorisées, formulaire de candidature, matching, mails) :
+
+- un pitch « parlez-moi de vous » de quelques phrases courtes ;
+- 10 à 15 questions probables, chacune avec pourquoi elle sera posée, une réponse à dire à voix haute, d'où viennent les faits, et un point de vigilance ;
+- 4 à 6 histoires au format STAR, tirées de vos vraies expériences et de leurs vrais chiffres ;
+- une réponse honnête pour chaque point faible (compétence manquante, exigence non couverte) ;
+- les questions à poser à l'interlocuteur, une liste de points pratiques, ce qu'il faut dire sur la rémunération, et les faits à confirmer.
+
+Rien n'est inventé, et les textes sont écrits comme vous parleriez (phrases courtes, mots simples, sans formules d'IA). La préparation est enregistrée sur la candidature, section « Interview prep » de la fiche, où un bouton permet aussi de la demander. La commande propose ensuite un **entretien blanc** : elle joue l'interlocuteur, pose les questions une à une, vous donne un retour honnête sur chaque réponse, et garde les questions où vous avez buté.
+
 ### `/thejobfather:thejobfather mail_synch`
 
-Garde le tableau des candidatures en phase avec votre boîte mail (connecteur Gmail, en lecture seule, avec votre accord). Elle cherche sur les 30 derniers jours les confirmations de candidature déjà envoyées (Greenhouse, Lever, Ashby, Welcome to the Jungle, LinkedIn...), vous montre celles qui manquent dans le tableau et ajoute celles que vous cochez, avec le statut « Applied » et la date de la confirmation. Ensuite elle va chercher les réponses (comme `track`) et propose les changements de statut. Pour chaque confirmation ou réponse, l'expéditeur, l'objet, la date, un court extrait, le texte du mail tel que reçu (retours à la ligne gardés, 20 000 caractères au plus) et son lien Gmail sont gardés : l'historique de la candidature affiche le mail en entier, avec ses liens cliquables, et un bouton l'ouvre dans Gmail. Les pièces jointes et les newsletters ne sont jamais gardées.
+Garde le tableau des candidatures en phase avec votre boîte mail (connecteur Gmail, en lecture seule, avec votre accord). Elle cherche sur les 30 derniers jours les confirmations de candidature déjà envoyées (Greenhouse, Lever, Ashby, Welcome to the Jungle, LinkedIn...), vous montre celles qui manquent dans le tableau et ajoute celles que vous cochez, avec le statut « Applied » et la date de la confirmation. Ensuite elle va chercher les réponses (comme `track`) et propose les changements de statut. Pour chaque confirmation ou réponse, l'expéditeur, l'objet, la date, un court extrait, le texte du mail tel que reçu (retours à la ligne gardés, 20 000 caractères au plus) et son lien Gmail sont gardés : l'historique de la candidature affiche le mail en entier, avec ses liens cliquables, et un bouton l'ouvre dans Gmail. Les messages que vous avez envoyés vous-même (réponses à un recruteur, relances, remerciements, retrait de candidature) sont tracés aussi, avec une mention « You wrote » dans l'historique. Les pièces jointes et les newsletters ne sont jamais gardées.
 
 **Routine automatique.** `/thejobfather:thejobfather mail_synch schedule` demande votre accord une fois, puis crée une tâche planifiée qui lance `mail_synch auto` tous les jours à 9h et à 14h. Elle cherche les nouvelles réponses toute seule, sans poser de question, et ne change jamais un statut : elle marque l'offre « New reply » (avec le statut suggéré), ce qui affiche un compteur sur « My offers » et une étiquette dans le tableau, et envoie une notification s'il y a au moins une réponse. Sur la fiche, un bandeau permet d'appliquer le statut suggéré ou de marquer la réponse comme vue. La tâche tourne tant que l'application Claude est ouverte (sinon au prochain lancement) ; un test avec « Run now » dans les tâches planifiées permet de valider les accès Gmail. `mail_synch unschedule` l'arrête.
 
@@ -130,7 +144,7 @@ Les modifications faites dans la page (édition sur place) s'appliquent à la ve
 ```
 .claude-plugin/plugin.json          manifeste du plugin
 .claude-plugin/marketplace.json     permet l'installation depuis ce dépôt
-skills/thejobfather/SKILL.md        commande /thejobfather et sous-commandes init, translate, ats_score, match, adapt, apply, mail_synch, track
+skills/thejobfather/SKILL.md        commande /thejobfather et sous-commandes init, translate, ats_score, match, adapt, apply, prepare, mail_synch, track
 skills/thejobfather/references/     schéma de la base de données, barèmes des scores ATS et de matching
 skills/thejobfather/scripts/        calcul des scores ATS et de matching, identifiants des offres
 skills/thejobfather/assets/         page de l'artefact

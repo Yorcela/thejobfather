@@ -8,6 +8,7 @@ Places:
 |---|---|---|
 | `versions/<id>` | a complete resume (one version) | `init`, `translate`, the page |
 | `settings/layout` | display shared by all versions (section order, colors) and the displayed version | the page; commands only write `active` |
+| `preps/<offerId>` | the interview preparation of one offer | `prepare`; the page (to ask for it) |
 | `meta/import` | trace of the last import and warnings | `init`, the page (`dismissed`) |
 | `meta/mailcheck` | `{at, newReplies}`: the last run of the mail check routine | `mail_synch auto` |
 | `settings/preferences` | the user's job preferences, used by `match` | the page ("Preferences" button); commands only read it |
@@ -182,18 +183,37 @@ Written by `scripts/offers.py build`, never by hand. The page "My offers" lists 
 | `logoAssetId` | string | optional, `id` of the company logo in the artifact's assets (served under `/_blob/<id>`); the page shows the company's initials without one, and lets the user upload a logo |
 | `status` | string | `not_applied` (default), `applied`, `response`, `no_response`, `offer` (the company made an offer), `rejected` (by the company), `declined` (by the user) |
 | `statusUpdatedAt`, `createdAt` | string | ISO dates |
+| `prepRequested` | string | ISO date, set by the page when the user asks for an interview preparation on this offer; `prepare` without arguments picks these offers up first and removes the field once the preparation is saved |
 | `analysisRequested` | string | ISO date, set by the page when the user pastes a job URL in "My offers" (the offer then has an empty `title` and `company`); `match` without arguments picks these offers up, and removes the field once the matching is saved |
 | `appliedAt` | string | `YYYY-MM-DD`, set when the status first becomes `applied` |
 | `cvVersionId` | string | the resume version sent (defaults to the version of the latest matching); the page can open it |
 | `formQA` | `[{q, a}]` | the application form: questions and the answers given, to say the same thing during a call |
 | `coverLetter`, `notes` | string | |
-| `events` | array | history: `{at, type: "status", from, to, by}` with `by` = `user` or `gmail`, or `{at, type: "apply", note}` when `apply` filled the form |
-| `emails` | array | found by `track` and `mail_synch`: `{date, from, subject, kind, snippet, body, viewUrl}`, `kind` = `response`, `rejected` or `ack`; `snippet` at most 200 characters; `body` the plain-text message with its line breaks (at most 20,000 characters, cut with `[…]` beyond), shown in full in the application's history with clickable links; `viewUrl` the Gmail link that opens the message in a browser tab |
+| `events` | array | history: `{at, type: "status", from, to, by}` with `by` = `user` or `gmail`, or `{at, type: "apply", note}` when `apply` filled the form, or `{at, type: "prep", note}` when `prepare` saved a preparation |
+| `emails` | array | found by `track` and `mail_synch`: `{date, from, subject, kind, snippet, body, viewUrl}`, `kind` = `response`, `rejected`, `ack` or `sent`; `direction` is `"sent"` for a message the user wrote (with `to`, the recipient), absent for a message received; `snippet` at most 200 characters; `body` the plain-text message with its line breaks (at most 20,000 characters, cut with `[…]` beyond), shown in full in the application's history with clickable links; `viewUrl` the Gmail link that opens the message in a browser tab |
 | `source` | string | `"gmail"` when `mail_synch` found the application in the mailbox; absent otherwise. Such an offer may have an empty `url` and a `mail://<company>/<title>` `urlKey` |
 | `newReply`, `newReplyAt`, `suggestedStatus` | bool, string, string | set by `mail_synch auto` when a new reply was found: the page shows a count on "My offers" and a "New reply" tag until the user marks it as seen; `suggestedStatus` is `response` or `rejected`, never applied by itself |
 | `lastEmailCheck` | string | ISO date of the last `track` |
 
 When `match` runs again on a posting whose offer exists, the offer is kept as it is: status, form answers and history belong to the user.
+
+## `preps/<offerId>`
+
+Written by `prepare`; one document per offer (the same identifier as `offers/<offerId>`). The page shows it in the application's "Interview prep" section.
+
+| Field | Type | Note |
+|---|---|---|
+| `offerId`, `versionId`, `matchId` | string | the offer, the resume version used, the saved matching it relies on |
+| `createdAt`, `language` | string | ISO date, language of the interview |
+| `stage`, `interviewer`, `date` | string | which interview (`recruiter`, `manager`, `technical`, `leadership`, `unknown`), who, when |
+| `pitch` | string | the spoken "tell me about yourself" |
+| `questions` | `[{q, kind, why, answer, evidence, watch}]` | likely questions with the answer to say; `kind` is `motivation`, `experience`, `leadership`, `technical`, `behavioral`, `gap`, `salary` or `logistics`; `evidence` is a `string[]` of where the facts come from; `watch` is optional |
+| `stories` | `[{title, situation, action, result, usedFor}]` | STAR stories drawn from the resume, `usedFor` is a `string[]` of question kinds |
+| `gaps` | `[{topic, answer}]` | honest answers on the missing or partial requirements |
+| `askThem` | `string[]` | questions to ask the interviewer |
+| `checklist`, `toConfirm` | `string[]` | practical points; facts to check with the user |
+| `salary` | string | what to say about pay, from the preferences and the posting |
+| `practice` | `[{q, note}]` | questions the user found hard in a mock interview |
 
 ## `meta/import`
 
