@@ -343,7 +343,15 @@ details > summary { cursor: pointer; padding: 4px 0; }
 .vtype.t-copy { background: color-mix(in srgb, var(--s-good) 16%, var(--ui-bg)); color: var(--s-good); }
 .vtype.t-translation { background: color-mix(in srgb, var(--s-mid) 18%, var(--ui-bg)); color: var(--s-mid); }
 .vsel { appearance: none; -webkit-appearance: none; border: 0; cursor: pointer; width: auto; padding: 2px 10px; font-family: inherit; }
-.vco { display: flex; align-items: center; gap: 10px; }
+.vco { min-width: 0; }
+.vcoin { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.vcoin .logo { flex: none; }
+.uslot { flex: none; width: 9px; height: 9px; }
+.udot { display: block; width: 9px; height: 9px; border-radius: 50%; background: #2f7bf5; box-shadow: 0 0 0 3px color-mix(in srgb, #2f7bf5 22%, transparent); }
+.vcoin .vopen { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; }
+.vtable.offtable { table-layout: fixed; }
+.offtable td, .offtable th { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.offtable td .vsel { width: 100%; max-width: 100%; text-overflow: ellipsis; }
 .vtype.st-applied { background: color-mix(in srgb, var(--s-good) 16%, var(--ui-bg)); color: var(--s-good); }
 .vtype.st-response { background: color-mix(in srgb, var(--s-high) 16%, var(--ui-bg)); color: var(--s-high); }
 .vtype.st-no_response { background: color-mix(in srgb, var(--s-mid) 18%, var(--ui-bg)); color: var(--s-mid); }
@@ -382,6 +390,10 @@ details.pd h5 { font-size: 11px; letter-spacing: .08em; text-transform: uppercas
 .inl:hover { background: var(--ui-field) !important; }
 .inl:focus { background: var(--ui-field) !important; border-color: var(--ui-accent) !important; outline: none; }
 textarea.inl { resize: vertical; }
+.odjd { margin-top: 14px; }
+.odjd p { margin: 6px 0; line-height: 1.5; }
+.odjd ol { margin: 4px 0 0; padding-left: 22px; display: grid; gap: 4px; }
+.odbar { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
 .odhead { display: flex; gap: 14px; align-items: flex-start; }
 .odhead .pair { flex: 1; min-width: 0; }
 .odlogo { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: none; }
@@ -483,6 +495,8 @@ a, button, summary, select, label, input { touch-action: manipulation; -webkit-t
   .vtable tbody td { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 0; border: 0; text-align: right; background: none !important; overflow-wrap: anywhere; }
   .vtable tbody td[data-label]:not([data-label=""])::before { content: attr(data-label); flex: none; text-align: left; color: var(--ui-muted); font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
   .vtable tbody td[data-label=""] { justify-content: flex-start; text-align: left; }
+  .offtable td, .offtable th { overflow: visible; white-space: normal; }
+  .vcoin .vopen { white-space: normal; }
   .vtable tbody td.vco { font-size: 17px; padding-bottom: 2px; }
   .vtable tbody td.vco + td { color: var(--ui-muted); padding-top: 0; }
   .vtable tbody td.vact { justify-content: flex-end; padding-top: 10px; }
@@ -2291,12 +2305,14 @@ a, button, summary, select, label, input { touch-action: manipulation; -webkit-t
 
   /* ---------- Applications : vue tableau, les offres du dernier mois par défaut ---------- */
   function updateNavBadge() {
-    var n = Object.keys(state.offers).filter(function (id) { return state.offers[id].newReply; }).length, b = $("offersBadge");
-    b.hidden = !n; b.textContent = String(n); b.title = n + " new repl" + (n > 1 ? "ies" : "y");
+    var ids = Object.keys(state.offers), nr = ids.filter(function (id) { return state.offers[id].newReply; }).length, nu = ids.filter(function (id) { return isUnseen(state.offers[id]); }).length;
+    var n = ids.filter(function (id) { return state.offers[id].newReply || isUnseen(state.offers[id]); }).length, b = $("offersBadge");
+    b.hidden = !n; b.textContent = String(n); b.title = [nu && nu + " not viewed yet", nr && nr + " new repl" + (nr > 1 ? "ies" : "y")].filter(Boolean).join(", ");
   }
+  function isUnseen(o) { return !!o && o.source === "search" && !o.seenAt; }
   function hostOf(u) { try { return new URL(u).hostname.replace(/^www\./, ""); } catch (e) { return "Untitled offer"; } }
   function monthAgo() { return new Date(Date.now() - 30 * 86400000).toLocaleDateString("en-CA"); }
-  function ofDefaults() { return { status: "", from: monthAgo(), to: "", sort: "applied", dir: "desc", hideDone: true, page: 1, open: null }; }
+  function ofDefaults() { return { status: "", from: monthAgo(), to: "", sort: "score", dir: "desc", hideDone: true, page: 1, open: null }; }
   var MODE_LABEL = { remote: "Remote", hybrid: "Hybrid", onsite: "On-site" };
   function offerMode(o) {
     var m = String(o.workMode || "").toLowerCase();
@@ -2336,6 +2352,7 @@ a, button, summary, select, label, input { touch-action: manipulation; -webkit-t
       return String(o.createdAt || "");
     }
     rows.sort(function (a, b) {
+      if (f.sort === "score" && isUnseen(a) !== isUnseen(b)) return isUnseen(a) ? -1 : 1;
       var x = key(a), y = key(b), c = typeof x === "number" ? x - y : String(x).localeCompare(String(y));
       return f.dir === "asc" ? c : -c;
     });
@@ -2392,21 +2409,22 @@ a, button, summary, select, label, input { touch-action: manipulation; -webkit-t
       if (opts.filter && f.open === opts.filter) c.appendChild(popover(opts.filter));
       return c;
     }
-    var table = h("table", "vtable"), thead = h("thead"), hr = h("tr");
+    var table = h("table", "vtable offtable"), thead = h("thead"), hr = h("tr");
+    var cg = h("colgroup"); [19, 26, 9, 13, 14, 8, 11].forEach(function (w) { var c = h("col"); c.style.width = w + "%"; cg.appendChild(c); }); table.appendChild(cg);
     hr.appendChild(th("Company", { sort: "company" })); hr.appendChild(th("Job title", {})); hr.appendChild(th("Mode", { sort: "mode" })); hr.appendChild(th("HQ", { sort: "hq" })); hr.appendChild(th("Status", { sort: "status", filter: "status" }));
     hr.appendChild(th("Score", { sort: "score" })); hr.appendChild(th("Added", { sort: "added", filter: "added" }));
     thead.appendChild(hr); table.appendChild(thead);
     var tbody = h("tbody");
     rows.slice((f.page - 1) * PAGE_SIZE, f.page * PAGE_SIZE).forEach(function (o) {
       var tr = h("tr", "clk"), td = h("td", "vco");
-      function openOffer() { state.offerOpen = o._id; renderOffers(true); window.scrollTo(0, 0); }
+      function openOffer() { if (isUnseen(o)) saveOffer(o._id, { seenAt: new Date().toISOString() }); state.offerOpen = o._id; renderOffers(true); window.scrollTo(0, 0); }
       tr.addEventListener("click", function (e) { if (!e.target.closest("select, a, input, textarea")) openOffer(); });
       var open = h("button", "vopen", o.company || "—"); open.type = "button";
       open.addEventListener("click", function (e) { e.stopPropagation(); openOffer(); });
-      td.appendChild(logoNode(o)); td.appendChild(open); tr.appendChild(td);
-      tr.appendChild(h("td", null, o.title || hostOf(o.url)));
+      open.title = o.company || ""; var cin = h("div", "vcoin"), us = h("span", "uslot"); if (isUnseen(o)) { var ud = h("span", "udot"); ud.title = "Not viewed yet"; ud.setAttribute("role", "img"); ud.setAttribute("aria-label", "Not viewed yet"); us.appendChild(ud); } cin.appendChild(us); cin.appendChild(logoNode(o)); cin.appendChild(open); td.appendChild(cin); tr.appendChild(td);
+      var ttd = h("td", null, o.title || hostOf(o.url)); ttd.title = o.title || ""; tr.appendChild(ttd);
       var md = offerMode(o); td = h("td"); if (md) td.appendChild(h("span", "chip", MODE_LABEL[md])); else td.textContent = "—"; tr.appendChild(td);
-      tr.appendChild(h("td", null, offerHq(o) || "—"));
+      var hqt = offerHq(o), hqd = h("td", null, hqt || "—"); if (hqt) hqd.title = hqt; tr.appendChild(hqd);
       td = h("td");
       var st = plainSelect("st-" + o._id, OFFER_STATUSES, o.status || "not_applied", "Status of " + (o.company || "this offer"));
       st.className = "vtype vsel st-" + (o.status || "not_applied");
@@ -2706,6 +2724,16 @@ a, button, summary, select, label, input { touch-action: manipulation; -webkit-t
     var trio = h("div", "trio");
     trio.appendChild(labeled("Status", sel, "od-status")); trio.appendChild(labeled("Applied on", applied, "od-applied")); trio.appendChild(labeled("Resume sent", cv, "od-cv"));
     ov.appendChild(trio);
+    if (o.roleSummary || arr(o.keyExpectations).length) {
+      var jd = h("div", "odjd");
+      jd.appendChild(h("h4", null, "Job description"));
+      if (o.roleSummary) jd.appendChild(h("p", null, o.roleSummary));
+      if (arr(o.keyExpectations).length) {
+        jd.appendChild(h("p", "note", "Main expectations"));
+        var jl = h("ol"); arr(o.keyExpectations).slice(0, 3).forEach(function (x) { jl.appendChild(h("li", null, x)); }); jd.appendChild(jl);
+      }
+      ov.appendChild(jd);
+    }
     if (o.cvVersionId && state.versions[o.cvVersionId]) ov.appendChild(btn("Open this version of the resume", "small", function () { selectVersion(o.cvVersionId); leaveView(); }));
     add(ov, "🏢", "Overview");
 
@@ -2835,17 +2863,17 @@ a, button, summary, select, label, input { touch-action: manipulation; -webkit-t
       });
       hc.appendChild(tul);
     } else hc.appendChild(h("p", "note", "Nothing yet."));
-    var danger = h("div", "actions");
-    danger.appendChild(twoClick("Delete this offer and its matchings", "Confirm deletion", function () {
+    add(hc, "🕒", "History");
+
+    /* barre d'actions en haut de la fiche : retour et suppression */
+    var actionBar = h("div", "odbar");
+    actionBar.appendChild(btn("\u2190 All offers", "small", function () { state.offerOpen = null; renderOffers(true); window.scrollTo(0, 0); }));
+    actionBar.appendChild(twoClick("Delete this offer and its matchings", "Confirm deletion", function () {
       var ops = offerMatches(id).map(function (x) { return db.doc("matches/" + x._id).delete(); });
       ops.push(db.doc("offers/" + id).delete());
       Promise.all(ops).then(function () { state.offerOpen = null; toast("Offer deleted."); }).catch(saveFail);
     }));
-    hc.appendChild(danger);
-    add(hc, "🕒", "History");
-
-    var back = btn("← All offers", "small", function () { state.offerOpen = null; renderOffers(true); window.scrollTo(0, 0); });
-    toc.appendChild(back);
+    main.insertBefore(actionBar, main.firstChild);
     secs.forEach(function (x, k) {
       var l = h("a", k === 0 ? "on" : null, x[1]); l.href = "#" + x[0]; l.dataset.sec = x[0];
       l.addEventListener("click", function (e) { e.preventDefault(); var t = $(x[0]); if (t) t.scrollIntoView({ behavior: "smooth", block: "start" }); });
