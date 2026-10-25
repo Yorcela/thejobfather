@@ -228,6 +228,8 @@ textarea.ie-input { overflow: hidden; }
 .addjob { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .addjob input { flex: 1; min-width: 0; }
 .addjob .err { flex-basis: 100%; }
+.nbadge { display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 5px; margin-left: 6px; border-radius: 999px; background: var(--s-low); color: #fff; font-size: 11px; font-weight: 700; }
+.replybar { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 12px; border-radius: 10px; background: color-mix(in srgb, var(--s-high) 12%, var(--ui-bg)); border: 1px solid color-mix(in srgb, var(--s-high) 40%, var(--ui-line)); }
 .iconbtn { padding: 8px 11px; }
 .formpage.offers h3 { font-family: var(--font-display); font-size: 16px; padding-top: 6px; }
 .formpage.offers h4 { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ui-muted); margin-top: 6px; }
@@ -351,7 +353,7 @@ details > summary { cursor: pointer; padding: 4px 0; }
 </style>
 
 <header class="topnav"><div class="topin">
-  <nav class="navlinks" id="nav" aria-label="Sections" hidden><a id="navresume" href="#resume">Resume</a><a id="offers" href="#offers">My offers</a><a id="prefs" href="#preferences">Preferences</a></nav>
+  <nav class="navlinks" id="nav" aria-label="Sections" hidden><a id="navresume" href="#resume">Resume</a><a id="offers" href="#offers">My offers<span id="offersBadge" class="nbadge" hidden></span></a><a id="prefs" href="#preferences">Preferences</a></nav>
 </div></header>
 <div class="page">
   <div id="cvrow" class="cvrow"><div class="cvmain">
@@ -2196,6 +2198,10 @@ details > summary { cursor: pointer; padding: 4px 0; }
   }
 
   /* ---------- Applications : vue tableau, les offres du dernier mois par défaut ---------- */
+  function updateNavBadge() {
+    var n = Object.keys(state.offers).filter(function (id) { return state.offers[id].newReply; }).length, b = $("offersBadge");
+    b.hidden = !n; b.textContent = String(n); b.title = n + " new repl" + (n > 1 ? "ies" : "y");
+  }
   function hostOf(u) { try { return new URL(u).hostname.replace(/^www\./, ""); } catch (e) { return "Untitled offer"; } }
   function monthAgo() { return new Date(Date.now() - 30 * 86400000).toLocaleDateString("en-CA"); }
   function ofDefaults() { return { status: "", from: monthAgo(), to: "", sort: "added", dir: "desc", page: 1, open: null }; }
@@ -2281,7 +2287,9 @@ details > summary { cursor: pointer; padding: 4px 0; }
       var st = plainSelect("st-" + o._id, OFFER_STATUSES, o.status || "not_applied", "Status of " + (o.company || "this offer"));
       st.className = "vtype vsel st-" + (o.status || "not_applied");
       st.addEventListener("change", function () { setOfferStatus(o._id, st.value); });
-      td.appendChild(st); tr.appendChild(td);
+      td.appendChild(st);
+      if (o.newReply) { var nr = h("span", "chip st-ok newreply", "New reply"); td.appendChild(document.createTextNode(" ")); td.appendChild(nr); }
+      tr.appendChild(td);
       var sc = bestScore(o._id); td = h("td"); if (sc != null) td.appendChild(scoreChip(sc)); else if (o.analysisRequested) td.appendChild(h("span", "chip", "Analysis pending")); else td.textContent = "—"; tr.appendChild(td);
       var cv = o.cvVersionId && state.versions[o.cvVersionId];
       tr.appendChild(h("td", null, cv ? versionName(Object.assign({ _id: o.cvVersionId }, cv)) : "—"));
@@ -2312,6 +2320,14 @@ details > summary { cursor: pointer; padding: 4px 0; }
   function offerDetail(wrap, id) {
     var o = state.offers[id], box = h("div", "od");
     wrap.appendChild(btn("← All offers", "small", function () { state.offerOpen = null; renderOffers(); }));
+    if (o.newReply) {
+      var rb = h("div", "replybar"), sug = o.suggestedStatus && o.suggestedStatus !== (o.status || "not_applied") ? o.suggestedStatus : "";
+      rb.appendChild(h("span", null, "New reply found by the mail check" + (o.newReplyAt ? " on " + day(o.newReplyAt) : "") + (sug ? ". Suggested status: " + statusLabel(sug) + "." : ".")));
+      var ra = h("span", "actions");
+      if (sug) ra.appendChild(btn("Set status to " + statusLabel(sug), "small", function () { setOfferStatus(id, sug); saveOffer(id, { newReply: false }); }));
+      ra.appendChild(btn("Mark as seen", "small", function () { saveOffer(id, { newReply: false }); }));
+      rb.appendChild(ra); wrap.appendChild(rb);
+    }
     var title = plainInput("od-title", o.title, "Job title", "Job title"), company = plainInput("od-company", o.company, "Company", "Company");
     bindSave(title, id, "title"); bindSave(company, id, "company");
     var lg = h("div", "actions"), lgBox = h("span");
@@ -2625,6 +2641,7 @@ details > summary { cursor: pointer; padding: 4px 0; }
     db.collection("offers").onSnapshot(function (snap) {
       state.offers = {};
       snap.docs.forEach(function (d) { state.offers[d.id] = d.data(); });
+      updateNavBadge();
       refreshOffers();
     }, onErr);
     db.collection("answers").onSnapshot(function (snap) {

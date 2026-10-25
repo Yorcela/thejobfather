@@ -92,6 +92,12 @@ Règles de fond : **elle ne soumet jamais le formulaire**, c'est vous qui clique
 
 La commande garde l'onglet ouvert et enregistre en continu ce que contient le formulaire : si vous modifiez des réponses avant de soumettre, c'est la version finale qui est sauvegardée. Quand vous validez le formulaire, elle demande si vous l'avez soumis, puis enregistre dans « My offers », sur la candidature : toutes les questions et réponses (« Application form »), la lettre, la version du CV, un événement dans l'historique et, si vous avez soumis, le statut « Applied ». Les réponses qui valent au-delà de ce formulaire rejoignent vos réponses mémorisées.
 
+### `/thejobfather:thejobfather mail_synch`
+
+Garde le tableau des candidatures en phase avec votre boîte mail (connecteur Gmail, en lecture seule, avec votre accord). Elle cherche sur les 30 derniers jours les confirmations de candidature déjà envoyées (Greenhouse, Lever, Ashby, Welcome to the Jungle, LinkedIn...), vous montre celles qui manquent dans le tableau et ajoute celles que vous cochez, avec le statut « Applied » et la date de la confirmation. Ensuite elle va chercher les réponses (comme `track`) et propose les changements de statut. Seuls l'expéditeur, l'objet, la date et un court extrait sont gardés.
+
+**Routine automatique.** `/thejobfather:thejobfather mail_synch schedule` demande votre accord une fois, puis crée une tâche planifiée qui lance `mail_synch auto` tous les jours à 9h et à 14h. Elle cherche les nouvelles réponses toute seule, sans poser de question, et ne change jamais un statut : elle marque l'offre « New reply » (avec le statut suggéré), ce qui affiche un compteur sur « My offers » et une étiquette dans le tableau, et envoie une notification s'il y a au moins une réponse. Sur la fiche, un bandeau permet d'appliquer le statut suggéré ou de marquer la réponse comme vue. La tâche tourne tant que l'application Claude est ouverte (sinon au prochain lancement) ; un test avec « Run now » dans les tâches planifiées permet de valider les accès Gmail. `mail_synch unschedule` l'arrête.
+
 ### `/thejobfather:thejobfather track`
 
 Suivi des réponses : la commande cherche dans votre Gmail (connecteur Gmail de Claude, en lecture seule, avec votre accord avant toute lecture) les messages reçus après chaque candidature, les classe (réponse, refus, simple accusé de réception), et vous propose de mettre à jour le statut. Rien n'est modifié sans votre validation, seules les métadonnées utiles (date, expéditeur, objet, un court extrait) sont gardées, et elle propose « sans réponse » après environ 21 jours de silence.
@@ -124,7 +130,7 @@ Les modifications faites dans la page (édition sur place) s'appliquent à la ve
 ```
 .claude-plugin/plugin.json          manifeste du plugin
 .claude-plugin/marketplace.json     permet l'installation depuis ce dépôt
-skills/thejobfather/SKILL.md        commande /thejobfather et sous-commandes init, translate, ats_score, match, adapt, apply, track
+skills/thejobfather/SKILL.md        commande /thejobfather et sous-commandes init, translate, ats_score, match, adapt, apply, mail_synch, track
 skills/thejobfather/references/     schéma de la base de données, barèmes des scores ATS et de matching
 skills/thejobfather/scripts/        calcul des scores ATS et de matching, identifiants des offres
 skills/thejobfather/assets/         page de l'artefact

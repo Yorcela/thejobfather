@@ -1,6 +1,6 @@
 {
   "name": "thejobfather",
-  "version": "0.7.3",
+  "version": "0.8.1",
   "description": "Gérer sa recherche d'emploi avec Claude : profil structuré en base de données, candidatures, relances.",
   "author": {
     "name": "Yorcela",

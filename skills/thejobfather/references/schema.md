@@ -9,6 +9,7 @@ Places:
 | `versions/<id>` | a complete resume (one version) | `init`, `translate`, the page |
 | `settings/layout` | display shared by all versions (section order, colors) and the displayed version | the page; commands only write `active` |
 | `meta/import` | trace of the last import and warnings | `init`, the page (`dismissed`) |
+| `meta/mailcheck` | `{at, newReplies}`: the last run of the mail check routine | `mail_synch auto` |
 | `settings/preferences` | the user's job preferences, used by `match` | the page ("Preferences" button); commands only read it |
 | `answers/<id>` | answers the user gave to `match` questions, kept for a while | `match`; the page (to forget one) |
 | `matches/<id>` | one saved matching (resume version + posting), with the whole analysis | `match`; the page (to delete) |
@@ -188,6 +189,8 @@ Written by `scripts/offers.py build`, never by hand. The page "My offers" lists 
 | `coverLetter`, `notes` | string | |
 | `events` | array | history: `{at, type: "status", from, to, by}` with `by` = `user` or `gmail`, or `{at, type: "apply", note}` when `apply` filled the form |
 | `emails` | array | found by `track`: `{date, from, subject, kind, snippet}`, `kind` = `response`, `rejected` or `ack`; snippet at most 200 characters, never a whole message |
+| `source` | string | `"gmail"` when `mail_synch` found the application in the mailbox; absent otherwise. Such an offer may have an empty `url` and a `mail://<company>/<title>` `urlKey` |
+| `newReply`, `newReplyAt`, `suggestedStatus` | bool, string, string | set by `mail_synch auto` when a new reply was found: the page shows a count on "My offers" and a "New reply" tag until the user marks it as seen; `suggestedStatus` is `response` or `rejected`, never applied by itself |
 | `lastEmailCheck` | string | ISO date of the last `track` |
 
 When `match` runs again on a posting whose offer exists, the offer is kept as it is: status, form answers and history belong to the user.
