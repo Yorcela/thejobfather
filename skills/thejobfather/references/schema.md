@@ -11,6 +11,7 @@ Places:
 | `companies/<companyId>` | the research on one company, shared by all its offers | `company`; the page (to ask for it) |
 | `preps/<offerId>` | the interview preparation of one offer | `prepare`; the page (to ask for it) |
 | `meta/import` | trace of the last import and warnings | `init`, the page (`dismissed`) |
+| `meta/search` | `{at, providers: {<name>: {found, kept, added, error}}, added}`: the last run of `search` | `search`, `search auto` |
 | `meta/mailcheck` | `{at, newReplies}`: the last run of the mail check routine | `mail_synch auto` |
 | `settings/preferences` | the user's job preferences, used by `match` | the page ("Preferences" button); commands only read it |
 | `answers/<id>` | answers the user gave to `match` questions, kept for a while | `match`; the page (to forget one) |
@@ -192,10 +193,11 @@ Written by `scripts/offers.py build`, never by hand. The page "Applications" lis
 | `cvVersionId` | string | the resume version sent (defaults to the version of the latest matching); the page can open it |
 | `formQA` | `[{q, a, draft, options, required}]` | the application form: questions and the answers given, to say the same thing during a call. `draft: true` marks a question read from the form by `intake` with a proposed answer (possibly empty) that the user has not validated; `apply` uses it as a proposal and saves the final answer without `draft`; editing an answer in the artifact clears it. `options` lists the choices the form offers, `required` says the form requires an answer |
 | `coverLetter`, `notes` | string | |
-| `events` | array | history: `{at, type: "status", from, to, by}` with `by` = `user` or `gmail`, or `{at, type: "apply", note}` when `apply` filled the form, `{at, type: "prep", note}` when `prepare` saved a preparation, `{at, type: "research", note}` when `company` saved the research, or `{at, type: "intake", note}` when `intake` finished |
+| `events` | array | history: `{at, type: "status", from, to, by}` with `by` = `user` or `gmail`, or `{at, type: "apply", note}` when `apply` filled the form, `{at, type: "prep", note}` when `prepare` saved a preparation, `{at, type: "search", note}` when `search` found the offer, `{at, type: "research", note}` when `company` saved the research, or `{at, type: "intake", note}` when `intake` finished |
 | `emails` | array | found by `track` and `mail_synch`: `{date, from, subject, kind, snippet, body, viewUrl}`, `kind` = `response`, `rejected`, `ack` or `sent`; `direction` is `"sent"` for a message the user wrote (with `to`, the recipient), absent for a message received; `snippet` at most 200 characters; `body` the plain-text message with its line breaks (at most 20,000 characters, cut with `[…]` beyond), shown in full in the application's history with clickable links; `viewUrl` the Gmail link that opens the message in a browser tab |
-| `source` | string | `"gmail"` when `mail_synch` found the application in the mailbox; absent otherwise. Such an offer may have an empty `url` and a `mail://<company>/<title>` `urlKey` |
+| `source` | string | `"search"` when `search` found the offer on a job site (then `provider`, `salaryText`, `location`, `postedAt` are set); `"gmail"` when `mail_synch` found the application in the mailbox; absent otherwise. A `gmail` offer may have an empty `url` and a `mail://<company>/<title>` `urlKey` |
 | `newReply`, `newReplyAt`, `suggestedStatus` | bool, string, string | set by `mail_synch auto` when a new reply was found: the page shows a count on "Applications" and a "New reply" tag until the user marks it as seen; `suggestedStatus` is `response` or `rejected`, never applied by itself |
+| `provider`, `salaryText`, `location`, `postedAt` | string | set by `search`: `linkedin`, `indeed` or `welcometothejungle`; the salary as the site shows it (never estimated); the place and mode as shown; the posting date |
 | `lastEmailCheck` | string | ISO date of the last `track` |
 
 When `match` runs again on a posting whose offer exists, the offer is kept as it is: status, form answers and history belong to the user.
