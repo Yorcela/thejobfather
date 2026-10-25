@@ -350,6 +350,31 @@ details > summary { cursor: pointer; padding: 4px 0; }
 .vtype.st-rejected { background: color-mix(in srgb, var(--s-low) 16%, var(--ui-bg)); color: var(--s-low); }
 .vtype.st-declined { background: color-mix(in srgb, #8a6fb0 18%, var(--ui-bg)); color: #8a6fb0; }
 @media (max-width: 760px) { .vtwrap { overflow-x: auto; } .vtable { min-width: 640px; } }
+/* fiche d'une offre */
+.pftoc a.on { color: var(--ui-accent); box-shadow: inset 3px 0 0 var(--ui-accent); background: var(--ui-field); border-radius: 0 8px 8px 0; }
+.odtoc > .btn { align-self: flex-start; margin-bottom: 8px; }
+.pcard > .btn:not(.add) { align-self: flex-start; }
+.inl { background: transparent !important; border: 1px solid transparent !important; border-radius: 6px; padding: 5px 7px; width: 100%; }
+.inl:hover { background: var(--ui-field) !important; }
+.inl:focus { background: var(--ui-field) !important; border-color: var(--ui-accent) !important; outline: none; }
+textarea.inl { resize: vertical; }
+.odhead { display: flex; gap: 14px; align-items: flex-start; }
+.odhead .pair { flex: 1; min-width: 0; }
+.odlogo { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: none; }
+.odurl { font-size: 13px; }
+.trio { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 760px) { .trio { grid-template-columns: minmax(0, 1fr); } .odhead { flex-direction: column; } }
+.ptabs { display: flex; gap: 8px; flex-wrap: wrap; }
+.ptab { padding: 5px 14px; border-radius: 999px; border: 1px solid var(--ui-line); background: var(--ui-field); color: var(--ui-muted); font-weight: 600; font-size: 13px; cursor: pointer; }
+.ptab[aria-pressed="true"] { background: var(--ui-accent); color: var(--ui-on-accent); border-color: var(--ui-accent); }
+.irow { display: flex; flex-direction: column; gap: 3px; padding: 10px 12px; border: 1px solid var(--ui-line); border-radius: 10px; background: var(--ui-field); }
+.irtop { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+.irtags { display: inline-flex; gap: 6px; align-items: center; flex: none; }
+.irow .why { color: var(--ui-muted); font-size: 13px; }
+.irow .lost { font-size: 12px; font-weight: 700; color: var(--s-low); }
+.qa { position: relative; display: flex; flex-direction: column; gap: 2px; padding: 8px 10px; border: 1px solid var(--ui-line); border-radius: 10px; background: var(--ui-field); }
+.qa .qaq { font-weight: 700; width: calc(100% - 70px); }
+.qa .rm { position: absolute; top: 8px; right: 10px; border: 0; background: none; color: var(--s-low); font-weight: 700; }
 </style>
 
 <header class="topnav"><div class="topin">
@@ -405,7 +430,7 @@ details > summary { cursor: pointer; padding: 4px 0; }
   }
 
   var db = null, assetsApi = null, downloadsApi = null;
-  var state = { profile: null, meta: null, settings: norm(null), data: {}, versions: {}, version: null, activeId: null, panelOpen: true, tab: "sections", prefs: null, answers: {}, of: ofDefaults(), vf: { lang: "", type: "", employer: "", from: "", to: "", sort: "date", dir: "desc", page: 1, open: null }, matches: {}, offers: {}, offersTab: "matches", offerOpen: null, openMatch: null, addingOffer: false, view: "resume" };
+  var state = { profile: null, meta: null, settings: norm(null), data: {}, versions: {}, version: null, activeId: null, panelOpen: true, tab: "sections", prefs: null, answers: {}, of: ofDefaults(), vf: { lang: "", type: "", employer: "", from: "", to: "", sort: "date", dir: "desc", page: 1, open: null }, matches: {}, offers: {}, offersTab: "matches", offerOpen: null, openMatch: null, addingOffer: false, odTab: {}, odMatch: {}, view: "resume" };
   COLLS.forEach(function (c) { state.data[c] = []; });
 
   var $ = function (id) { return document.getElementById(id); };
@@ -2317,104 +2342,181 @@ details > summary { cursor: pointer; padding: 4px 0; }
     addJobRow(wrap);
   }
 
-  function offerDetail(wrap, id) {
-    var o = state.offers[id], box = h("div", "od");
-    wrap.appendChild(btn("← All offers", "small", function () { state.offerOpen = null; renderOffers(); }));
+  /* ---------- Fiche d'une offre : sommaire latéral, cartes, édition sur place ---------- */
+  function inl(el) { el.classList.add("inl"); return el; }
+  function itemRow(i) {
+    var r = h("div", "irow"), top = h("div", "irtop");
+    top.appendChild(h("b", null, i.label));
+    var tags = h("span", "irtags");
+    var lost = Number(i.lost) || 0;
+    if (lost >= 0.5) tags.appendChild(h("span", "lost", "−" + Math.round(lost) + " pt" + (Math.round(lost) > 1 ? "s" : "")));
+    if (i.kind === "must" || i.kind === "nice") tags.appendChild(h("span", "chip " + (i.kind === "must" ? "st-ok" : ""), i.kind === "must" ? "MUST" : "NICE"));
+    top.appendChild(tags); r.appendChild(top);
+    var why = [i.detail, i.source && i.source !== "cv" ? "[" + i.source + "]" : ""].filter(Boolean).join(" ");
+    if (why) r.appendChild(h("span", "why", why));
+    return r;
+  }
+  /* trois onglets : atteint, partiel ou à clarifier, manquant */
+  function itemTabs(items, names, key) {
+    var cols = [["met", names[0], ["met", "ok"]], ["partial", names[1], ["partial", "unknown"]], ["missing", names[2], ["missing", "conflict"]]];
+    var counts = cols.map(function (c) { return items.filter(function (i) { return c[2].indexOf(i.status) >= 0; }).length; });
+    var cur = state.odTab[key] || "met";
+    var box = h("div", "stack"), tabs = h("div", "ptabs");
+    cols.forEach(function (c, k) {
+      var b = h("button", "ptab", c[1] + " (" + counts[k] + ")"); b.type = "button";
+      b.setAttribute("aria-pressed", cur === c[0] ? "true" : "false");
+      b.addEventListener("click", function () { state.odTab[key] = c[0]; renderOffers(true); });
+      tabs.appendChild(b);
+    });
+    box.appendChild(tabs);
+    var col = cols.filter(function (c) { return c[0] === cur; })[0];
+    var rows = items.filter(function (i) { return col[2].indexOf(i.status) >= 0; });
+    if (!rows.length) box.appendChild(h("p", "note", "Nothing here."));
+    rows.forEach(function (i) { box.appendChild(itemRow(i)); });
+    return box;
+  }
+  function section(id, icon, title, sub) {
+    var c = h("section", "pcard"); c.id = id;
+    c.appendChild(h("h3", null, icon + " " + title));
+    if (sub) c.appendChild(h("p", "psub", sub));
+    return c;
+  }
+  function requestMatching(id, o) {
+    var cmd = "/thejobfather:thejobfather match " + o.url, say = function (ok) { toast(ok ? "Marked for analysis. The command is copied: paste it in Claude Code." : "Marked for analysis. Run /thejobfather:thejobfather match in Claude Code."); };
+    saveOffer(id, { analysisRequested: new Date().toISOString() }).then(function () {
+      try { navigator.clipboard.writeText(cmd).then(function () { say(true); }, function () { say(false); }); } catch (e) { say(false); }
+    });
+  }
+  function offerDetail(mount, id) {
+    var o = state.offers[id], ms = offerMatches(id), m = ms.filter(function (x) { return x._id === state.odMatch[id]; })[0] || ms[0];
+    var form = h("div", "pfpage odpage"), toc = h("aside", "pftoc odtoc"), main = h("div", "pfmain");
+    var secs = [];
+    function add(sec, icon, label) { if (!sec) return; main.appendChild(sec); secs.push([sec.id, icon + " " + label]); }
+
     if (o.newReply) {
       var rb = h("div", "replybar"), sug = o.suggestedStatus && o.suggestedStatus !== (o.status || "not_applied") ? o.suggestedStatus : "";
       rb.appendChild(h("span", null, "New reply found by the mail check" + (o.newReplyAt ? " on " + day(o.newReplyAt) : "") + (sug ? ". Suggested status: " + statusLabel(sug) + "." : ".")));
       var ra = h("span", "actions");
       if (sug) ra.appendChild(btn("Set status to " + statusLabel(sug), "small", function () { setOfferStatus(id, sug); saveOffer(id, { newReply: false }); }));
       ra.appendChild(btn("Mark as seen", "small", function () { saveOffer(id, { newReply: false }); }));
-      rb.appendChild(ra); wrap.appendChild(rb);
+      rb.appendChild(ra); main.appendChild(rb);
     }
-    var title = plainInput("od-title", o.title, "Job title", "Job title"), company = plainInput("od-company", o.company, "Company", "Company");
-    bindSave(title, id, "title"); bindSave(company, id, "company");
-    var lg = h("div", "actions"), lgBox = h("span");
-    lgBox.appendChild(logoNode(o, true)); lg.appendChild(lgBox);
+
+    /* aperçu */
+    var ov = section("od-overview", "🏢", "Overview", "");
+    ov.removeChild(ov.firstChild);
+    var head = h("div", "odhead");
+    var lgw = h("div", "odlogo"); lgw.appendChild(logoNode(o, true));
     if (assetsApi) {
       var file = document.createElement("input"); file.type = "file"; file.accept = "image/png,image/jpeg,image/webp,image/svg+xml"; file.hidden = true; file.setAttribute("aria-label", "Company logo file");
-      var pick = btn(o.logoAssetId ? "Change logo" : "Add a logo", "small", function () { file.click(); });
-      file.addEventListener("change", function () {
-        var f = file.files && file.files[0];
-        if (!f) return;
-        assetsApi.upload(f).then(function (r) { return saveOffer(id, { logoAssetId: r.id }); }).catch(saveFail);
-      });
-      lg.appendChild(pick); lg.appendChild(file);
+      var pick = btn(o.logoAssetId ? "Change" : "Add logo", "small", function () { file.click(); });
+      file.addEventListener("change", function () { var f = file.files && file.files[0]; if (f) assetsApi.upload(f).then(function (r) { return saveOffer(id, { logoAssetId: r.id }); }).catch(saveFail); });
+      lgw.appendChild(pick); lgw.appendChild(file);
     }
-    box.appendChild(lg);
-    var p1 = h("div", "pair");
-    p1.appendChild(labeled("Job title", title, "od-title")); p1.appendChild(labeled("Company", company, "od-company"));
-    box.appendChild(p1);
-    if (safeUrl(o.url)) {
-      var a = h("a", null, o.url); a.href = o.url; a.target = "_blank"; a.rel = "noopener noreferrer";
-      var pa = h("p", "note"); pa.appendChild(a); box.appendChild(pa);
-    }
-
-    var sel = plainSelect("od-status", OFFER_STATUSES, o.status || "not_applied", "Status");
+    head.appendChild(lgw);
+    var title = inl(plainInput("od-title", o.title, "Job title", "Job title")), company = inl(plainInput("od-company", o.company, "Company", "Company"));
+    bindSave(title, id, "title"); bindSave(company, id, "company");
+    var pair = h("div", "pair");
+    pair.appendChild(labeled("Job title", title, "od-title")); pair.appendChild(labeled("Company", company, "od-company"));
+    head.appendChild(pair); ov.appendChild(head);
+    if (safeUrl(o.url)) { var a = h("a", "odurl", o.url); a.href = o.url; a.target = "_blank"; a.rel = "noopener noreferrer"; ov.appendChild(a); }
+    var sel = inl(plainSelect("od-status", OFFER_STATUSES, o.status || "not_applied", "Status"));
     sel.addEventListener("change", function () { setOfferStatus(id, sel.value); });
-    var applied = plainInput("od-applied", o.appliedAt, "", "Applied on"); applied.type = "date"; bindSave(applied, id, "appliedAt");
-    var p2 = h("div", "pair");
-    p2.appendChild(labeled("Status", sel, "od-status")); p2.appendChild(labeled("Applied on", applied, "od-applied"));
-    box.appendChild(p2);
-
-    box.appendChild(h("h3", null, "Resume sent"));
-    var cv = document.createElement("select"); cv.id = "od-cv"; cv.setAttribute("aria-label", "Resume version sent");
+    var applied = inl(plainInput("od-applied", o.appliedAt, "", "Applied on")); applied.type = "date"; bindSave(applied, id, "appliedAt");
+    var cv = inl(document.createElement("select")); cv.id = "od-cv"; cv.setAttribute("aria-label", "Resume version sent");
     var none = h("option", null, "(not set)"); none.value = ""; cv.appendChild(none);
     versionList().forEach(function (v) { var op = h("option", null, versionLabel(v)); op.value = v._id; if (v._id === o.cvVersionId) op.selected = true; cv.appendChild(op); });
     cv.addEventListener("change", function () { saveOffer(id, { cvVersionId: cv.value }); });
-    var cvRow = h("div", "actions");
-    cvRow.appendChild(cv);
-    var openCv = btn("Open this version of the resume", "small", function () { selectVersion(o.cvVersionId); leaveView(); });
-    openCv.disabled = !(o.cvVersionId && state.versions[o.cvVersionId]);
-    cvRow.appendChild(openCv);
-    box.appendChild(cvRow);
+    var trio = h("div", "trio");
+    trio.appendChild(labeled("Status", sel, "od-status")); trio.appendChild(labeled("Applied on", applied, "od-applied")); trio.appendChild(labeled("Resume sent", cv, "od-cv"));
+    ov.appendChild(trio);
+    if (o.cvVersionId && state.versions[o.cvVersionId]) ov.appendChild(btn("Open this version of the resume", "small", function () { selectVersion(o.cvVersionId); leaveView(); }));
+    add(ov, "🏢", "Overview");
 
-    var ms = offerMatches(id);
-    box.appendChild(h("h3", null, "Matching analysis"));
-    if (!ms.length) box.appendChild(h("p", "note", "No matching for this offer."));
-    ms.forEach(function (m, i) {
-      var d = document.createElement("details"); if (i === 0) d.open = true;
-      var s = document.createElement("summary");
-      s.appendChild(scoreChip(m.score)); s.appendChild(document.createTextNode(" " + [m.versionName, day(m.createdAt), m.label].filter(Boolean).join(" · ")));
-      d.appendChild(s); d.appendChild(analysisNode(m));
-      box.appendChild(d);
-    });
-
-    box.appendChild(h("h3", null, "Application form"));
-    var qaBox = h("div", "stack"), qaRows = [];
-    function commitQA() {
-      saveOffer(id, { formQA: qaRows.map(function (r) { return { q: r.q.value.trim(), a: r.a.value.trim() }; }).filter(function (x) { return x.q || x.a; }) });
+    /* matching */
+    var mc = section("od-score", "🎯", "Matching analysis", "How this posting lines up with your resume and preferences.");
+    if (!m) {
+      mc.appendChild(h("p", "note", o.analysisRequested ? "Analysis requested on " + day(o.analysisRequested) + ". Run the command in Claude Code to get it." : "No matching has been done for this offer yet."));
+      var run = btn(o.analysisRequested ? "Copy the command again" : "Run the matching", "primary", function () { requestMatching(id, o); });
+      if (!safeUrl(o.url)) { run.disabled = true; run.title = "This offer has no posting address"; }
+      mc.appendChild(run);
+    } else {
+      if (ms.length > 1) {
+        var ms2 = plainSelect("od-match", ms.map(function (x) { return [x._id, [x.versionName, day(x.createdAt), x.score].filter(Boolean).join(" · ")]; }), m._id, "Matching shown");
+        inl(ms2); ms2.addEventListener("change", function () { state.odMatch[id] = ms2.value; renderOffers(true); });
+        mc.appendChild(labeled("Matching shown", ms2, "od-match"));
+      }
+      var hero = h("div", "hero " + scoreClass(m.score)), ring = h("div", "ring"); ring.style.setProperty("--p", String(m.score)); ring.appendChild(h("span", null, String(m.score)));
+      hero.appendChild(ring);
+      var side = h("div", "hside"), gg = m.groups || {};
+      side.appendChild(h("strong", "hlabel", (m.label || "").replace(/^./, function (c) { return c.toUpperCase(); })));
+      if (gg.requirements) side.appendChild(bar("Requirements", gg.requirements.points, gg.requirements.max, "s-fill"));
+      if (gg.preferences) side.appendChild(bar("Preferences", gg.preferences.points, gg.preferences.max, "s-fill"));
+      hero.appendChild(side); mc.appendChild(hero);
+      if (m.summary) mc.appendChild(h("p", "summary", m.summary));
+      if (arr(m.dealBreakers).length) {
+        var db1 = h("div", "an-warn");
+        db1.appendChild(h("strong", null, "Deal-breaker" + (m.capped ? " — score capped at 25" : "")));
+        arr(m.dealBreakers).forEach(function (d) { db1.appendChild(h("div", null, [d.type, d.text, d.detail].filter(Boolean).join(" — "))); });
+        mc.appendChild(db1);
+      }
+      var two = h("div", "duo");
+      two.appendChild(bulletsCol("What to put forward", "good", m.next && m.next.highlights, "✓"));
+      two.appendChild(bulletsCol("Points of attention", "bad", m.attention, "!"));
+      mc.appendChild(two);
     }
+    add(mc, "🎯", "Matching score");
+    if (m) {
+      var items = arr(m.items);
+      var reqs = items.filter(function (i) { return i.group === "requirements"; }), prefs = items.filter(function (i) { return i.group === "preferences"; });
+      if (reqs.length) { var rc = section("od-req", "📋", "Requirements of the posting", "Every requirement, checked against your resume."); rc.appendChild(itemTabs(reqs, ["Met", "Partial", "Missing"], "req")); add(rc, "📋", "Requirements"); }
+      if (prefs.length) { var pc = section("od-pref", "⭐", "Your preferences", "How the posting fits what you are looking for."); pc.appendChild(itemTabs(prefs, ["Fits", "Partial", "Conflict"], "pref")); add(pc, "⭐", "Preferences fit"); }
+      var rq = arr(m.next && m.next.recruiterQuestions);
+      if (rq.length || arr(m.answersUsed).length) {
+        var qc = section("od-questions", "❓", "Questions for the recruiter", "");
+        if (rq.length) { var ul = h("ul", "plain"); rq.forEach(function (t) { ul.appendChild(h("li", null, t)); }); qc.appendChild(ul); }
+        if (arr(m.answersUsed).length) { qc.appendChild(h("h4", "gh", "Saved answers relied on")); var ul2 = h("ul", "plain"); arr(m.answersUsed).forEach(function (t) { ul2.appendChild(h("li", null, t)); }); qc.appendChild(ul2); }
+        add(qc, "❓", "Questions");
+      }
+    }
+
+    /* formulaire de candidature */
+    var fc = section("od-form", "✍️", "Application form", "The questions and the answers you gave, to say the same thing during a call.");
+    var qaBox = h("div", "stack"), qaRows = [];
+    function commitQA() { saveOffer(id, { formQA: qaRows.map(function (r) { return { q: r.q.value.trim(), a: r.a.value.trim() }; }).filter(function (x) { return x.q || x.a; }) }); }
     function addQA(q, ans) {
-      var r = h("div", "grp"), rec = { q: plainInput("qa-q-" + Date.now() + "-" + qaRows.length, q, "Question", "Question"), a: document.createElement("textarea") };
-      rec.a.value = ans || ""; rec.a.placeholder = "Your answer"; rec.a.rows = 3; rec.a.setAttribute("aria-label", "Answer");
+      var r = h("div", "qa"), rec = { q: inl(plainInput("qa-q-" + Date.now() + "-" + qaRows.length, q, "Question", "Question")), a: inl(document.createElement("textarea")) };
+      rec.q.classList.add("qaq"); rec.a.value = ans || ""; rec.a.placeholder = "Your answer"; rec.a.rows = 3; rec.a.setAttribute("aria-label", "Answer");
       rec.q.addEventListener("change", commitQA); rec.a.addEventListener("change", commitQA);
-      var rm = btn("Remove this question", "small", function () { qaRows.splice(qaRows.indexOf(rec), 1); qaBox.removeChild(r); commitQA(); });
+      var rm = btn("Remove", "small rm", function () { qaRows.splice(qaRows.indexOf(rec), 1); qaBox.removeChild(r); commitQA(); });
       r.appendChild(rec.q); r.appendChild(rec.a); r.appendChild(rm);
       qaRows.push(rec); qaBox.appendChild(r);
     }
     arr(o.formQA).forEach(function (x) { addQA(x.q, x.a); });
-    box.appendChild(qaBox);
-    box.appendChild(btn("Add a question", "small", function () { addQA("", ""); }));
-
-    var cl = document.createElement("textarea"); cl.id = "od-cover"; cl.rows = 6; cl.value = o.coverLetter || ""; cl.placeholder = "Cover letter or message sent with the application";
+    fc.appendChild(qaBox);
+    fc.appendChild(btn("+ Add a question", "add", function () { addQA("", ""); }));
+    var cl = inl(document.createElement("textarea")); cl.id = "od-cover"; cl.rows = 5; cl.value = o.coverLetter || ""; cl.placeholder = "Cover letter or message sent with the application";
     cl.addEventListener("change", function () { saveOffer(id, { coverLetter: cl.value.trim() }); });
-    box.appendChild(labeled("Cover letter or message sent", cl, "od-cover"));
-    var notes = document.createElement("textarea"); notes.id = "od-notes"; notes.rows = 5; notes.value = o.notes || ""; notes.placeholder = "Contacts, interview notes, things to remember for the next call";
-    notes.addEventListener("change", function () { saveOffer(id, { notes: notes.value.trim() }); });
-    box.appendChild(labeled("Notes", notes, "od-notes"));
+    fc.appendChild(labeled("Cover letter or message sent", cl, "od-cover"));
+    add(fc, "✍️", "Application form");
 
-    box.appendChild(h("h3", null, "History"));
+    /* notes */
+    var nc = section("od-notes", "🗒️", "Notes", "Contacts, interview notes, things to remember for the next call.");
+    var notes = inl(document.createElement("textarea")); notes.id = "od-notes-t"; notes.rows = 5; notes.value = o.notes || ""; notes.placeholder = "Write here";
+    notes.setAttribute("aria-label", "Notes"); notes.addEventListener("change", function () { saveOffer(id, { notes: notes.value.trim() }); });
+    nc.appendChild(notes); add(nc, "🗒️", "Notes");
+
+    /* historique */
+    var hc = section("od-history", "🕒", "History", "");
     var tl = [];
     arr(o.events).forEach(function (e) {
       var text = e.type === "status" ? "Status: " + statusLabel(e.from) + " → " + statusLabel(e.to) + (e.by === "gmail" ? " (found in Gmail)" : "") : (e.note || e.type);
       tl.push({ at: e.at, text: text });
     });
-    arr(o.emails).forEach(function (m) { tl.push({ at: m.date, mail: m }); });
+    arr(o.emails).forEach(function (mm) { tl.push({ at: mm.date, mail: mm }); });
     tl.sort(function (x, y) { return String(y.at || "").localeCompare(String(x.at || "")); });
     if (tl.length) {
-      var ul = h("ul", "tl");
+      var tul = h("ul", "tl");
       tl.forEach(function (e) {
         var li = h("li");
         li.appendChild(h("span", "note", day(e.at) + "  "));
@@ -2422,32 +2524,48 @@ details > summary { cursor: pointer; padding: 4px 0; }
           li.appendChild(h("b", null, "✉ " + (e.mail.subject || "(no subject)")));
           li.appendChild(h("span", "note", "  — " + (e.mail.from || "") + (e.mail.kind ? " · " + e.mail.kind : "")));
           if (e.mail.snippet) li.appendChild(h("div", "note", e.mail.snippet));
-        } else { li.appendChild(document.createTextNode(e.text)); }
-        ul.appendChild(li);
+        } else li.appendChild(document.createTextNode(e.text));
+        tul.appendChild(li);
       });
-      box.appendChild(ul);
-    } else { box.appendChild(h("p", "note", "Nothing yet.")); }
-
+      hc.appendChild(tul);
+    } else hc.appendChild(h("p", "note", "Nothing yet."));
     var danger = h("div", "actions");
     danger.appendChild(twoClick("Delete this offer and its matchings", "Confirm deletion", function () {
-      var ops = offerMatches(id).map(function (m) { return db.doc("matches/" + m._id).delete(); });
+      var ops = offerMatches(id).map(function (x) { return db.doc("matches/" + x._id).delete(); });
       ops.push(db.doc("offers/" + id).delete());
       Promise.all(ops).then(function () { state.offerOpen = null; toast("Offer deleted."); }).catch(saveFail);
     }));
-    box.appendChild(danger);
-    wrap.appendChild(box);
+    hc.appendChild(danger);
+    add(hc, "🕒", "History");
+
+    var back = btn("← All offers", "small", function () { state.offerOpen = null; renderOffers(true); window.scrollTo(0, 0); });
+    toc.appendChild(back);
+    secs.forEach(function (x, k) {
+      var l = h("a", k === 0 ? "on" : null, x[1]); l.href = "#" + x[0]; l.dataset.sec = x[0];
+      l.addEventListener("click", function (e) { e.preventDefault(); var t = $(x[0]); if (t) t.scrollIntoView({ behavior: "smooth", block: "start" }); });
+      toc.appendChild(l);
+    });
+    form.appendChild(toc); form.appendChild(main);
+    mount.appendChild(form);
   }
+  /* sommaire de la fiche : met en avant la section visible */
+  window.addEventListener("scroll", function () {
+    var links = document.querySelectorAll(".odtoc a[data-sec]");
+    if (!links.length) return;
+    var cur = links[0];
+    Array.prototype.forEach.call(links, function (l) { var t = document.getElementById(l.dataset.sec); if (t && t.getBoundingClientRect().top < 150) cur = l; });
+    Array.prototype.forEach.call(links, function (l) { l.classList.toggle("on", l === cur); });
+  }, { passive: true });
 
   function renderOffers(force) {
     var mount = $("offersView"), ae = document.activeElement;
     if (!force && ae && mount.contains(ae) && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName)) { offersDirty = true; return; }
     offersDirty = false;
     clear(mount);
+    if (state.offerOpen && state.offers[state.offerOpen]) { offerDetail(mount, state.offerOpen); return; }
     var wrap = h("div", "formpage offers");
     wrap.appendChild(h("h2", null, "My offers"));
-    if (state.offerOpen && state.offers[state.offerOpen]) {
-      offerDetail(wrap, state.offerOpen);
-    } else {
+    {
       state.offerOpen = null;
       var tabs = h("div", "tabs"); tabs.setAttribute("role", "tablist");
       [["matches", "Matchings (" + Object.keys(state.matches).length + ")"], ["apps", "Applications (" + Object.keys(state.offers).length + ")"]].forEach(function (t) {
