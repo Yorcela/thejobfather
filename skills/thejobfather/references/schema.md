@@ -180,7 +180,7 @@ Written by `scripts/offers.py build`, never by hand. The page "My offers" lists 
 |---|---|---|
 | `url`, `urlKey`, `title`, `company` | string | the page lets the user fix `title` and `company` |
 | `logoAssetId` | string | optional, `id` of the company logo in the artifact's assets (served under `/_blob/<id>`); the page shows the company's initials without one, and lets the user upload a logo |
-| `status` | string | `not_applied` (default), `applied`, `response`, `no_response`, `rejected` (by the company), `declined` (by the user) |
+| `status` | string | `not_applied` (default), `applied`, `response`, `no_response`, `offer` (the company made an offer), `rejected` (by the company), `declined` (by the user) |
 | `statusUpdatedAt`, `createdAt` | string | ISO dates |
 | `analysisRequested` | string | ISO date, set by the page when the user pastes a job URL in "My offers" (the offer then has an empty `title` and `company`); `match` without arguments picks these offers up, and removes the field once the matching is saved |
 | `appliedAt` | string | `YYYY-MM-DD`, set when the status first becomes `applied` |
@@ -188,7 +188,7 @@ Written by `scripts/offers.py build`, never by hand. The page "My offers" lists 
 | `formQA` | `[{q, a}]` | the application form: questions and the answers given, to say the same thing during a call |
 | `coverLetter`, `notes` | string | |
 | `events` | array | history: `{at, type: "status", from, to, by}` with `by` = `user` or `gmail`, or `{at, type: "apply", note}` when `apply` filled the form |
-| `emails` | array | found by `track`: `{date, from, subject, kind, snippet}`, `kind` = `response`, `rejected` or `ack`; snippet at most 200 characters, never a whole message |
+| `emails` | array | found by `track` and `mail_synch`: `{date, from, subject, kind, snippet, body, viewUrl}`, `kind` = `response`, `rejected` or `ack`; `snippet` at most 200 characters; `body` the plain-text message with its line breaks (at most 20,000 characters, cut with `[…]` beyond), shown in full in the application's history with clickable links; `viewUrl` the Gmail link that opens the message in a browser tab |
 | `source` | string | `"gmail"` when `mail_synch` found the application in the mailbox; absent otherwise. Such an offer may have an empty `url` and a `mail://<company>/<title>` `urlKey` |
 | `newReply`, `newReplyAt`, `suggestedStatus` | bool, string, string | set by `mail_synch auto` when a new reply was found: the page shows a count on "My offers" and a "New reply" tag until the user marks it as seen; `suggestedStatus` is `response` or `rejected`, never applied by itself |
 | `lastEmailCheck` | string | ISO date of the last `track` |

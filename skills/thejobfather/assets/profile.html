@@ -347,6 +347,16 @@ details > summary { cursor: pointer; padding: 4px 0; }
 .vtype.st-applied { background: color-mix(in srgb, var(--s-good) 16%, var(--ui-bg)); color: var(--s-good); }
 .vtype.st-response { background: color-mix(in srgb, var(--s-high) 16%, var(--ui-bg)); color: var(--s-high); }
 .vtype.st-no_response { background: color-mix(in srgb, var(--s-mid) 18%, var(--ui-bg)); color: var(--s-mid); }
+.vtype.st-offer { background: color-mix(in srgb, var(--s-high) 26%, var(--ui-bg)); color: var(--s-high); }
+.vtable tbody tr.clk { cursor: pointer; }
+.vtable tbody tr.clk:hover td { background: color-mix(in srgb, var(--ui-accent) 8%, var(--ui-bg)); }
+.tl > li { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+details.mail { flex: 1 1 100%; border: 1px solid var(--ui-line); border-radius: 10px; background: var(--ui-field); padding: 6px 10px; }
+details.mail > summary { cursor: pointer; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+details.mail .ph { flex: none; color: var(--ui-accent); }
+.mailtools { margin: 8px 0; display: flex; gap: 8px; }
+.mailtools .btn { display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
+.mailbody { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 13.5px; line-height: 1.5; padding: 10px 12px; background: var(--ui-bg); border: 1px solid var(--ui-line); border-radius: 8px; max-height: 420px; overflow: auto; }
 .vtype.st-rejected { background: color-mix(in srgb, var(--s-low) 16%, var(--ui-bg)); color: var(--s-low); }
 .vtype.st-declined { background: color-mix(in srgb, #8a6fb0 18%, var(--ui-bg)); color: #8a6fb0; }
 @media (max-width: 760px) { .vtwrap { overflow-x: auto; } .vtable { min-width: 640px; } }
@@ -1984,8 +1994,9 @@ textarea.inl { resize: vertical; }
   /* ---------- My offers : matchings enregistrés et suivi des candidatures (collections matches et offers) ---------- */
   var OFFER_STATUSES = [
     ["not_applied", "Not applied"], ["applied", "Applied"], ["response", "Response received"],
-    ["no_response", "No response"], ["rejected", "Rejected by company"], ["declined", "Declined by me"]
+    ["no_response", "No response"], ["offer", "Offer"], ["rejected", "Rejected by company"], ["declined", "Declined by me"]
   ];
+  var DONE_STATUSES = ["offer", "rejected", "declined"];
   var TRACKING_PARAM = /^(utm_.*|gclid|fbclid|msclkid|mc_[a-z]+|trk|trackingid|refid|ref|referrer|source|src|campaign|li_.*|ga_.*)$/i;
   var offersDirty = false;
 
@@ -2229,13 +2240,15 @@ textarea.inl { resize: vertical; }
   }
   function hostOf(u) { try { return new URL(u).hostname.replace(/^www\./, ""); } catch (e) { return "Untitled offer"; } }
   function monthAgo() { return new Date(Date.now() - 30 * 86400000).toLocaleDateString("en-CA"); }
-  function ofDefaults() { return { status: "", from: monthAgo(), to: "", sort: "added", dir: "desc", page: 1, open: null }; }
+  function ofDefaults() { return { status: "", from: monthAgo(), to: "", sort: "applied", dir: "desc", hideDone: true, page: 1, open: null }; }
   function bestScore(id) { var ms = offerMatches(id); return ms.length ? Math.max.apply(null, ms.map(function (m) { return m.score; })) : null; }
   function filteredApps() {
     var f = state.of, order = OFFER_STATUSES.map(function (x) { return x[0]; });
     var rows = offerRows().filter(function (o) {
       var d = day(o.createdAt);
-      if (f.status && (o.status || "not_applied") !== f.status) return false;
+      var st = o.status || "not_applied";
+      if (f.status && st !== f.status) return false;
+      if (!f.status && f.hideDone && DONE_STATUSES.indexOf(st) >= 0) return false;
       if (f.from && d < f.from) return false;
       if (f.to && d > f.to) return false;
       return true;
@@ -2244,7 +2257,7 @@ textarea.inl { resize: vertical; }
       if (f.sort === "company") return String(o.company || "").toLowerCase();
       if (f.sort === "score") { var b = bestScore(o._id); return b == null ? -1 : b; }
       if (f.sort === "status") return order.indexOf(o.status || "not_applied");
-      if (f.sort === "applied") return String(o.appliedAt || "");
+      if (f.sort === "applied") return String(o.appliedAt || day(o.createdAt));
       return String(o.createdAt || "");
     }
     rows.sort(function (a, b) {
@@ -2303,9 +2316,11 @@ textarea.inl { resize: vertical; }
     thead.appendChild(hr); table.appendChild(thead);
     var tbody = h("tbody");
     rows.slice((f.page - 1) * PAGE_SIZE, f.page * PAGE_SIZE).forEach(function (o) {
-      var tr = h("tr"), td = h("td", "vco");
+      var tr = h("tr", "clk"), td = h("td", "vco");
+      function openOffer() { state.offerOpen = o._id; renderOffers(true); window.scrollTo(0, 0); }
+      tr.addEventListener("click", function (e) { if (!e.target.closest("select, a, input, textarea")) openOffer(); });
       var open = h("button", "vopen", o.company || "—"); open.type = "button";
-      open.addEventListener("click", function () { state.offerOpen = o._id; renderOffers(true); window.scrollTo(0, 0); });
+      open.addEventListener("click", function (e) { e.stopPropagation(); openOffer(); });
       td.appendChild(logoNode(o)); td.appendChild(open); tr.appendChild(td);
       tr.appendChild(h("td", null, o.title || hostOf(o.url)));
       td = h("td");
@@ -2326,6 +2341,8 @@ textarea.inl { resize: vertical; }
     table.appendChild(tbody);
     var holder = h("div", "vtwrap"); holder.appendChild(table); card.appendChild(holder);
     var foot = h("div", "actions");
+    var doneCount = all.filter(function (o) { return DONE_STATUSES.indexOf(o.status || "not_applied") >= 0; }).length;
+    if (doneCount && !f.status) foot.appendChild(btn(f.hideDone ? "Show finished (" + doneCount + ")" : "Hide finished", "small", function () { f.hideDone = !f.hideDone; redo(true); }));
     if (f.status) foot.appendChild(btn("Clear status", "small", function () { f.status = ""; redo(true); }));
     foot.appendChild(h("span", "sp"));
     if (pages > 1) {
@@ -2343,6 +2360,45 @@ textarea.inl { resize: vertical; }
   }
 
   /* ---------- Fiche d'une offre : sommaire latéral, cartes, édition sur place ---------- */
+  /* icônes Phosphor (régulier), tracés repris tels quels */
+  var PH = {
+    envelope: "M224,48H32a8,8,0,0,0-8,8V192a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A8,8,0,0,0,224,48Zm-96,85.15L52.57,64H203.43ZM98.71,128,40,181.81V74.19Zm11.84,10.85,12,11.05a8,8,0,0,0,10.82,0l12-11.05,58,53.15H52.57ZM157.29,128,216,74.18V181.82Z",
+    out: "M224,104a8,8,0,0,1-16,0V59.31l-66.34,66.35a8,8,0,0,1-11.32-11.32L196.69,48H152a8,8,0,0,1,0-16h56a8,8,0,0,1,8,8Zm-40,24a8,8,0,0,0-8,8v72H48V80h72a8,8,0,0,0,0-16H48A16,16,0,0,0,32,80V208a16,16,0,0,0,16,16H176a16,16,0,0,0,16-16V136A8,8,0,0,0,184,128Z"
+  };
+  function phIcon(name, size) {
+    var ns = "http://www.w3.org/2000/svg", svg = document.createElementNS(ns, "svg"), path = document.createElementNS(ns, "path");
+    svg.setAttribute("viewBox", "0 0 256 256"); svg.setAttribute("width", String(size || 16)); svg.setAttribute("height", String(size || 16)); svg.setAttribute("aria-hidden", "true"); svg.setAttribute("class", "ph");
+    path.setAttribute("d", PH[name]); path.setAttribute("fill", "currentColor");
+    svg.appendChild(path);
+    return svg;
+  }
+  /* texte brut du mail : retours à la ligne gardés (pre-wrap), adresses http(s) cliquables */
+  function linkified(text) {
+    var box = h("div", "mailbody");
+    String(text || "").split(/(https?:\/\/[^\s<>"]+)/g).forEach(function (part, i) {
+      if (i % 2 === 0) { box.appendChild(document.createTextNode(part)); return; }
+      var m = part.match(/[.,;:!?)\]]+$/), tail = m ? m[0] : "", url = tail ? part.slice(0, -tail.length) : part;
+      if (safeUrl(url)) { var a = h("a", null, url); a.href = url; a.target = "_blank"; a.rel = "noopener noreferrer"; box.appendChild(a); box.appendChild(document.createTextNode(tail)); }
+      else box.appendChild(document.createTextNode(part));
+    });
+    return box;
+  }
+  function mailEntry(mm) {
+    var d = document.createElement("details"); d.className = "mail";
+    var sm = document.createElement("summary");
+    sm.appendChild(phIcon("envelope", 18));
+    sm.appendChild(h("b", null, " " + (mm.subject || "(no subject)")));
+    sm.appendChild(h("span", "note", "  — " + [mm.from, mm.kind].filter(Boolean).join(" · ")));
+    d.appendChild(sm);
+    var tools = h("div", "mailtools");
+    if (safeUrl(mm.viewUrl)) {
+      var a = h("a", "btn small", "Open in Gmail "); a.href = mm.viewUrl; a.target = "_blank"; a.rel = "noopener noreferrer";
+      a.appendChild(phIcon("out", 14)); tools.appendChild(a);
+    }
+    d.appendChild(tools);
+    d.appendChild(linkified(mm.body || mm.snippet || ""));
+    return d;
+  }
   function inl(el) { el.classList.add("inl"); return el; }
   function itemRow(i) {
     var r = h("div", "irow"), top = h("div", "irtop");
@@ -2520,11 +2576,8 @@ textarea.inl { resize: vertical; }
       tl.forEach(function (e) {
         var li = h("li");
         li.appendChild(h("span", "note", day(e.at) + "  "));
-        if (e.mail) {
-          li.appendChild(h("b", null, "✉ " + (e.mail.subject || "(no subject)")));
-          li.appendChild(h("span", "note", "  — " + (e.mail.from || "") + (e.mail.kind ? " · " + e.mail.kind : "")));
-          if (e.mail.snippet) li.appendChild(h("div", "note", e.mail.snippet));
-        } else li.appendChild(document.createTextNode(e.text));
+        if (e.mail) li.appendChild(mailEntry(e.mail));
+        else li.appendChild(document.createTextNode(e.text));
         tul.appendChild(li);
       });
       hc.appendChild(tul);
