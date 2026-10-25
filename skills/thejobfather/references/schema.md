@@ -152,7 +152,7 @@ An answer whose `expiresAt` is in the past is ignored by `match` and hidden by t
 
 ## `matches/<id>` and `offers/<id>`
 
-Written by `scripts/offers.py build`, never by hand. The page "My offers" lists them: the matchings tab shows `matches`, the applications board shows `offers`.
+Written by `scripts/offers.py build`, never by hand. The page "My offers" lists them: the matchings tab shows `matches`, the applications table shows `offers`.
 
 **Identifiers.** The posting's address is normalized (host in lower case without `www.`, path without trailing slash, query string without tracking parameters such as `utm_*`, `gclid`, `ref`, the remaining pairs sorted, fragment dropped) and hashed: `hash` = the first 12 characters of the SHA-1. The offer is `offers/o-<hash>`, and the matching is `matches/<versionId>--<hash>`: **one matching per resume version and posting**. `scripts/offers.py key <url>` prints them; the page computes the same values (`normUrl`, `urlHash`).
 
@@ -181,6 +181,7 @@ Written by `scripts/offers.py build`, never by hand. The page "My offers" lists 
 | `logoAssetId` | string | optional, `id` of the company logo in the artifact's assets (served under `/_blob/<id>`); the page shows the company's initials without one, and lets the user upload a logo |
 | `status` | string | `not_applied` (default), `applied`, `response`, `no_response`, `rejected` (by the company), `declined` (by the user) |
 | `statusUpdatedAt`, `createdAt` | string | ISO dates |
+| `analysisRequested` | string | ISO date, set by the page when the user pastes a job URL in "My offers" (the offer then has an empty `title` and `company`); `match` without arguments picks these offers up, and removes the field once the matching is saved |
 | `appliedAt` | string | `YYYY-MM-DD`, set when the status first becomes `applied` |
 | `cvVersionId` | string | the resume version sent (defaults to the version of the latest matching); the page can open it |
 | `formQA` | `[{q, a}]` | the application form: questions and the answers given, to say the same thing during a call |

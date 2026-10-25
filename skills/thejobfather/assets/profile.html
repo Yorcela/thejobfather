@@ -223,14 +223,18 @@ textarea.ie-input { overflow: hidden; }
 .photo-wrap .ie-x { position: absolute; top: -6px; right: -6px; background: var(--paper); border: 1px solid var(--line); border-radius: 50%; width: 22px; height: 22px; padding: 0; opacity: 1; }
 .formpage { width: 100%; background: var(--ui-bg); color: var(--ui-ink); border: 1px solid var(--ui-line); border-radius: 12px; padding: clamp(18px, 4vw, 36px); display: flex; flex-direction: column; gap: 14px; }
 /* Mes offres */
+.formpage.offers { padding: clamp(12px, 2vw, 16px); }
+.vgrid { display: flex; flex-direction: column; gap: 10px; }
+.addjob { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.addjob input { flex: 1; min-width: 0; }
+.addjob .err { flex-basis: 100%; }
+.iconbtn { padding: 8px 11px; }
 .formpage.offers h3 { font-family: var(--font-display); font-size: 16px; padding-top: 6px; }
 .formpage.offers h4 { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ui-muted); margin-top: 6px; }
 .logo { flex: none; width: 36px; height: 36px; border-radius: 8px; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; background: #fff; border: 1px solid var(--ui-line); }
 .logo img { width: 100%; height: 100%; object-fit: contain; display: block; }
 .logo.ini { background: hsl(var(--hue, 200) 45% 88%); color: hsl(var(--hue, 200) 50% 25%); font: 700 13px var(--font-display); border-color: transparent; }
 .logo.big { width: 64px; height: 64px; border-radius: 12px; font-size: 20px; }
-.khead { display: flex; gap: 8px; align-items: flex-start; }
-.ktxt { display: flex; flex-direction: column; min-width: 0; }
 .score { display: inline-flex; align-items: center; justify-content: center; min-width: 38px; padding: 2px 8px; border-radius: 999px; border: 2px solid currentColor; font-weight: 700; font-size: 14px; flex: none; }
 .s-high { color: var(--s-high); } .s-good { color: var(--s-good); } .s-mid { color: var(--s-mid); } .s-low { color: var(--s-low); }
 .chip { display: inline-block; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--ui-line); font-size: 12px; background: var(--ui-field); color: var(--ui-muted); white-space: nowrap; }
@@ -272,17 +276,6 @@ textarea.ie-input { overflow: hidden; }
 .ic-card .lost { align-self: flex-start; font-size: 12px; font-weight: 700; color: var(--s-low); }
 @media (max-width: 760px) { .duo, .tri { grid-template-columns: minmax(0, 1fr); } }
 .an-warn { padding: 8px 10px; border-radius: 8px; background: var(--warn-soft); color: var(--warn); }
-.kanban { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(220px, 1fr); gap: 10px; overflow-x: auto; padding-bottom: 6px; align-items: start; }
-.kcol { display: flex; flex-direction: column; gap: 8px; padding: 8px; border: 1px solid var(--ui-line); border-radius: 8px; min-height: 120px; min-width: 0; }
-.kcol.over { border-color: var(--ui-accent); background: var(--ui-field); }
-.kcol h3 { font-size: 13px; padding: 0 0 6px; color: var(--c); border-bottom: 2px solid var(--c); }
-.kcol { --c: var(--ui-muted); background: color-mix(in srgb, var(--c) 8%, var(--ui-bg)); border-color: color-mix(in srgb, var(--c) 35%, var(--ui-line)); }
-.kcol.k-applied { --c: var(--s-good); } .kcol.k-response { --c: var(--s-high); } .kcol.k-no_response { --c: var(--s-mid); } .kcol.k-rejected { --c: var(--s-low); } .kcol.k-declined { --c: #8a6fb0; }
-.kcard { display: flex; flex-direction: column; gap: 4px; padding: 8px; border: 1px solid var(--ui-line); border-radius: 8px; background: var(--ui-field); cursor: grab; overflow-wrap: anywhere; }
-.kcard { border-left: 4px solid var(--c); background: var(--ui-bg); }
-.kcard b { cursor: pointer; }
-.kmeta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-.kcard select { font-size: 12.5px; padding: 3px 6px; }
 .kform { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; align-items: center; }
 .od { display: flex; flex-direction: column; gap: 12px; }
 .tl { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 8px; }
@@ -347,6 +340,13 @@ details > summary { cursor: pointer; padding: 4px 0; }
 .vtype.t-adaptation { background: color-mix(in srgb, var(--s-high) 16%, var(--ui-bg)); color: var(--s-high); }
 .vtype.t-copy { background: color-mix(in srgb, var(--s-good) 16%, var(--ui-bg)); color: var(--s-good); }
 .vtype.t-translation { background: color-mix(in srgb, var(--s-mid) 18%, var(--ui-bg)); color: var(--s-mid); }
+.vsel { appearance: none; -webkit-appearance: none; border: 0; cursor: pointer; width: auto; padding: 2px 10px; font-family: inherit; }
+.vco { display: flex; align-items: center; gap: 10px; }
+.vtype.st-applied { background: color-mix(in srgb, var(--s-good) 16%, var(--ui-bg)); color: var(--s-good); }
+.vtype.st-response { background: color-mix(in srgb, var(--s-high) 16%, var(--ui-bg)); color: var(--s-high); }
+.vtype.st-no_response { background: color-mix(in srgb, var(--s-mid) 18%, var(--ui-bg)); color: var(--s-mid); }
+.vtype.st-rejected { background: color-mix(in srgb, var(--s-low) 16%, var(--ui-bg)); color: var(--s-low); }
+.vtype.st-declined { background: color-mix(in srgb, #8a6fb0 18%, var(--ui-bg)); color: #8a6fb0; }
 @media (max-width: 760px) { .vtwrap { overflow-x: auto; } .vtable { min-width: 640px; } }
 </style>
 
@@ -403,7 +403,7 @@ details > summary { cursor: pointer; padding: 4px 0; }
   }
 
   var db = null, assetsApi = null, downloadsApi = null;
-  var state = { profile: null, meta: null, settings: norm(null), data: {}, versions: {}, version: null, activeId: null, panelOpen: true, tab: "sections", prefs: null, answers: {}, vf: { lang: "", type: "", employer: "", from: "", to: "", sort: "date", dir: "desc", page: 1, open: null }, matches: {}, offers: {}, offersTab: "matches", offerOpen: null, openMatch: null, addingOffer: false, view: "resume" };
+  var state = { profile: null, meta: null, settings: norm(null), data: {}, versions: {}, version: null, activeId: null, panelOpen: true, tab: "sections", prefs: null, answers: {}, of: ofDefaults(), vf: { lang: "", type: "", employer: "", from: "", to: "", sort: "date", dir: "desc", page: 1, open: null }, matches: {}, offers: {}, offersTab: "matches", offerOpen: null, openMatch: null, addingOffer: false, view: "resume" };
   COLLS.forEach(function (c) { state.data[c] = []; });
 
   var $ = function (id) { return document.getElementById(id); };
@@ -2161,76 +2161,152 @@ details > summary { cursor: pointer; padding: 4px 0; }
     wrap.appendChild(box);
   }
 
-  function offerCard(o) {
-    var c = h("div", "kcard"), ms = offerMatches(o._id);
-    c.draggable = true;
-    c.addEventListener("dragstart", function (e) { e.dataTransfer.setData("text/plain", o._id); e.dataTransfer.effectAllowed = "move"; });
-    var t = h("b", null, o.title || "Untitled offer");
-    t.tabIndex = 0; t.setAttribute("role", "button");
-    function openIt() { state.offerOpen = o._id; renderOffers(); window.scrollTo(0, 0); }
-    t.addEventListener("click", openIt);
-    t.addEventListener("keydown", function (e) { if (e.key === "Enter") openIt(); });
-    var head = h("div", "khead"), htxt = h("div", "ktxt");
-    htxt.appendChild(t);
-    if (o.company) htxt.appendChild(h("span", "note", o.company));
-    head.appendChild(logoNode(o)); head.appendChild(htxt);
-    c.appendChild(head);
-    var meta = h("div", "kmeta");
-    if (ms.length) meta.appendChild(scoreChip(ms[0].score));
-    if (o.appliedAt) meta.appendChild(h("span", "note", "applied " + o.appliedAt));
-    c.appendChild(meta);
-    var cv = o.cvVersionId && state.versions[o.cvVersionId];
-    if (cv) c.appendChild(h("span", "note", "CV: " + versionLabel(Object.assign({ _id: o.cvVersionId }, cv))));
-    if (arr(o.emails).length) c.appendChild(h("span", "note", "✉ " + arr(o.emails).length + " e-mail" + (arr(o.emails).length > 1 ? "s" : "")));
-    return c;
+  /* ligne d'ajout en bas du tableau : l'adresse de l'annonce suffit, l'analyse est demandée à la commande match */
+  function planeIcon() {
+    var ns = "http://www.w3.org/2000/svg", svg = document.createElementNS(ns, "svg"), path = document.createElementNS(ns, "path");
+    svg.setAttribute("viewBox", "0 0 24 24"); svg.setAttribute("width", "18"); svg.setAttribute("height", "18"); svg.setAttribute("aria-hidden", "true");
+    path.setAttribute("d", "M21 3 3 10.5l7 3 3 7zM10 13.5 21 3");
+    path.setAttribute("fill", "none"); path.setAttribute("stroke", "currentColor"); path.setAttribute("stroke-width", "1.8"); path.setAttribute("stroke-linejoin", "round"); path.setAttribute("stroke-linecap", "round");
+    svg.appendChild(path);
+    return svg;
   }
-
-  function addOfferForm(wrap) {
-    var f = h("form", "kform");
-    var url = plainInput("ao-url", "", "https://… address of the posting", "Posting address");
-    var title = plainInput("ao-title", "", "Job title", "Job title"), company = plainInput("ao-company", "", "Company", "Company");
+  function addJobRow(wrap) {
+    var f = h("form", "addjob");
+    var url = plainInput("aj-url", "", "Paste the URL of a job posting, then press Enter to analyze it", "Job posting URL");
+    var go = h("button", "btn primary iconbtn"); go.type = "submit"; go.title = "Analyze this job posting"; go.setAttribute("aria-label", "Analyze this job posting");
+    go.appendChild(planeIcon());
     var err = h("div", "err"); err.hidden = true;
-    var go = h("button", "btn primary small", "Add"); go.type = "submit";
-    f.appendChild(url); f.appendChild(title); f.appendChild(company); f.appendChild(go);
-    f.appendChild(btn("Cancel", "small", function () { state.addingOffer = false; renderOffers(); }));
-    f.appendChild(err);
+    f.appendChild(url); f.appendChild(go); f.appendChild(err);
     f.addEventListener("submit", function (ev) {
       ev.preventDefault();
       var u = url.value.trim();
       if (!safeUrl(u)) { err.hidden = false; err.textContent = "Enter the address of the posting, starting with http."; return; }
+      err.hidden = true; go.disabled = true;
       urlHash(u).then(function (hash) {
-        var id = "o-" + hash;
-        if (state.offers[id]) { err.hidden = false; err.textContent = "This offer is already tracked."; return null; }
-        var now = new Date().toISOString();
-        return db.doc("offers/" + id).set({ url: u, urlKey: normUrl(u), title: title.value.trim(), company: company.value.trim(), status: "not_applied", statusUpdatedAt: now, createdAt: now, formQA: [], events: [], emails: [] })
-          .then(function () { state.addingOffer = false; toast("Offer added."); });
-      }).catch(saveFail);
+        var id = "o-" + hash, now = new Date().toISOString();
+        if (state.offers[id]) { toast("This offer is already tracked."); return null; }
+        return db.doc("offers/" + id).set({ url: u, urlKey: normUrl(u), title: "", company: "", status: "not_applied", statusUpdatedAt: now, createdAt: now, analysisRequested: now, formQA: [], events: [], emails: [] })
+          .then(function () {
+            var cmd = "/thejobfather:thejobfather match " + u, say = function (ok) { toast(ok ? "Added. The command to run the analysis is copied: paste it in Claude Code." : "Added. Run /thejobfather:thejobfather match in Claude Code to analyze it."); };
+            try { navigator.clipboard.writeText(cmd).then(function () { say(true); }, function () { say(false); }); } catch (e) { say(false); }
+          });
+      }).catch(saveFail).then(function () { go.disabled = false; });
     });
     wrap.appendChild(f);
   }
 
-  function kanbanTab(wrap) {
-    var bar = h("div", "actions");
-    bar.appendChild(h("span", "sp"));
-    if (!state.addingOffer) bar.appendChild(btn("+ Add an offer", "small", function () { state.addingOffer = true; renderOffers(); }));
-    wrap.appendChild(bar);
-    if (state.addingOffer) addOfferForm(wrap);
-    var rows = offerRows(), board = h("div", "kanban");
-    if (!rows.length) wrap.appendChild(h("p", "note", "No offer yet."));
-    OFFER_STATUSES.forEach(function (st) {
-      var col = h("section", "kcol k-" + st[0]), mine = rows.filter(function (o) { return (o.status || "not_applied") === st[0]; });
-      col.appendChild(h("h3", null, st[1] + " (" + mine.length + ")"));
-      mine.forEach(function (o) { col.appendChild(offerCard(o)); });
-      col.addEventListener("dragover", function (e) { e.preventDefault(); col.classList.add("over"); });
-      col.addEventListener("dragleave", function () { col.classList.remove("over"); });
-      col.addEventListener("drop", function (e) {
-        e.preventDefault(); col.classList.remove("over");
-        var id = e.dataTransfer.getData("text/plain");
-        if (id) setOfferStatus(id, st[0]);
-      });
-      board.appendChild(col);
+  /* ---------- Applications : vue tableau, les offres du dernier mois par défaut ---------- */
+  function hostOf(u) { try { return new URL(u).hostname.replace(/^www\./, ""); } catch (e) { return "Untitled offer"; } }
+  function monthAgo() { return new Date(Date.now() - 30 * 86400000).toLocaleDateString("en-CA"); }
+  function ofDefaults() { return { status: "", from: monthAgo(), to: "", sort: "added", dir: "desc", page: 1, open: null }; }
+  function bestScore(id) { var ms = offerMatches(id); return ms.length ? Math.max.apply(null, ms.map(function (m) { return m.score; })) : null; }
+  function filteredApps() {
+    var f = state.of, order = OFFER_STATUSES.map(function (x) { return x[0]; });
+    var rows = offerRows().filter(function (o) {
+      var d = day(o.createdAt);
+      if (f.status && (o.status || "not_applied") !== f.status) return false;
+      if (f.from && d < f.from) return false;
+      if (f.to && d > f.to) return false;
+      return true;
     });
-    wrap.appendChild(board);
+    function key(o) {
+      if (f.sort === "company") return String(o.company || "").toLowerCase();
+      if (f.sort === "score") { var b = bestScore(o._id); return b == null ? -1 : b; }
+      if (f.sort === "status") return order.indexOf(o.status || "not_applied");
+      if (f.sort === "applied") return String(o.appliedAt || "");
+      return String(o.createdAt || "");
+    }
+    rows.sort(function (a, b) {
+      var x = key(a), y = key(b), c = typeof x === "number" ? x - y : String(x).localeCompare(String(y));
+      return f.dir === "asc" ? c : -c;
+    });
+    return rows;
+  }
+  function appsTable(wrap) {
+    var f = state.of, all = offerRows(), rows = filteredApps();
+    var pages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
+    if (f.page > pages) f.page = pages;
+    function redo(resetPage) { if (resetPage) f.page = 1; f.open = null; renderOffers(true); }
+    var card = h("section", "vgrid"), meta = h("div", "actions");
+    meta.appendChild(h("span", "sp"));
+    meta.appendChild(h("span", "note", rows.length + " of " + all.length + " application" + (all.length > 1 ? "s" : "") + (f.from ? " · added since " + f.from : "")));
+    card.appendChild(meta);
+    var filterState = { status: !!f.status, added: !!(f.from || f.to) };
+    function popover(key) {
+      var box = h("div", "vpop");
+      if (key === "status") {
+        var ss = plainSelect("of-status", [["", "All statuses"]].concat(OFFER_STATUSES), f.status, "Status");
+        ss.addEventListener("change", function () { f.status = ss.value; redo(true); }); box.appendChild(ss);
+      } else {
+        var from = plainInput("of-from", f.from, "", "Added from"); from.type = "date";
+        var to = plainInput("of-to", f.to, "", "Added until"); to.type = "date";
+        from.addEventListener("change", function () { f.from = from.value; redo(true); });
+        to.addEventListener("change", function () { f.to = to.value; redo(true); });
+        box.appendChild(labeled("From", from, "of-from")); box.appendChild(labeled("To", to, "of-to"));
+      }
+      return box;
+    }
+    function th(label, opts) {
+      var c = h("th"); c.scope = "col";
+      var row = h("div", "vth");
+      if (opts.sort) {
+        var sb = h("button", "vsort", label + (f.sort === opts.sort ? (f.dir === "asc" ? " ▲" : " ▼") : " ⇅")); sb.type = "button";
+        sb.setAttribute("aria-label", "Sort by " + label.toLowerCase());
+        sb.addEventListener("click", function () { if (f.sort === opts.sort) f.dir = f.dir === "asc" ? "desc" : "asc"; else { f.sort = opts.sort; f.dir = opts.sort === "company" || opts.sort === "status" ? "asc" : "desc"; } redo(true); });
+        row.appendChild(sb);
+      } else row.appendChild(h("span", null, label));
+      if (opts.filter) {
+        var fb = h("button", "vfilter" + (filterState[opts.filter] ? " on" : "")); fb.type = "button";
+        fb.setAttribute("aria-label", "Filter by " + label.toLowerCase()); fb.setAttribute("aria-expanded", f.open === opts.filter ? "true" : "false");
+        fb.appendChild(funnelIcon());
+        fb.addEventListener("click", function () { f.open = f.open === opts.filter ? null : opts.filter; renderOffers(true); });
+        row.appendChild(fb);
+      }
+      c.appendChild(row);
+      if (opts.filter && f.open === opts.filter) c.appendChild(popover(opts.filter));
+      return c;
+    }
+    var table = h("table", "vtable"), thead = h("thead"), hr = h("tr");
+    hr.appendChild(th("Company", { sort: "company" })); hr.appendChild(th("Job title", {})); hr.appendChild(th("Status", { sort: "status", filter: "status" }));
+    hr.appendChild(th("Score", { sort: "score" })); hr.appendChild(th("Resume sent", {})); hr.appendChild(th("Applied", { sort: "applied" })); hr.appendChild(th("Added", { sort: "added", filter: "added" }));
+    thead.appendChild(hr); table.appendChild(thead);
+    var tbody = h("tbody");
+    rows.slice((f.page - 1) * PAGE_SIZE, f.page * PAGE_SIZE).forEach(function (o) {
+      var tr = h("tr"), td = h("td", "vco");
+      var open = h("button", "vopen", o.company || "—"); open.type = "button";
+      open.addEventListener("click", function () { state.offerOpen = o._id; renderOffers(true); window.scrollTo(0, 0); });
+      td.appendChild(logoNode(o)); td.appendChild(open); tr.appendChild(td);
+      tr.appendChild(h("td", null, o.title || hostOf(o.url)));
+      td = h("td");
+      var st = plainSelect("st-" + o._id, OFFER_STATUSES, o.status || "not_applied", "Status of " + (o.company || "this offer"));
+      st.className = "vtype vsel st-" + (o.status || "not_applied");
+      st.addEventListener("change", function () { setOfferStatus(o._id, st.value); });
+      td.appendChild(st); tr.appendChild(td);
+      var sc = bestScore(o._id); td = h("td"); if (sc != null) td.appendChild(scoreChip(sc)); else if (o.analysisRequested) td.appendChild(h("span", "chip", "Analysis pending")); else td.textContent = "—"; tr.appendChild(td);
+      var cv = o.cvVersionId && state.versions[o.cvVersionId];
+      tr.appendChild(h("td", null, cv ? versionName(Object.assign({ _id: o.cvVersionId }, cv)) : "—"));
+      tr.appendChild(h("td", "vdate", o.appliedAt || "—"));
+      tr.appendChild(h("td", "vdate", day(o.createdAt)));
+      tbody.appendChild(tr);
+    });
+    if (!rows.length) { var er = h("tr"), ec = h("td", "note", all.length ? "No application matches these filters." : "No offer yet."); ec.colSpan = 7; er.appendChild(ec); tbody.appendChild(er); }
+    table.appendChild(tbody);
+    var holder = h("div", "vtwrap"); holder.appendChild(table); card.appendChild(holder);
+    var foot = h("div", "actions");
+    if (f.status) foot.appendChild(btn("Clear status", "small", function () { f.status = ""; redo(true); }));
+    foot.appendChild(h("span", "sp"));
+    if (pages > 1) {
+      var prev = btn("← Previous", "small", function () { f.page--; renderOffers(true); }); prev.disabled = f.page <= 1;
+      var next = btn("Next →", "small", function () { f.page++; renderOffers(true); }); next.disabled = f.page >= pages;
+      foot.appendChild(prev); foot.appendChild(h("span", "note", "Page " + f.page + " of " + pages)); foot.appendChild(next);
+    }
+    card.appendChild(foot);
+    wrap.appendChild(card);
+  }
+
+  function appsTab(wrap) {
+    appsTable(wrap);
+    addJobRow(wrap);
   }
 
   function offerDetail(wrap, id) {
@@ -2346,9 +2422,9 @@ details > summary { cursor: pointer; padding: 4px 0; }
     wrap.appendChild(box);
   }
 
-  function renderOffers() {
+  function renderOffers(force) {
     var mount = $("offersView"), ae = document.activeElement;
-    if (ae && mount.contains(ae) && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName)) { offersDirty = true; return; }
+    if (!force && ae && mount.contains(ae) && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName)) { offersDirty = true; return; }
     offersDirty = false;
     clear(mount);
     var wrap = h("div", "formpage offers");
@@ -2358,14 +2434,14 @@ details > summary { cursor: pointer; padding: 4px 0; }
     } else {
       state.offerOpen = null;
       var tabs = h("div", "tabs"); tabs.setAttribute("role", "tablist");
-      [["matches", "Matchings (" + Object.keys(state.matches).length + ")"], ["kanban", "Applications (" + Object.keys(state.offers).length + ")"]].forEach(function (t) {
+      [["matches", "Matchings (" + Object.keys(state.matches).length + ")"], ["apps", "Applications (" + Object.keys(state.offers).length + ")"]].forEach(function (t) {
         var b = h("button", "tab", t[1]); b.type = "button"; b.setAttribute("role", "tab");
         b.setAttribute("aria-selected", state.offersTab === t[0] ? "true" : "false");
         b.addEventListener("click", function () { state.offersTab = t[0]; renderOffers(); });
         tabs.appendChild(b);
       });
       wrap.appendChild(tabs);
-      if (state.offersTab === "matches") matchesTab(wrap); else kanbanTab(wrap);
+      if (state.offersTab === "matches") matchesTab(wrap); else appsTab(wrap);
     }
     mount.appendChild(wrap);
   }
