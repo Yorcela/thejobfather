@@ -186,7 +186,7 @@ Written by `scripts/offers.py build`, never by hand. The page "My offers" lists 
 | `cvVersionId` | string | the resume version sent (defaults to the version of the latest matching); the page can open it |
 | `formQA` | `[{q, a}]` | the application form: questions and the answers given, to say the same thing during a call |
 | `coverLetter`, `notes` | string | |
-| `events` | array | history: `{at, type: "status", from, to, by}` with `by` = `user` or `gmail` |
+| `events` | array | history: `{at, type: "status", from, to, by}` with `by` = `user` or `gmail`, or `{at, type: "apply", note}` when `apply` filled the form |
 | `emails` | array | found by `track`: `{date, from, subject, kind, snippet}`, `kind` = `response`, `rejected` or `ack`; snippet at most 200 characters, never a whole message |
 | `lastEmailCheck` | string | ISO date of the last `track` |
 

@@ -69,6 +69,12 @@ Adapte le CV à une offre d'emploi. La commande lit l'annonce, repère ce que le
 
 Elle montre ensuite ce qui va changer (langue, titre et résumé, puces déplacées ou reformulées, faits ajoutés d'après vos réponses, exigences qui restent non couvertes) et crée, après votre accord, une **nouvelle version** du CV, sans toucher à la version d'origine. Le CV est rédigé par défaut dans la langue de l'annonce (traduit si besoin, comme `translate`). Règle de fond : on réordonne, reformule et met en avant ce que le CV montre déjà, et on n'ajoute un fait que si vous l'avez confirmé. Rien n'est inventé ni supprimé. Si l'offre est suivie dans « My offers », la version adaptée y est associée, et le score ATS ciblé avant et après est donné.
 
+### Sans adresse d'offre
+
+Quand `match`, `adapt` ou `apply` est lancée sans URL, la commande demande de quelle offre il s'agit parmi celles déjà enregistrées (les plus récentes d'abord, une adresse ou un nom d'entreprise se saisissent via « Autre »). Pour `match`, les analyses demandées depuis le tableau passent en premier. Pour `apply`, seules les offres auxquelles vous n'avez pas encore postulé sont proposées.
+
+Quand un matching donne moins de 70 sur 100, `match` demande si vous gardez l'annonce ou si elle passe directement en « Declined by me » dans le tableau des candidatures.
+
 ### Mes offres et suivi des candidatures
 
 Le bouton « My offers » de l'artefact affiche deux onglets :
@@ -77,6 +83,14 @@ Le bouton « My offers » de l'artefact affiche deux onglets :
 - **Applications** : un tableau des candidatures (statuts : pas postulé, postulé, réponse reçue, sans réponse, refusé par l'entreprise, refusé par moi). Le statut se change directement dans la ligne. Une ligne en bas du tableau demande seulement l'adresse d'une annonce : Entrée ou le bouton à icône d'avion ajoute l'offre (marquée « Analysis pending »), copie la commande à lancer et, dans Claude Code, `/thejobfather:thejobfather match` sans argument reprend les analyses demandées (la page ne peut pas lancer l'analyse elle-même). Chaque candidature s'ouvre sur sa fiche : statut et date, **version du CV envoyée** (avec un lien pour l'ouvrir), analyse de matching, **formulaire de candidature** (questions et réponses données, pour dire la même chose lors d'un call), lettre de motivation, notes et historique.
 
 Le tableau des applications liste l'entreprise (avec son logo), l'intitulé, le statut, le meilleur score de matching, le CV envoyé, la date de candidature et la date d'ajout. Elle n'affiche par défaut que les offres ajoutées il y a un mois ou moins : le filtre de la colonne « Added », pré-rempli, permet de remonter plus loin. Le statut se filtre, Company, Status, Score, Applied et Added se trient, et un clic sur l'entreprise ouvre la fiche. 20 offres par page.
+
+### `/thejobfather:thejobfather apply <url>`
+
+Remplit le formulaire de candidature d'une offre, dans votre navigateur (Claude in Chrome), avec le bon CV. Vous validez chaque réponse avant que la commande passe à la question suivante : elle propose une réponse tirée de ce qu'elle sait de vous (réponses mémorisées, candidatures précédentes, CV, préférences, matching) et, quand elle ne sait pas, elle pose la question telle quelle, sans rien inventer. Seul le bloc d'identité (nom, e-mail, téléphone, ville, liens) est validé d'un coup.
+
+Règles de fond : **elle ne soumet jamais le formulaire**, c'est vous qui cliquez. Elle ne crée pas de compte, ne tape aucun mot de passe ni code et ne résout pas de captcha. Elle demande avant de cocher un consentement, et ne propose jamais de réponse aux données sensibles (identité, santé, diversité...). Le CV envoyé est la version associée à l'offre (par `adapt`) ou celle que vous choisissez : vous exportez son PDF depuis l'artefact et la commande le téléverse. Les textes libres (lettre, « pourquoi nous ») sont écrits comme vous parleriez : phrases courtes, mots simples, sans tirets longs ni formules d'IA, avec de temps en temps une toute petite faute de frappe dans un long texte, que vous pouvez faire nettoyer.
+
+Quand vous validez le formulaire, la commande demande si vous l'avez soumis, puis enregistre dans « My offers », sur la candidature : toutes les questions et réponses (« Application form »), la lettre, la version du CV, un événement dans l'historique et, si vous avez soumis, le statut « Applied ». Les réponses qui valent au-delà de ce formulaire rejoignent vos réponses mémorisées.
 
 ### `/thejobfather:thejobfather track`
 
@@ -110,7 +124,7 @@ Les modifications faites dans la page (édition sur place) s'appliquent à la ve
 ```
 .claude-plugin/plugin.json          manifeste du plugin
 .claude-plugin/marketplace.json     permet l'installation depuis ce dépôt
-skills/thejobfather/SKILL.md        commande /thejobfather et sous-commandes init, translate, ats_score, match, adapt, track
+skills/thejobfather/SKILL.md        commande /thejobfather et sous-commandes init, translate, ats_score, match, adapt, apply, track
 skills/thejobfather/references/     schéma de la base de données, barèmes des scores ATS et de matching
 skills/thejobfather/scripts/        calcul des scores ATS et de matching, identifiants des offres
 skills/thejobfather/assets/         page de l'artefact
