@@ -17,6 +17,10 @@ claude --plugin-dir .
 
 ## Commandes
 
+### `/thejobfather:thejobfather` ou `help`
+
+Sans argument, ou avec `help` (ou un mot inconnu), la commande affiche un menu cliquable : on choisit d'abord un groupe (CV et profil, Candidatures, Recherche et suivi), puis la commande, qui se lance aussitôt.
+
 ### `/thejobfather:thejobfather init`
 
 Importe votre profil dans la base de données d'un artefact Claude.
@@ -77,7 +81,7 @@ Avec `prepare <url>`, si l'adresse ne correspond à aucune candidature enregistr
 
 Quand un matching donne moins de 70 sur 100, `match` demande si vous gardez l'annonce ou si elle passe directement en « Declined by me » dans le tableau des candidatures.
 
-### Mes offres et suivi des candidatures
+### Applications : suivi des candidatures
 
 Le lien « Applications » de l'artefact affiche le tableau de vos candidatures. Chaque `match` est enregistré avec son score et **toute l'analyse** (chaque exigence et chaque préférence avec sa preuve, points d'attention, ce qu'il faut mettre en avant, questions au recruteur), visible dans la fiche de la candidature, section « Matching analysis ». Il y a un matching par version du CV et par annonce, identifiée par son adresse (les paramètres de suivi comme `utm_*` et la barre finale sont ignorés). Si vous relancez `match` sur une annonce déjà comparée, la commande propose de revoir le matching précédent, ou d'en refaire un (par exemple avec une version plus récente du CV).
 

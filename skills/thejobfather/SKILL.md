@@ -19,9 +19,18 @@ Entry point of the plugin. Arguments received: `$ARGUMENTS`. The first word is t
 - `prepare`: see the bottom of this file. The rest of the arguments is empty or the URL of the job posting.
 - `mail_synch`: see the bottom of this file. The rest of the arguments is empty, or `auto`, `schedule` or `unschedule`.
 - `track`: see the bottom of this file. No complement.
-- empty or unknown: say in one sentence that `init`, `translate`, `ats_score`, `match`, `adapt`, `apply`, `prepare`, `company`, `intake`, `mail_synch` and `track` exist and offer to run `init`.
+- empty, `help` or unknown: show the menu of commands, see "Command menu" below.
 
 Reply in the user's language. The questions and button labels written in quotes below are given in English: say them in the user's language.
+
+### Command menu
+
+Never just list the commands in text: make them clickable with AskUserQuestion, in two steps (the tool shows 4 options at most). If the arguments were an unknown word, say so in one short sentence first.
+
+1. "What do you want to do?" with three options: "Resume and profile" (description: `init`, `translate`, `ats_score`, `adapt`), "Applications" (`intake`, `match`, `apply`, `track`), "Research and follow-up" (`company`, `prepare`, `mail_synch`).
+2. A second question "Which command?" with the commands of the chosen group as options. Label = the command name, description = what it does in one short sentence: `init` imports the profile (PDF or website) as a resume version; `translate` translates a version into another language; `ats_score` estimates the ATS score of a version; `adapt` tailors the resume to a job posting; `intake` runs the whole pipeline on a new offer; `match` scores an offer against the resume and the preferences; `apply` fills in an application form without submitting it; `track` records the form while the user submits it; `company` researches the company behind an offer; `prepare` prepares an interview; `mail_synch` reads Gmail for replies to applications.
+
+Then run the chosen command as if the user had typed it with no complement (the commands that need an offer ask which one, see below).
 
 ### Choosing the job offer when no URL is given
 
