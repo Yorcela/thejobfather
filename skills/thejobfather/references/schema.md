@@ -155,7 +155,7 @@ An answer whose `expiresAt` is in the past is ignored by `match` and hidden by t
 
 ## `matches/<id>` and `offers/<id>`
 
-Written by `scripts/offers.py build`, never by hand. The page "My offers" lists them: the matchings tab shows `matches`, the applications table shows `offers`.
+Written by `scripts/offers.py build`, never by hand. The page "Applications" lists them: the matchings tab shows `matches`, the applications table shows `offers`.
 
 **Identifiers.** The posting's address is normalized (host in lower case without `www.`, path without trailing slash, query string without tracking parameters such as `utm_*`, `gclid`, `ref`, the remaining pairs sorted, fragment dropped) and hashed: `hash` = the first 12 characters of the SHA-1. The offer is `offers/o-<hash>`, and the matching is `matches/<versionId>--<hash>`: **one matching per resume version and posting**. `scripts/offers.py key <url>` prints them; the page computes the same values (`normUrl`, `urlHash`).
 
@@ -187,7 +187,7 @@ Written by `scripts/offers.py build`, never by hand. The page "My offers" lists 
 | `companyId` | string | the company research that applies (`companies/<companyId>`), set by `company` |
 | `companyRequested` | string | ISO date, set by the page when the user asks for the company research; `company` without arguments picks these offers up first and removes the field once the research is saved |
 | `prepRequested` | string | ISO date, set by the page when the user asks for an interview preparation on this offer; `prepare` without arguments picks these offers up first and removes the field once the preparation is saved |
-| `analysisRequested` | string | ISO date, set by the page when the user pastes a job URL in "My offers" (the offer then has an empty `title` and `company`); `match` without arguments picks these offers up, and removes the field once the matching is saved |
+| `analysisRequested` | string | ISO date, set by the page when the user pastes a job URL in "Applications" (the offer then has an empty `title` and `company`); `match` without arguments picks these offers up, and removes the field once the matching is saved |
 | `appliedAt` | string | `YYYY-MM-DD`, set when the status first becomes `applied` |
 | `cvVersionId` | string | the resume version sent (defaults to the version of the latest matching); the page can open it |
 | `formQA` | `[{q, a, draft, options, required}]` | the application form: questions and the answers given, to say the same thing during a call. `draft: true` marks a question read from the form by `intake` with a proposed answer (possibly empty) that the user has not validated; `apply` uses it as a proposal and saves the final answer without `draft`; editing an answer in the artifact clears it. `options` lists the choices the form offers, `required` says the form requires an answer |
@@ -195,7 +195,7 @@ Written by `scripts/offers.py build`, never by hand. The page "My offers" lists 
 | `events` | array | history: `{at, type: "status", from, to, by}` with `by` = `user` or `gmail`, or `{at, type: "apply", note}` when `apply` filled the form, `{at, type: "prep", note}` when `prepare` saved a preparation, `{at, type: "research", note}` when `company` saved the research, or `{at, type: "intake", note}` when `intake` finished |
 | `emails` | array | found by `track` and `mail_synch`: `{date, from, subject, kind, snippet, body, viewUrl}`, `kind` = `response`, `rejected`, `ack` or `sent`; `direction` is `"sent"` for a message the user wrote (with `to`, the recipient), absent for a message received; `snippet` at most 200 characters; `body` the plain-text message with its line breaks (at most 20,000 characters, cut with `[…]` beyond), shown in full in the application's history with clickable links; `viewUrl` the Gmail link that opens the message in a browser tab |
 | `source` | string | `"gmail"` when `mail_synch` found the application in the mailbox; absent otherwise. Such an offer may have an empty `url` and a `mail://<company>/<title>` `urlKey` |
-| `newReply`, `newReplyAt`, `suggestedStatus` | bool, string, string | set by `mail_synch auto` when a new reply was found: the page shows a count on "My offers" and a "New reply" tag until the user marks it as seen; `suggestedStatus` is `response` or `rejected`, never applied by itself |
+| `newReply`, `newReplyAt`, `suggestedStatus` | bool, string, string | set by `mail_synch auto` when a new reply was found: the page shows a count on "Applications" and a "New reply" tag until the user marks it as seen; `suggestedStatus` is `response` or `rejected`, never applied by itself |
 | `lastEmailCheck` | string | ISO date of the last `track` |
 
 When `match` runs again on a posting whose offer exists, the offer is kept as it is: status, form answers and history belong to the user.

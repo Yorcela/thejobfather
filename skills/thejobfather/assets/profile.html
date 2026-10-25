@@ -528,7 +528,7 @@ a, button, summary, select, label, input { touch-action: manipulation; -webkit-t
 </style>
 
 <header class="topnav"><div class="topin">
-  <nav class="navlinks" id="nav" aria-label="Sections" hidden><a id="navresume" href="#resume">Resume</a><a id="offers" href="#offers">My offers<span id="offersBadge" class="nbadge" hidden></span></a><a id="prefs" href="#preferences">Preferences</a></nav>
+  <nav class="navlinks" id="nav" aria-label="Sections" hidden><a id="navresume" href="#resume">Resume</a><a id="offers" href="#offers">Applications<span id="offersBadge" class="nbadge" hidden></span></a><a id="prefs" href="#preferences">Preferences</a></nav>
 </div></header>
 <div class="page">
   <div id="cvrow" class="cvrow"><div class="cvmain">
@@ -2146,7 +2146,7 @@ a, button, summary, select, label, input { touch-action: manipulation; -webkit-t
     return !!(a && p.contains(a) && /^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName));
   }
 
-  /* ---------- My offers : matchings enregistrés et suivi des candidatures (collections matches et offers) ---------- */
+  /* ---------- Applications : matchings enregistrés et suivi des candidatures (collections matches et offers) ---------- */
   var OFFER_STATUSES = [
     ["not_applied", "Not applied"], ["applied", "Applied"], ["response", "Response received"],
     ["no_response", "No response"], ["offer", "Offer"], ["rejected", "Rejected by company"], ["declined", "Declined by me"]
@@ -2857,10 +2857,11 @@ a, button, summary, select, label, input { touch-action: manipulation; -webkit-t
     clear(mount);
     if (state.offerOpen && state.offers[state.offerOpen]) { offerDetail(mount, state.offerOpen); return; }
     state.offerOpen = null;
-    var wrap = h("div", "formpage offers");
-    wrap.appendChild(h("h2", null, "My offers"));
+    var page = h("div", "pfmain vpage"), wrap = h("div", "formpage offers");
+    page.appendChild(h("h2", null, "Applications"));
     appsTab(wrap);
-    mount.appendChild(wrap);
+    page.appendChild(wrap);
+    mount.appendChild(page);
   }
   /* ---------- Toutes les versions : liste paginée, filtres et tri ---------- */
   function versionCompany(v) { return (v.target && v.target.company) || ""; }
