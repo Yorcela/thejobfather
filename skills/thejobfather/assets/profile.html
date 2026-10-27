@@ -687,6 +687,309 @@ a, button, summary, select, label, input { touch-action: manipulation; -webkit-t
   }
   function byStartDesc(a, b) { return String(b.start || "").localeCompare(String(a.start || "")); }
 
+  /* ---------- Langue de l'interface (en, fr, es, de) ----------
+     Les textes de l'interface sont écrits en anglais dans le code. Ce dictionnaire donne leur traduction [fr, es, de].
+     Un passage sur le DOM remplace les textes, les info-bulles et les champs d'aide au moment de l'affichage, et revient à l'anglais
+     si on change de langue. Le contenu du CV et les textes écrits par l'utilisateur ou par Claude ne sont pas touchés.
+     Une clé qui finit par une espace est un préfixe : la suite (une date, un nom) est gardée telle quelle.
+     Le choix est enregistré dans la base de l'artefact (settings/ui). */
+  var UI_LANGS = [["en", "English"], ["fr", "Français"], ["es", "Español"], ["de", "Deutsch"]];
+  var UI_DICT = {
+    "Resume": ["CV", "CV", "Lebenslauf"],
+    "Applications": ["Candidatures", "Candidaturas", "Bewerbungen"],
+    "My offers": ["Mes offres", "Mis ofertas", "Meine Angebote"],
+    "Preferences": ["Préférences", "Preferencias", "Einstellungen"],
+    "Export PDF": ["Exporter en PDF", "Exportar PDF", "Als PDF exportieren"],
+    "Customize": ["Personnaliser", "Personalizar", "Anpassen"],
+    "Customization": ["Personnalisation", "Personalización", "Anpassung"],
+    "Done": ["Terminé", "Hecho", "Fertig"],
+    "Loading profile": ["Chargement du profil", "Cargando el perfil", "Profil wird geladen"],
+    "Reading the database...": ["Lecture de la base de données...", "Leyendo la base de datos...", "Datenbank wird gelesen..."],
+    "Palettes": ["Palettes", "Paletas", "Farbpaletten"],
+    "Blue": ["Bleu", "Azul", "Blau"], "Green": ["Vert", "Verde", "Grün"], "Plum": ["Prune", "Ciruela", "Pflaume"], "Graphite": ["Graphite", "Grafito", "Graphit"],
+    "Accent (section titles, links)": ["Accent (titres de section, liens)", "Acento (títulos de sección, enlaces)", "Akzent (Abschnittstitel, Links)"],
+    "Name and subheadings": ["Nom et sous-titres", "Nombre y subtítulos", "Name und Zwischenüberschriften"],
+    "Text": ["Texte", "Texto", "Text"],
+    "Resume background": ["Fond du CV", "Fondo del CV", "Hintergrund des Lebenslaufs"],
+    "Page background": ["Fond de la page", "Fondo de la página", "Seitenhintergrund"],
+    "Font": ["Police", "Fuente", "Schriftart"],
+    "Modern": ["Moderne", "Moderna", "Modern"],
+    "Classic (serif headings)": ["Classique (titres à empattements)", "Clásica (títulos con serifa)", "Klassisch (Überschriften mit Serifen)"],
+    "Neutral (system font)": ["Neutre (police système)", "Neutra (fuente del sistema)", "Neutral (Systemschrift)"],
+    "Restore default appearance": ["Rétablir l'apparence par défaut", "Restablecer la apariencia por defecto", "Standarddarstellung wiederherstellen"],
+    "Reset": ["Réinitialiser", "Restablecer", "Zurücksetzen"],
+    "Reset filters": ["Réinitialiser les filtres", "Restablecer filtros", "Filter zurücksetzen"],
+    "Show dismissed import warnings (": ["Afficher les alertes d'import masquées (", "Mostrar las advertencias de importación ocultas (", "Ausgeblendete Importwarnungen anzeigen ("],
+    "Hide": ["Masquer", "Ocultar", "Ausblenden"], "Show": ["Afficher", "Mostrar", "Anzeigen"],
+    "Edit": ["Modifier", "Editar", "Bearbeiten"], "Delete": ["Supprimer", "Eliminar", "Löschen"], "Confirm": ["Confirmer", "Confirmar", "Bestätigen"],
+    "Confirm deletion": ["Confirmer la suppression", "Confirmar la eliminación", "Löschen bestätigen"],
+    "Remove": ["Retirer", "Quitar", "Entfernen"], "Remove?": ["Retirer ?", "¿Quitar?", "Entfernen?"], "Forget": ["Oublier", "Olvidar", "Vergessen"], "Forgotten.": ["Oublié.", "Olvidado.", "Vergessen."],
+    "Change": ["Changer", "Cambiar", "Ändern"], "Copy": ["Copier", "Copiar", "Kopieren"], "Add logo": ["Ajouter un logo", "Añadir logo", "Logo hinzufügen"],
+    "Change the photo": ["Changer la photo", "Cambiar la foto", "Foto ändern"], "Save changes": ["Enregistrer les modifications", "Guardar cambios", "Änderungen speichern"],
+    "Saved.": ["Enregistré.", "Guardado.", "Gespeichert."], "Next →": ["Suivant →", "Siguiente →", "Weiter →"], "← Previous": ["← Précédent", "← Anterior", "← Zurück"],
+    "← All offers": ["← Toutes les offres", "← Todas las ofertas", "← Alle Angebote"], "Back to resume": ["Retour au CV", "Volver al CV", "Zurück zum Lebenslauf"],
+    "Page ": ["Page ", "Página ", "Seite "],
+    "Sort by ": ["Trier par ", "Ordenar por ", "Sortieren nach "], "Filter by ": ["Filtrer par ", "Filtrar por ", "Filtern nach "],
+    "Status of ": ["Statut de ", "Estado de ", "Status von "], "Status: ": ["Statut : ", "Estado: ", "Status: "], "Status": ["Statut", "Estado", "Status"],
+
+    /* candidatures */
+    "All": ["Tous", "Todos", "Alle"],
+    "Not applied": ["Pas encore postulé", "Sin postular", "Nicht beworben"], "Applied": ["Postulé", "Postulado", "Beworben"],
+    "Response received": ["Réponse reçue", "Respuesta recibida", "Antwort erhalten"], "No response": ["Sans réponse", "Sin respuesta", "Keine Antwort"],
+    "Offer": ["Offre reçue", "Oferta recibida", "Angebot erhalten"], "Rejected by company": ["Refusé par l'entreprise", "Rechazado por la empresa", "Von der Firma abgelehnt"],
+    "Declined by me": ["Décliné par moi", "Descartado por mí", "Von mir abgelehnt"], "Applications by status": ["Candidatures par statut", "Candidaturas por estado", "Bewerbungen nach Status"],
+    "Company": ["Entreprise", "Empresa", "Unternehmen"], "Job title": ["Intitulé du poste", "Puesto", "Stellenbezeichnung"], "Mode": ["Mode", "Modalidad", "Modus"], "HQ": ["Siège", "Sede", "Hauptsitz"],
+    "Score": ["Score", "Puntuación", "Score"], "Added": ["Ajoutée", "Añadida", "Hinzugefügt"], "Added from": ["Ajoutée depuis", "Añadida desde", "Hinzugefügt ab"], "Added until": ["Ajoutée jusqu'au", "Añadida hasta", "Hinzugefügt bis"],
+    "Remote": ["Télétravail", "Remoto", "Remote"], "Hybrid": ["Hybride", "Híbrido", "Hybrid"], "On-site": ["Sur site", "Presencial", "Vor Ort"],
+    "No application matches these filters.": ["Aucune candidature ne correspond à ces filtres.", "Ninguna candidatura coincide con estos filtros.", "Keine Bewerbung entspricht diesen Filtern."],
+    "No offer yet.": ["Aucune offre pour l'instant.", "Aún no hay ofertas.", "Noch kein Angebot."],
+    "New reply": ["Nouvelle réponse", "Nueva respuesta", "Neue Antwort"], "Not viewed yet": ["Pas encore consultée", "Aún no vista", "Noch nicht angesehen"],
+    "Analysis pending": ["Analyse en attente", "Análisis pendiente", "Analyse ausstehend"], "Untitled offer": ["Offre sans titre", "Oferta sin título", "Angebot ohne Titel"],
+    "Paste a job posting URL": ["Collez l'adresse d'une annonce", "Pega la URL de una oferta", "URL einer Stellenanzeige einfügen"],
+    "Paste the URL of a job posting, then press Enter to analyze it": ["Collez l'adresse d'une annonce puis appuyez sur Entrée pour l'analyser", "Pega la URL de una oferta y pulsa Intro para analizarla", "URL einer Stellenanzeige einfügen und Enter drücken, um sie zu analysieren"],
+    "Job posting URL": ["Adresse de l'annonce", "URL de la oferta", "URL der Stellenanzeige"], "Analyze this job posting": ["Analyser cette annonce", "Analizar esta oferta", "Diese Stellenanzeige analysieren"],
+    "Enter the address of the posting, starting with http.": ["Saisissez l'adresse de l'annonce, qui commence par http.", "Introduce la dirección de la oferta, que empiece por http.", "Geben Sie die Adresse der Anzeige ein, beginnend mit http."],
+    "This offer is already tracked.": ["Cette offre est déjà suivie.", "Esta oferta ya está en seguimiento.", "Dieses Angebot wird bereits verfolgt."],
+    "Offer deleted.": ["Offre supprimée.", "Oferta eliminada.", "Angebot gelöscht."], "Delete this offer and its matchings": ["Supprimer cette offre et ses matchings", "Eliminar esta oferta y sus matchings", "Dieses Angebot und seine Matchings löschen"],
+    "Added. Run /thejobfather:thejobfather intake in Claude Code to analyze it.": ["Ajoutée. Lancez /thejobfather:thejobfather intake dans Claude Code pour l'analyser.", "Añadida. Ejecuta /thejobfather:thejobfather intake en Claude Code para analizarla.", "Hinzugefügt. Führen Sie /thejobfather:thejobfather intake in Claude Code aus, um sie zu analysieren."],
+    "Added. The command for the full analysis is copied: paste it in Claude Code.": ["Ajoutée. La commande de l'analyse complète est copiée : collez-la dans Claude Code.", "Añadida. El comando del análisis completo está copiado: pégalo en Claude Code.", "Hinzugefügt. Der Befehl für die vollständige Analyse ist kopiert: In Claude Code einfügen."],
+
+    /* fiche d'une offre */
+    "Overview": ["Aperçu", "Resumen", "Überblick"], "Matching score": ["Score de matching", "Puntuación de matching", "Matching-Score"], "Matching analysis": ["Analyse du matching", "Análisis del matching", "Matching-Analyse"],
+    "Requirements": ["Exigences", "Requisitos", "Anforderungen"], "Preferences fit": ["Adéquation aux préférences", "Encaje con las preferencias", "Passung zu den Präferenzen"],
+    "Questions": ["Questions", "Preguntas", "Fragen"], "Company research": ["Étude de l'entreprise", "Estudio de la empresa", "Unternehmensrecherche"], "Interview prep": ["Préparation d'entretien", "Preparación de entrevista", "Interviewvorbereitung"],
+    "Application form": ["Formulaire de candidature", "Formulario de candidatura", "Bewerbungsformular"], "Notes": ["Notes", "Notas", "Notizen"], "History": ["Historique", "Historial", "Verlauf"], "Job description": ["Description du poste", "Descripción del puesto", "Stellenbeschreibung"],
+    "Company logo file": ["Fichier du logo", "Archivo del logo", "Logo-Datei"], "Applied on": ["Postulé le", "Postulado el", "Beworben am"], "Resume sent": ["CV envoyé", "CV enviado", "Gesendeter Lebenslauf"], "Resume version sent": ["Version du CV envoyée", "Versión del CV enviada", "Gesendete Lebenslaufversion"],
+    "(not set)": ["(non renseigné)", "(sin definir)", "(nicht festgelegt)"], "Mark as seen": ["Marquer comme vu", "Marcar como visto", "Als gesehen markieren"], "Set status to ": ["Passer le statut à ", "Cambiar el estado a ", "Status setzen auf "],
+    "New reply found by the mail check": ["Nouvelle réponse trouvée par la vérification des mails", "Nueva respuesta encontrada por la revisión del correo", "Neue Antwort bei der Mail-Prüfung gefunden"],
+    "Open in Gmail ": ["Ouvrir dans Gmail ", "Abrir en Gmail ", "In Gmail öffnen "], "(no subject)": ["(sans objet)", "(sin asunto)", "(kein Betreff)"], "You wrote": ["Vous avez écrit", "Escribiste", "Sie schrieben"],
+    "Run the matching": ["Lancer le matching", "Ejecutar el matching", "Matching starten"], "Research the company": ["Étudier l'entreprise", "Estudiar la empresa", "Unternehmen recherchieren"], "Prepare the interview": ["Préparer l'entretien", "Preparar la entrevista", "Interview vorbereiten"],
+    "No matching has been done for this offer yet.": ["Aucun matching n'a encore été fait pour cette offre.", "Aún no se ha hecho ningún matching para esta oferta.", "Für dieses Angebot wurde noch kein Matching durchgeführt."],
+    "No research on this company yet.": ["Pas encore d'étude de cette entreprise.", "Aún no hay estudio de esta empresa.", "Noch keine Recherche zu diesem Unternehmen."],
+    "No preparation yet for this offer.": ["Pas encore de préparation pour cette offre.", "Aún no hay preparación para esta oferta.", "Noch keine Vorbereitung für dieses Angebot."],
+    "Marked for analysis. Run /thejobfather:thejobfather match in Claude Code.": ["Marquée pour analyse. Lancez /thejobfather:thejobfather match dans Claude Code.", "Marcada para análisis. Ejecuta /thejobfather:thejobfather match en Claude Code.", "Zur Analyse vorgemerkt. Führen Sie /thejobfather:thejobfather match in Claude Code aus."],
+    "Marked for analysis. The command is copied: paste it in Claude Code.": ["Marquée pour analyse. La commande est copiée : collez-la dans Claude Code.", "Marcada para análisis. El comando está copiado: pégalo en Claude Code.", "Zur Analyse vorgemerkt. Der Befehl ist kopiert: In Claude Code einfügen."],
+    "Marked for preparation. Run /thejobfather:thejobfather prepare in Claude Code.": ["Marquée pour préparation. Lancez /thejobfather:thejobfather prepare dans Claude Code.", "Marcada para preparación. Ejecuta /thejobfather:thejobfather prepare en Claude Code.", "Zur Vorbereitung vorgemerkt. Führen Sie /thejobfather:thejobfather prepare in Claude Code aus."],
+    "Marked for preparation. The command is copied: paste it in Claude Code.": ["Marquée pour préparation. La commande est copiée : collez-la dans Claude Code.", "Marcada para preparación. El comando está copiado: pégalo en Claude Code.", "Zur Vorbereitung vorgemerkt. Der Befehl ist kopiert: In Claude Code einfügen."],
+    "Marked for research. Run /thejobfather:thejobfather company in Claude Code.": ["Marquée pour étude. Lancez /thejobfather:thejobfather company dans Claude Code.", "Marcada para estudio. Ejecuta /thejobfather:thejobfather company en Claude Code.", "Zur Recherche vorgemerkt. Führen Sie /thejobfather:thejobfather company in Claude Code aus."],
+    "Marked for research. The command is copied: paste it in Claude Code.": ["Marquée pour étude. La commande est copiée : collez-la dans Claude Code.", "Marcada para estudio. El comando está copiado: pégalo en Claude Code.", "Zur Recherche vorgemerkt. Der Befehl ist kopiert: In Claude Code einfügen."],
+    "Copy the command again": ["Copier à nouveau la commande", "Copiar el comando otra vez", "Befehl erneut kopieren"],
+    "How this posting lines up with your resume and preferences.": ["Comment cette annonce correspond à votre CV et à vos préférences.", "Cómo encaja esta oferta con tu CV y tus preferencias.", "Wie diese Anzeige zu Ihrem Lebenslauf und Ihren Präferenzen passt."],
+    "Every requirement, checked against your resume.": ["Chaque exigence, vérifiée par rapport à votre CV.", "Cada requisito, comprobado con tu CV.", "Jede Anforderung, mit Ihrem Lebenslauf abgeglichen."],
+    "How the posting fits what you are looking for.": ["Comment l'annonce correspond à ce que vous cherchez.", "Cómo encaja la oferta con lo que buscas.", "Wie die Anzeige zu dem passt, was Sie suchen."],
+    "Requirements of the posting": ["Exigences de l'annonce", "Requisitos de la oferta", "Anforderungen der Anzeige"],
+    "Points of attention": ["Points d'attention", "Puntos de atención", "Aufmerksamkeitspunkte"], "What to put forward": ["Ce qu'il faut mettre en avant", "Qué destacar", "Was hervorzuheben ist"],
+    "Questions for the recruiter": ["Questions pour le recruteur", "Preguntas para el reclutador", "Fragen an die Recruiter"], "Saved answers relied on": ["Réponses mémorisées utilisées", "Respuestas guardadas utilizadas", "Verwendete gespeicherte Antworten"],
+    "Nothing to report.": ["Rien à signaler.", "Nada que señalar.", "Nichts zu melden."], "Nothing here.": ["Rien ici.", "Nada aquí.", "Hier ist nichts."], "Nothing yet.": ["Rien pour l'instant.", "Nada por ahora.", "Noch nichts."],
+    "Fits": ["Correspond", "Encaja", "Passt"], "Partial": ["Partiel", "Parcial", "Teilweise"], "Conflict": ["Conflit", "Conflicto", "Konflikt"], "Has": ["A", "Tiene", "Hat"], "Partly has": ["A en partie", "Tiene en parte", "Hat teilweise"], "Does not have": ["N'a pas", "No tiene", "Hat nicht"],
+    "Strong match": ["Très bonne adéquation", "Encaje muy bueno", "Sehr gute Passung"], "Good match": ["Bonne adéquation", "Buen encaje", "Gute Passung"], "Partial match": ["Adéquation partielle", "Encaje parcial", "Teilweise Passung"], "Weak match": ["Adéquation faible", "Encaje débil", "Schwache Passung"],
+    "Deal-breaker": ["Motif de refus", "Motivo de rechazo", "Ausschlusskriterium"], "Refused": ["Refusé", "Rechazado", "Abgelehnt"], "Accepted": ["Accepté", "Aceptado", "Akzeptiert"], "Overall": ["Bilan", "Balance general", "Gesamtbild"],
+    "MUST": ["INDISPENSABLE", "IMPRESCINDIBLE", "MUSS"], "NICE": ["PLUS", "DESEABLE", "KANN"], "Seen": ["Vu", "Visto", "Gesehen"],
+    "Remembered matches": ["Matchings mémorisés", "Matchings recordados", "Gemerkte Matchings"], "Matching shown": ["Matching affiché", "Matching mostrado", "Angezeigtes Matching"],
+    "Analysis requested on ": ["Analyse demandée le ", "Análisis solicitado el ", "Analyse angefordert am "], "Preparation requested on ": ["Préparation demandée le ", "Preparación solicitada el ", "Vorbereitung angefordert am "], "Research requested on ": ["Étude demandée le ", "Estudio solicitado el ", "Recherche angefordert am "],
+    "Prepared on ": ["Préparé le ", "Preparado el ", "Vorbereitet am "], "Researched on ": ["Étudiée le ", "Estudiada el ", "Recherchiert am "],
+    "Is the company profitable, what is its culture, and do its values match what people say. Sources and confidence included.": ["L'entreprise est-elle rentable, quelle est sa culture, et ses valeurs correspondent-elles à ce que disent les gens. Sources et niveau de confiance inclus.", "Si la empresa es rentable, cuál es su cultura y si sus valores coinciden con lo que dice la gente. Con fuentes y nivel de confianza.", "Ist das Unternehmen profitabel, wie ist seine Kultur und passen seine Werte zu dem, was Leute sagen. Mit Quellen und Vertrauensniveau."],
+    "Likely questions with answers built from your real experience, stories, honest answers on the weak points, and questions to ask back.": ["Questions probables avec des réponses bâties sur votre vraie expérience, des histoires, des réponses honnêtes sur les points faibles et des questions à poser en retour.", "Preguntas probables con respuestas basadas en tu experiencia real, historias, respuestas honestas sobre los puntos débiles y preguntas para hacer.", "Wahrscheinliche Fragen mit Antworten aus Ihrer echten Erfahrung, Geschichten, ehrliche Antworten zu Schwächen und Fragen zum Zurückfragen."],
+    "Accounts, news, what people say, displayed against observed values, and what it means for you.": ["Comptes, actualités, ce que disent les gens, valeurs affichées face aux valeurs observées, et ce que cela signifie pour vous.", "Cuentas, noticias, lo que dice la gente, valores declarados frente a observados y lo que significa para ti.", "Bilanzen, Neuigkeiten, was Leute sagen, angegebene gegenüber beobachteten Werten und was das für Sie bedeutet."],
+    "Questions with answers to say, stories, honest answers on the weak points, and questions to ask.": ["Questions avec les réponses à dire, histoires, réponses honnêtes sur les points faibles et questions à poser.", "Preguntas con respuestas para decir, historias, respuestas honestas sobre los puntos débiles y preguntas para hacer.", "Fragen mit Antworten zum Sagen, Geschichten, ehrliche Antworten zu Schwächen und Fragen zum Stellen."],
+    "The questions and the answers you gave, to say the same thing during a call.": ["Les questions et les réponses que vous avez données, pour redire la même chose pendant un appel.", "Las preguntas y las respuestas que diste, para decir lo mismo durante una llamada.", "Die Fragen und Ihre Antworten, damit Sie im Gespräch dasselbe sagen."],
+    "Contacts, interview notes, things to remember for the next call.": ["Contacts, notes d'entretien, choses à retenir pour le prochain appel.", "Contactos, notas de entrevista, cosas que recordar para la próxima llamada.", "Kontakte, Interviewnotizen, Dinge für das nächste Gespräch."],
+    "Application form": ["Formulaire de candidature", "Formulario de candidatura", "Bewerbungsformular"], "Cover letter or message sent": ["Lettre ou message envoyé", "Carta o mensaje enviado", "Gesendetes Anschreiben oder Nachricht"],
+    "Cover letter or message sent with the application": ["Lettre ou message envoyé avec la candidature", "Carta o mensaje enviado con la candidatura", "Mit der Bewerbung gesendetes Anschreiben oder Nachricht"],
+    "Draft answer, not validated yet": ["Réponse brouillon, pas encore validée", "Respuesta en borrador, aún sin validar", "Entwurf der Antwort, noch nicht bestätigt"], "Your answer": ["Votre réponse", "Tu respuesta", "Ihre Antwort"], "Question": ["Question", "Pregunta", "Frage"], "Answer": ["Réponse", "Respuesta", "Antwort"],
+    "+ Add a question": ["+ Ajouter une question", "+ Añadir una pregunta", "+ Frage hinzufügen"], "Options: ": ["Options : ", "Opciones: ", "Optionen: "],
+    "Write here": ["Écrivez ici", "Escribe aquí", "Hier schreiben"], "Text": ["Texte", "Texto", "Text"],
+    "Feedback from the company": ["Retour de l'entreprise", "Comentarios de la empresa", "Rückmeldung des Unternehmens"], "From the rejection e-mail": ["Extrait du mail de refus", "Del correo de rechazo", "Aus der Absage-E-Mail"],
+    "Facts from: ": ["Faits issus de : ", "Datos de: ", "Fakten aus: "], "This offer has no posting address": ["Cette offre n'a pas d'adresse d'annonce", "Esta oferta no tiene dirección de anuncio", "Dieses Angebot hat keine Anzeigenadresse"],
+
+    /* étude d'entreprise */
+    "Profitability": ["Rentabilité", "Rentabilidad", "Profitabilität"], "Culture": ["Culture", "Cultura", "Kultur"], "Published accounts": ["Comptes publiés", "Cuentas publicadas", "Veröffentlichte Abschlüsse"], "Funding": ["Financement", "Financiación", "Finanzierung"],
+    "What people say": ["Ce que disent les gens", "Lo que dice la gente", "Was Leute sagen"], "Displayed against observed": ["Affiché face à observé", "Declarado frente a observado", "Angegeben gegenüber beobachtet"], "Values the company displays": ["Valeurs affichées par l'entreprise", "Valores que la empresa declara", "Vom Unternehmen angegebene Werte"],
+    "Green flags": ["Signaux positifs", "Señales positivas", "Positive Signale"], "Red flags": ["Signaux d'alerte", "Señales de alerta", "Warnsignale"], "For you": ["Pour vous", "Para ti", "Für Sie"], "Recent news": ["Actualités récentes", "Noticias recientes", "Aktuelle Nachrichten"],
+    "Not found or not checked": ["Non trouvé ou non vérifié", "No encontrado o no comprobado", "Nicht gefunden oder nicht geprüft"], "Sources": ["Sources", "Fuentes", "Quellen"], "Website": ["Site web", "Sitio web", "Webseite"], "Legal name": ["Raison sociale", "Razón social", "Firmenname"], "Legal form": ["Forme juridique", "Forma jurídica", "Rechtsform"],
+    "Headcount": ["Effectif", "Plantilla", "Mitarbeiterzahl"], "Revenue": ["Chiffre d'affaires", "Ingresos", "Umsatz"], "Net result": ["Résultat net", "Resultado neto", "Nettoergebnis"], "Capital": ["Capital", "Capital", "Kapital"], "Investors": ["Investisseurs", "Inversores", "Investoren"], "Round": ["Tour de table", "Ronda", "Runde"],
+    "Rating": ["Note", "Valoración", "Bewertung"], "Reviews": ["Avis", "Reseñas", "Bewertungen"], "Pros": ["Points positifs", "Pros", "Pro"], "Cons": ["Points négatifs", "Contras", "Contra"], "Observed": ["Observé", "Observado", "Beobachtet"], "Displayed": ["Affiché", "Declarado", "Angegeben"], "Verdict": ["Verdict", "Veredicto", "Urteil"], "Theme": ["Thème", "Tema", "Thema"], "Company activity": ["Activité de l'entreprise", "Actividad de la empresa", "Geschäftstätigkeit"],
+
+    /* préparation d'entretien */
+    "Interview preparation": ["Préparation d'entretien", "Preparación de entrevista", "Interviewvorbereitung"], "Your pitch": ["Votre présentation", "Tu presentación", "Ihr Pitch"], "Likely questions (": ["Questions probables (", "Preguntas probables (", "Wahrscheinliche Fragen ("], "Stories to tell (": ["Histoires à raconter (", "Historias para contar (", "Geschichten zum Erzählen ("],
+    "Weak points, honest answers": ["Points faibles, réponses honnêtes", "Puntos débiles, respuestas honestas", "Schwächen, ehrliche Antworten"], "Questions to ask them": ["Questions à leur poser", "Preguntas para hacerles", "Fragen an sie"], "Checklist": ["Liste de contrôle", "Lista de comprobación", "Checkliste"], "To confirm with you": ["À confirmer avec vous", "Por confirmar contigo", "Mit Ihnen zu bestätigen"],
+    "Hard in the mock interview": ["Difficile lors de l'entretien d'entraînement", "Difícil en la entrevista de práctica", "Schwierig im Probeinterview"], "Situation": ["Situation", "Situación", "Situation"], "Why they ask: ": ["Pourquoi ils demandent : ", "Por qué lo preguntan: ", "Warum sie fragen: "], "Watch out: ": ["Attention : ", "Cuidado: ", "Achtung: "], "About pay": ["À propos de la rémunération", "Sobre la remuneración", "Zur Vergütung"],
+
+    /* versions */
+    "CV versions": ["Versions du CV", "Versiones del CV", "Lebenslaufversionen"], "Versions": ["Versions", "Versiones", "Versionen"], "Version": ["Version", "Versión", "Version"], "Displayed version": ["Version affichée", "Versión mostrada", "Angezeigte Version"],
+    "Every resume version you've generated, with its language, type and employer.": ["Chaque version de CV générée, avec sa langue, son type et son employeur.", "Cada versión del CV generada, con su idioma, tipo y empleador.", "Jede erzeugte Lebenslaufversion mit Sprache, Typ und Arbeitgeber."],
+    "Language": ["Langue", "Idioma", "Sprache"], "Type": ["Type", "Tipo", "Typ"], "Employer": ["Employeur", "Empleador", "Arbeitgeber"], "Date": ["Date", "Fecha", "Datum"], "Actions": ["Actions", "Acciones", "Aktionen"], "Action": ["Action", "Acción", "Aktion"],
+    "Imported": ["Importé", "Importado", "Importiert"], "Translated": ["Traduit", "Traducido", "Übersetzt"], "Adapted": ["Adapté", "Adaptado", "Angepasst"], "All languages": ["Toutes les langues", "Todos los idiomas", "Alle Sprachen"], "All types": ["Tous les types", "Todos los tipos", "Alle Typen"], "All employers": ["Tous les employeurs", "Todos los empleadores", "Alle Arbeitgeber"], "No employer": ["Sans employeur", "Sin empleador", "Kein Arbeitgeber"],
+    "All statuses": ["Tous les statuts", "Todos los estados", "Alle Status"], "No version matches these filters.": ["Aucune version ne correspond à ces filtres.", "Ninguna versión coincide con estos filtros.", "Keine Version entspricht diesen Filtern."], "A resume needs at least one version": ["Un CV a besoin d'au moins une version", "Un CV necesita al menos una versión", "Ein Lebenslauf braucht mindestens eine Version"],
+    "Save a copy of this version": ["Enregistrer une copie de cette version", "Guardar una copia de esta versión", "Kopie dieser Version speichern"], "Saved a copy: ": ["Copie enregistrée : ", "Copia guardada: ", "Kopie gespeichert: "], "Open this version of the resume": ["Ouvrir cette version du CV", "Abrir esta versión del CV", "Diese Lebenslaufversion öffnen"], "Version deleted.": ["Version supprimée.", "Versión eliminada.", "Version gelöscht."], "View more": ["Voir plus", "Ver más", "Mehr anzeigen"],
+    "Unnamed profile": ["Profil sans nom", "Perfil sin nombre", "Profil ohne Namen"], "No profile imported": ["Aucun profil importé", "Ningún perfil importado", "Kein Profil importiert"], "To check after import": ["À vérifier après l'import", "Para revisar tras la importación", "Nach dem Import zu prüfen"],
+    "Photo upload is not available in this view.": ["L'envoi de photo n'est pas disponible dans cette vue.", "La subida de fotos no está disponible en esta vista.", "Foto-Upload ist in dieser Ansicht nicht verfügbar."], "PDF saved.": ["PDF enregistré.", "PDF guardado.", "PDF gespeichert."], "Export cancelled.": ["Export annulé.", "Exportación cancelada.", "Export abgebrochen."],
+
+    /* préférences */
+    "Job preferences": ["Préférences d'emploi", "Preferencias de empleo", "Job-Präferenzen"], "Your preferences": ["Vos préférences", "Tus preferencias", "Ihre Präferenzen"],
+    "Tell us what you're looking for so we only bring you matches worth your time.": ["Dites-nous ce que vous cherchez pour que nous ne vous proposions que des offres qui valent votre temps.", "Cuéntanos qué buscas para traerte solo ofertas que valgan tu tiempo.", "Sagen Sie uns, was Sie suchen, damit wir Ihnen nur Treffer zeigen, die Ihre Zeit wert sind."],
+    "Roles & pay": ["Postes et rémunération", "Puestos y remuneración", "Rollen und Gehalt"], "Roles, contracts & pay": ["Postes, contrats et rémunération", "Puestos, contratos y remuneración", "Rollen, Verträge und Gehalt"], "Roles, contracts and wanted pay": ["Postes, contrats et rémunération souhaitée", "Puestos, contratos y remuneración deseada", "Rollen, Verträge und Wunschgehalt"],
+    "Roles you are looking for, each with its contract types and its pay (salary, or daily rate when freelance)": ["Les postes que vous cherchez, chacun avec ses types de contrat et sa rémunération (salaire, ou TJM en freelance)", "Los puestos que buscas, cada uno con sus tipos de contrato y su remuneración (salario, o tarifa diaria si eres autónomo)", "Die Rollen, die Sie suchen, jeweils mit Vertragsarten und Vergütung (Gehalt, oder Tagessatz als Freelancer)"],
+    "Roles you're open to, each with its accepted contract types and wanted pay.": ["Les postes qui vous intéressent, chacun avec ses types de contrat acceptés et la rémunération souhaitée.", "Los puestos que te interesan, cada uno con sus tipos de contrato aceptados y la remuneración deseada.", "Rollen, für die Sie offen sind, jeweils mit akzeptierten Vertragsarten und Wunschgehalt."],
+    "Locations": ["Lieux", "Ubicaciones", "Orte"], "Locations & work mode": ["Lieux et mode de travail", "Ubicaciones y modalidad", "Orte und Arbeitsmodus"], "Locations and work mode": ["Lieux et mode de travail", "Ubicaciones y modalidad", "Orte und Arbeitsmodus"],
+    "Where you want to work, and in which mode (several modes possible)": ["Où vous voulez travailler, et dans quel mode (plusieurs possibles)", "Dónde quieres trabajar y en qué modalidad (varias posibles)", "Wo Sie arbeiten möchten und in welchem Modus (mehrere möglich)"],
+    "Where you want to work, and in which mode. Several modes possible per location.": ["Où vous voulez travailler, et dans quel mode. Plusieurs modes possibles par lieu.", "Dónde quieres trabajar y en qué modalidad. Varias modalidades posibles por ubicación.", "Wo Sie arbeiten möchten und in welchem Modus. Mehrere Modi pro Ort möglich."],
+    "Sectors & companies": ["Secteurs et entreprises", "Sectores y empresas", "Branchen und Unternehmen"], "Sectors and companies": ["Secteurs et entreprises", "Sectores y empresas", "Branchen und Unternehmen"], "The sectors and companies you want, and the ones to avoid.": ["Les secteurs et entreprises que vous voulez, et ceux à éviter.", "Los sectores y empresas que quieres y los que quieres evitar.", "Die gewünschten Branchen und Unternehmen sowie die zu meidenden."],
+    "Anything else": ["Autre chose", "Algo más", "Sonstiges"], "Working languages, must-haves, nice-to-haves and deal-breakers.": ["Langues de travail, indispensables, souhaits et motifs de refus.", "Idiomas de trabajo, imprescindibles, deseables y motivos de rechazo.", "Arbeitssprachen, Muss-Kriterien, Wünsche und Ausschlusskriterien."],
+    "Answers I am remembering": ["Réponses que je retiens", "Respuestas que recuerdo", "Antworten, die ich mir merke"], "Your answers to the match command are kept for a while, so you are not asked twice. Forget any that no longer holds.": ["Vos réponses à la commande match sont gardées un temps, pour ne pas vous redemander. Oubliez celles qui ne sont plus vraies.", "Tus respuestas al comando match se guardan un tiempo para no preguntarte dos veces. Olvida las que ya no valgan.", "Ihre Antworten auf den match-Befehl werden eine Weile gespeichert, damit Sie nicht zweimal gefragt werden. Vergessen Sie, was nicht mehr gilt."],
+    "Role": ["Poste", "Puesto", "Rolle"], "+ Add a role": ["+ Ajouter un poste", "+ Añadir un puesto", "+ Rolle hinzufügen"], "+ Add a location": ["+ Ajouter un lieu", "+ Añadir una ubicación", "+ Ort hinzufügen"], "Wanted pay": ["Rémunération souhaitée", "Remuneración deseada", "Wunschgehalt"],
+    "Job title (e.g. Engineering Manager)": ["Intitulé du poste (ex. Engineering Manager)", "Puesto (p. ej. Engineering Manager)", "Stellenbezeichnung (z. B. Engineering Manager)"], "Contract type": ["Type de contrat", "Tipo de contrato", "Vertragsart"], "Contract types accepted": ["Types de contrat acceptés", "Tipos de contrato aceptados", "Akzeptierte Vertragsarten"],
+    "Permanent": ["CDI", "Indefinido", "Unbefristet"], "Fixed-term": ["CDD", "Temporal", "Befristet"], "Freelance": ["Freelance", "Autónomo", "Freiberuflich"], "Internship": ["Stage", "Prácticas", "Praktikum"], "Apprenticeship": ["Alternance", "Formación dual", "Ausbildung"],
+    "Minimum salary": ["Salaire minimum", "Salario mínimo", "Mindestgehalt"], "Maximum salary": ["Salaire maximum", "Salario máximo", "Höchstgehalt"], "Min. salary": ["Salaire min.", "Salario mín.", "Mindestgehalt"], "Max. salary": ["Salaire max.", "Salario máx.", "Höchstgehalt"],
+    "Minimum daily rate": ["TJM minimum", "Tarifa diaria mínima", "Mindest-Tagessatz"], "Maximum daily rate": ["TJM maximum", "Tarifa diaria máxima", "Höchst-Tagessatz"], "Min. daily rate": ["TJM min.", "Tarifa diaria mín.", "Tagessatz min."], "Max. daily rate": ["TJM max.", "Tarifa diaria máx.", "Tagessatz max."],
+    "Wanted daily rate (TJM) when freelance": ["TJM souhaité en freelance", "Tarifa diaria deseada como autónomo", "Gewünschter Tagessatz als Freelancer"], "Salary currency": ["Devise du salaire", "Moneda del salario", "Gehaltswährung"], "Salary period": ["Période du salaire", "Periodo del salario", "Gehaltszeitraum"], "Daily rate currency": ["Devise du TJM", "Moneda de la tarifa diaria", "Währung des Tagessatzes"],
+    "per year": ["par an", "al año", "pro Jahr"], "per month": ["par mois", "al mes", "pro Monat"], "Work modes accepted": ["Modes de travail acceptés", "Modalidades aceptadas", "Akzeptierte Arbeitsmodi"], "Open to relocation": ["Prêt à déménager", "Dispuesto a mudarme", "Umzugsbereit"],
+    "Max on-site days / week (hybrid only)": ["Jours sur site max. / semaine (hybride uniquement)", "Días presenciales máx. / semana (solo híbrido)", "Max. Präsenztage / Woche (nur Hybrid)"], "Max on-site days per week": ["Jours sur site max. par semaine", "Días presenciales máx. por semana", "Max. Präsenztage pro Woche"], "Max on-site days per week for hybrid": ["Jours sur site max. par semaine en hybride", "Días presenciales máx. por semana en híbrido", "Max. Präsenztage pro Woche bei Hybrid"],
+    "City, region or country (or Remote)": ["Ville, région ou pays (ou Télétravail)", "Ciudad, región o país (o Remoto)", "Stadt, Region oder Land (oder Remote)"], "Sectors you want (whitelist)": ["Secteurs souhaités (liste blanche)", "Sectores que quieres (lista blanca)", "Gewünschte Branchen (Whitelist)"], "Sectors to avoid (blacklist)": ["Secteurs à éviter (liste noire)", "Sectores a evitar (lista negra)", "Zu meidende Branchen (Blacklist)"],
+    "Companies you would love to join": ["Entreprises que vous aimeriez rejoindre", "Empresas a las que te gustaría unirte", "Unternehmen, denen Sie gern beitreten würden"], "Companies to avoid": ["Entreprises à éviter", "Empresas a evitar", "Zu meidende Unternehmen"], "Company sizes you prefer": ["Tailles d'entreprise préférées", "Tamaños de empresa preferidos", "Bevorzugte Unternehmensgrößen"],
+    "Startup (under 50)": ["Startup (moins de 50)", "Startup (menos de 50)", "Startup (unter 50)"], "Scale-up (50 to 500)": ["Scale-up (50 à 500)", "Scale-up (50 a 500)", "Scale-up (50 bis 500)"], "Mid-size (500 to 5,000)": ["Taille moyenne (500 à 5 000)", "Mediana (500 a 5.000)", "Mittelgroß (500 bis 5.000)"], "Large (over 5,000)": ["Grande (plus de 5 000)", "Grande (más de 5.000)", "Groß (über 5.000)"],
+    "Working languages (comma-separated)": ["Langues de travail (séparées par des virgules)", "Idiomas de trabajo (separados por comas)", "Arbeitssprachen (durch Kommas getrennt)"], "Must-haves (one per line)": ["Indispensables (un par ligne)", "Imprescindibles (uno por línea)", "Muss-Kriterien (eines pro Zeile)"], "Nice-to-haves (one per line)": ["Souhaits (un par ligne)", "Deseables (uno por línea)", "Wünsche (eines pro Zeile)"], "Deal-breakers (one per line)": ["Motifs de refus (un par ligne)", "Motivos de rechazo (uno por línea)", "Ausschlusskriterien (eines pro Zeile)"],
+    "Each role needs a job title.": ["Chaque poste doit avoir un intitulé.", "Cada puesto necesita un nombre.", "Jede Rolle braucht eine Stellenbezeichnung."], "Each location needs a name.": ["Chaque lieu doit avoir un nom.", "Cada ubicación necesita un nombre.", "Jeder Ort braucht einen Namen."], "This cannot be empty.": ["Ce champ ne peut pas être vide.", "Esto no puede estar vacío.", "Dies darf nicht leer sein."],
+    "Interface language": ["Langue de l'interface", "Idioma de la interfaz", "Sprache der Oberfläche"], "Language of the menus, buttons and labels. Saved right away in this artifact, no need to save the preferences.": ["Langue des menus, boutons et libellés. Enregistrée tout de suite dans cet artefact, inutile d'enregistrer les préférences.", "Idioma de los menús, botones y etiquetas. Se guarda al instante en este artefacto, sin guardar las preferencias.", "Sprache der Menüs, Schaltflächen und Beschriftungen. Wird sofort in diesem Artefakt gespeichert, ohne die Einstellungen zu speichern."],
+    "Language": ["Langue", "Idioma", "Sprache"],
+
+
+    /* mots des invites « + mot » du CV */
+    "+ age": ["+ âge", "+ edad", "+ Alter"], "+ location": ["+ lieu", "+ ubicación", "+ Ort"], "+ e-mail": ["+ e-mail", "+ correo", "+ E-Mail"], "+ phone": ["+ téléphone", "+ teléfono", "+ Telefon"], "+ website": ["+ site web", "+ sitio web", "+ Webseite"], "+ link": ["+ lien", "+ enlace", "+ Link"],
+    "+ skill": ["+ compétence", "+ competencia", "+ Fähigkeit"], "+ category": ["+ catégorie", "+ categoría", "+ Kategorie"], "+ language": ["+ langue", "+ idioma", "+ Sprache"], "+ hobby": ["+ loisir", "+ afición", "+ Hobby"], "+ degree": ["+ diplôme", "+ titulación", "+ Abschluss"],
+    "+ institution": ["+ établissement", "+ institución", "+ Institution"], "+ bullet": ["+ puce", "+ viñeta", "+ Punkt"], "+ subheading": ["+ sous-titre", "+ subtítulo", "+ Zwischenüberschrift"], "+ role": ["+ poste", "+ puesto", "+ Rolle"], "+ company": ["+ entreprise", "+ empresa", "+ Unternehmen"],
+    "+ project": ["+ projet", "+ proyecto", "+ Projekt"], "+ certification": ["+ certification", "+ certificación", "+ Zertifikat"], "+ experience": ["+ expérience", "+ experiencia", "+ Erfahrung"], "+ education": ["+ formation", "+ educación", "+ Ausbildung"], "+ company activity": ["+ activité de l'entreprise", "+ actividad de la empresa", "+ Geschäftstätigkeit"], "+ contract type": ["+ type de contrat", "+ tipo de contrato", "+ Vertragsart"], "+ description": ["+ description", "+ descripción", "+ Beschreibung"], "+ subheading with bullets": ["+ sous-titre avec puces", "+ subtítulo con viñetas", "+ Zwischenüberschrift mit Punkten"], "+ project name": ["+ nom du projet", "+ nombre del proyecto", "+ Projektname"], "+ title": ["+ intitulé", "+ título", "+ Titel"], "+ name": ["+ nom", "+ nombre", "+ Name"], "+ headline": ["+ titre", "+ titular", "+ Überschrift"],
+    /* CV et panneau */
+    "Profile": ["Profil", "Perfil", "Profil"], "Skills": ["Compétences", "Competencias", "Fähigkeiten"], "Hobbies": ["Hobbies", "Aficiones", "Hobbys"], "Languages": ["Langues", "Idiomas", "Sprachen"], "Education & Certifications": ["Formation et certifications", "Educación y certificaciones", "Ausbildung und Zertifikate"], "Professional Experience": ["Expérience professionnelle", "Experiencia profesional", "Berufserfahrung"], "Personal Projects": ["Projets personnels", "Proyectos personales", "Persönliche Projekte"],
+    "+ photo": ["+ photo", "+ foto", "+ Foto"], "+ summary": ["+ résumé", "+ resumen", "+ Zusammenfassung"], "+ start": ["+ début", "+ inicio", "+ Beginn"], "+ end": ["+ fin", "+ fin", "+ Ende"], "+ year": ["+ année", "+ año", "+ Jahr"], "+ technologies": ["+ technologies", "+ tecnologías", "+ Technologien"],
+    "Write a short professional summary": ["Écrivez un court résumé professionnel", "Escribe un breve resumen profesional", "Schreiben Sie eine kurze berufliche Zusammenfassung"], "Section title": ["Titre de section", "Título de sección", "Abschnittstitel"], "Sections": ["Sections", "Secciones", "Abschnitte"],
+    "Full name": ["Nom complet", "Nombre completo", "Vollständiger Name"], "Headline": ["Titre", "Titular", "Überschrift"], "E-mail": ["E-mail", "Correo", "E-Mail"], "Phone": ["Téléphone", "Teléfono", "Telefon"], "Age": ["Âge", "Edad", "Alter"], "Address": ["Adresse", "Dirección", "Adresse"], "Web address": ["Adresse web", "Dirección web", "Webadresse"],
+    "Age must be a whole number.": ["L'âge doit être un nombre entier.", "La edad debe ser un número entero.", "Das Alter muss eine ganze Zahl sein."], "Use YYYY-MM (or YYYY).": ["Utilisez AAAA-MM (ou AAAA).", "Usa AAAA-MM (o AAAA).", "Verwenden Sie JJJJ-MM (oder JJJJ)."], "YYYY or YYYY-MM": ["AAAA ou AAAA-MM", "AAAA o AAAA-MM", "JJJJ oder JJJJ-MM"], "YYYY-MM": ["AAAA-MM", "AAAA-MM", "JJJJ-MM"], "YYYY-MM or today": ["AAAA-MM ou aujourd'hui", "AAAA-MM o hoy", "JJJJ-MM oder heute"],
+    "Start date": ["Date de début", "Fecha de inicio", "Startdatum"], "End date": ["Date de fin", "Fecha de fin", "Enddatum"], "From date": ["Depuis le", "Desde", "Ab Datum"], "To date": ["Jusqu'au", "Hasta", "Bis Datum"], "From": ["Du", "Desde", "Von"], "To": ["Au", "Hasta", "Bis"],
+    "Degree": ["Diplôme", "Titulación", "Abschluss"], "Degree / Certification": ["Diplôme / certification", "Titulación / certificación", "Abschluss / Zertifikat"], "Institution": ["Établissement", "Institución", "Institution"], "Field of study": ["Domaine d'études", "Campo de estudio", "Studienfach"], "Issuer": ["Émetteur", "Emisor", "Aussteller"], "Certification": ["Certification", "Certificación", "Zertifikat"], "Position": ["Poste", "Cargo", "Position"],
+    "Project": ["Projet", "Proyecto", "Projekt"], "Project name": ["Nom du projet", "Nombre del proyecto", "Projektname"], "Technologies": ["Technologies", "Tecnologías", "Technologien"], "Technologies (comma-separated)": ["Technologies (séparées par des virgules)", "Tecnologías (separadas por comas)", "Technologien (durch Kommas getrennt)"], "Hobby": ["Loisir", "Afición", "Hobby"],
+    "Description": ["Description", "Descripción", "Beschreibung"], "Bullet": ["Puce", "Viñeta", "Aufzählungspunkt"], "New bullet": ["Nouvelle puce", "Nueva viñeta", "Neuer Aufzählungspunkt"], "Subheading": ["Sous-titre", "Subtítulo", "Zwischenüberschrift"], "Subheading (e.g. Results)": ["Sous-titre (ex. Résultats)", "Subtítulo (p. ej. Resultados)", "Zwischenüberschrift (z. B. Ergebnisse)"],
+    "Clear the text to remove this bullet": ["Effacez le texte pour retirer cette puce", "Borra el texto para quitar esta viñeta", "Text löschen, um diesen Punkt zu entfernen"], "Clear the text to remove this language": ["Effacez le texte pour retirer cette langue", "Borra el texto para quitar este idioma", "Text löschen, um diese Sprache zu entfernen"], "Clear the text to remove this link": ["Effacez le texte pour retirer ce lien", "Borra el texto para quitar este enlace", "Text löschen, um diesen Link zu entfernen"], "Clear the text to remove this skill": ["Effacez le texte pour retirer cette compétence", "Borra el texto para quitar esta competencia", "Text löschen, um diese Fähigkeit zu entfernen"],
+    "Skill (name | level)": ["Compétence (nom | niveau)", "Competencia (nombre | nivel)", "Fähigkeit (Name | Niveau)"], "Language (name | level)": ["Langue (nom | niveau)", "Idioma (nombre | nivel)", "Sprache (Name | Niveau)"], "Link (Label | https://…)": ["Lien (Libellé | https://…)", "Enlace (Etiqueta | https://…)", "Link (Bezeichnung | https://…)"], "Label | https://…": ["Libellé | https://…", "Etiqueta | https://…", "Bezeichnung | https://…"], "Category name": ["Nom de la catégorie", "Nombre de la categoría", "Kategoriename"],
+    "Category: skill, skill, skill": ["Catégorie : compétence, compétence, compétence", "Categoría: competencia, competencia, competencia", "Kategorie: Fähigkeit, Fähigkeit, Fähigkeit"], "Write it as Category: skill, skill, skill.": ["Écrivez-la sous la forme Catégorie : compétence, compétence, compétence.", "Escríbelo como Categoría: competencia, competencia, competencia.", "Schreiben Sie es als Kategorie: Fähigkeit, Fähigkeit, Fähigkeit."], "Write it as Label | https://… (the address must start with http).": ["Écrivez-le sous la forme Libellé | https://… (l'adresse doit commencer par http).", "Escríbelo como Etiqueta | https://… (la dirección debe empezar por http).", "Schreiben Sie es als Bezeichnung | https://… (die Adresse muss mit http beginnen)."],
+    "The address must start with http.": ["L'adresse doit commencer par http.", "La dirección debe empezar por http.", "Die Adresse muss mit http beginnen."], "Photo of ": ["Photo de ", "Foto de ", "Foto von "],
+    "Nothing saved right now.": ["Rien d'enregistré pour l'instant.", "Nada guardado por ahora.", "Im Moment nichts gespeichert."], "Could not save: ": ["Enregistrement impossible : ", "No se pudo guardar: ", "Speichern nicht möglich: "], "unknown error": ["erreur inconnue", "error desconocido", "unbekannter Fehler"],
+    "Could not read the database. Reload the page.": ["Lecture de la base impossible. Rechargez la page.", "No se pudo leer la base de datos. Recarga la página.", "Datenbank konnte nicht gelesen werden. Seite neu laden."], "Database capability unavailable.": ["Base de données indisponible.", "Base de datos no disponible.", "Datenbank nicht verfügbar."], "Database unavailable": ["Base de données indisponible", "Base de datos no disponible", "Datenbank nicht verfügbar"],
+    "Open this artifact signed in to your account to view your profile.": ["Ouvrez cet artefact connecté à votre compte pour voir votre profil.", "Abre este artefacto con tu cuenta para ver tu perfil.", "Öffnen Sie dieses Artefakt mit Ihrem Konto, um Ihr Profil zu sehen."], "Export failed: ": ["Échec de l'export : ", "Error al exportar: ", "Export fehlgeschlagen: "],
+    "Enter": ["Entrée", "Intro", "Eingabe"], "Escape": ["Échap", "Esc", "Esc"], "Other": ["Autre", "Otro", "Andere"], "Seen": ["Vu", "Visto", "Gesehen"], "Hidden": ["Masquée", "Oculta", "Ausgeblendet"], "Empty": ["Vide", "Vacío", "Leer"], "Result": ["Résultat", "Resultado", "Ergebnis"], "Amount": ["Montant", "Importe", "Betrag"], "Source": ["Source", "Fuente", "Quelle"]
+  };
+
+  var UI = { lang: "en", touched: false }, UI_MAPS = null, UI_PREFIXES = [];
+  var UI_ATTRS = ["placeholder", "title", "aria-label", "alt"], UI_SKIP_TAGS = { SCRIPT: 1, STYLE: 1, TEXTAREA: 1, TITLE: 1, NOSCRIPT: 1 };
+  var uiTextRec = new WeakMap(), uiAttrRec = new WeakMap();
+  function uiHas(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
+  function uiInit() {
+    UI_MAPS = { fr: {}, es: {}, de: {} };
+    Object.keys(UI_DICT).forEach(function (k) { ["fr", "es", "de"].forEach(function (l, i) { UI_MAPS[l][k] = UI_DICT[k][i]; }); });
+    UI_PREFIXES = Object.keys(UI_DICT).filter(function (k) { return /\s$/.test(k) || /[(:]$/.test(k); }).sort(function (a, b) { return b.length - a.length; });
+  }
+  /* formes avec des nombres ou des dates : une expression par forme, un texte par langue [fr, es, de] */
+  var UI_PATTERNS = [
+    [/^(\d+) of (\d+) applications?(?: · added since (.+))?$/, function (m, i) {
+      var n = +m[2], s = n > 1, since = m[3];
+      return [m[1] + " sur " + n + " candidature" + (s ? "s" : "") + (since ? " · ajoutées depuis " + since : ""),
+        m[1] + " de " + n + " candidatura" + (s ? "s" : "") + (since ? " · añadidas desde " + since : ""),
+        m[1] + " von " + n + " Bewerbung" + (s ? "en" : "") + (since ? " · hinzugefügt seit " + since : "")][i];
+    }],
+    [/^Page (\d+) of (\d+)$/, function (m, i) { return ["Page " + m[1] + " sur " + m[2], "Página " + m[1] + " de " + m[2], "Seite " + m[1] + " von " + m[2]][i]; }],
+    [/^New reply found by the mail check(?: on (.+?))?(?:\. Suggested status: (.+?))?\.$/, function (m, i) {
+      var st = m[2] ? uiCore(m[2]) : "", d = m[1] || "";
+      return [["Nouvelle réponse trouvée par la vérification des mails", d ? " le " + d : "", st ? ". Statut suggéré : " + st : "", "."].join(""),
+        ["Nueva respuesta encontrada por la revisión del correo", d ? " el " + d : "", st ? ". Estado sugerido: " + st : "", "."].join(""),
+        ["Neue Antwort bei der Mail-Prüfung gefunden", d ? " am " + d : "", st ? ". Vorgeschlagener Status: " + st : "", "."].join("")][i];
+    }]
+  ];
+  function uiIdx() { return { fr: 0, es: 1, de: 2 }[UI.lang]; }
+  function uiCore(c) {
+    var i = uiIdx(); if (i == null || !UI_MAPS) return c;
+    var d = UI_MAPS[UI.lang], m;
+    if (uiHas(d, c)) return d[c];
+    if ((m = /^(.*\S)(\s[⇅▲▼])$/.exec(c)) && uiHas(d, m[1])) return d[m[1]] + m[2];
+    if ((m = /^([^\sA-Za-z0-9]+)\s+(.+)$/.exec(c)) && uiHas(d, m[2])) return m[1] + " " + d[m[2]];
+    if ((m = /^(.*\S) \((\d+)\)$/.exec(c)) && uiHas(d, m[1])) return d[m[1]] + " (" + m[2] + ")";
+    for (var k = 0; k < UI_PATTERNS.length; k++) { if ((m = UI_PATTERNS[k][0].exec(c))) return UI_PATTERNS[k][1](m, i); }
+    for (var j = 0; j < UI_PREFIXES.length; j++) {
+      var p = UI_PREFIXES[j];
+      if (c === p.replace(/\s+$/, "")) return d[p].replace(/\s+$/, "");
+      if (c.indexOf(p) === 0 && c.length > p.length) { var rest = c.slice(p.length); return d[p] + (uiHas(d, rest) ? d[rest] : rest); }
+    }
+    return c;
+  }
+  function uiText(s) { var m = /^(\s*)([\s\S]*?)(\s*)$/.exec(s); return m[2] ? m[1] + uiCore(m[2]) + m[3] : s; }
+  /* le CV et ce que l'utilisateur ou Claude a écrit restent tels quels ; seuls les repères de l'interface sont traduits */
+  function uiSkip(n) {
+    var el = n.nodeType === 1 ? n : n.parentElement;
+    if (!el || UI_SKIP_TAGS[el.tagName]) return true;
+    if (el.closest("[data-no-i18n], .mailbody, .prosetext")) return true;
+    return !!(el.closest("#sheet") && !el.closest(".ph, .ie-add, .mini, .ie-x, .badge, .adds, .warnings, .source"));
+  }
+  function uiTextNode(n) {
+    if (uiSkip(n)) return;
+    var rec = uiTextRec.get(n), cur = n.nodeValue;
+    if (!rec || cur !== rec.out) { rec = { en: cur, out: cur }; uiTextRec.set(n, rec); }
+    var out = UI.lang === "en" ? rec.en : uiText(rec.en);
+    if (out !== cur) { rec.out = out; n.nodeValue = out; }
+  }
+  function uiElAttrs(el) {
+    if (el.tagName === "SCRIPT" || el.tagName === "STYLE") return;
+    var recs = uiAttrRec.get(el);
+    for (var a = 0; a < UI_ATTRS.length; a++) {
+      var at = UI_ATTRS[a]; if (!el.hasAttribute(at)) continue;
+      if (uiSkip(el)) return;
+      var cur = el.getAttribute(at); recs = recs || {}; var r = recs[at];
+      if (!r || cur !== r.out) { r = recs[at] = { en: cur, out: cur }; uiAttrRec.set(el, recs); }
+      var out = UI.lang === "en" ? r.en : uiText(r.en);
+      if (out !== cur) { r.out = out; el.setAttribute(at, out); }
+    }
+  }
+  function uiWalk(root) {
+    if (UI.lang === "en" && !UI.touched) return;
+    if (root.nodeType === 3) { uiTextNode(root); return; }
+    if (root.nodeType !== 1) return;
+    uiElAttrs(root);
+    var w = document.createTreeWalker(root, 5, null), n;
+    while ((n = w.nextNode())) { if (n.nodeType === 3) uiTextNode(n); else uiElAttrs(n); }
+  }
+  var uiQueue = [];
+  new MutationObserver(function (ms) {
+    if (UI.lang === "en" && !UI.touched) return;
+    ms.forEach(function (m) { if (m.type === "childList") Array.prototype.forEach.call(m.addedNodes, function (n) { uiQueue.push(n); }); else uiQueue.push(m.target); });
+    /* tout de suite, avant l'affichage : pas de flash en anglais */
+    var q = uiQueue; uiQueue = []; q.forEach(function (n) { if (document.body.contains(n)) uiWalk(n); });
+  }).observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: UI_ATTRS });
+  function setUiLang(code) {
+    if (!UI_LANGS.some(function (l) { return l[0] === code; })) code = "en";
+    if (!UI_MAPS) uiInit();
+    UI.lang = code; if (code !== "en") UI.touched = true;
+    document.documentElement.setAttribute("data-ui-lang", code);
+    uiWalk(document.body);
+    Array.prototype.forEach.call(document.querySelectorAll('input[name="ui-lang"]'), function (r) { r.checked = r.value === code; });
+  }
+  /* le choix vit dans la base de l'artefact : il suit le propriétaire d'un appareil à l'autre */
+  function chooseUiLang(code) {
+    setUiLang(code);
+    if (db) db.doc("settings/ui").set({ lang: code, updatedAt: new Date().toISOString() }).then(function () { toast("Saved."); }).catch(saveFail);
+  }
+  function uiLangCard() {
+    var card = h("section", "pcard"); card.id = "pf-language";
+    card.appendChild(h("h3", null, "🌐 Interface language"));
+    card.appendChild(h("p", "psub", "Language of the menus, buttons and labels. Saved right away in this artifact, no need to save the preferences."));
+    var box = h("div", "checks"); box.setAttribute("role", "radiogroup"); box.setAttribute("aria-label", "Interface language");
+    UI_LANGS.forEach(function (l) {
+      var lab = h("label", "check"), r = document.createElement("input");
+      r.type = "radio"; r.name = "ui-lang"; r.value = l[0]; r.checked = UI.lang === l[0];
+      r.addEventListener("change", function () { if (r.checked) chooseUiLang(l[0]); });
+      lab.setAttribute("data-no-i18n", ""); lab.appendChild(r); lab.appendChild(document.createTextNode(l[1])); box.appendChild(lab);
+    });
+    card.appendChild(box);
+    return card;
+  }
+
   /* ---------- Réglages ---------- */
   function norm(d) {
     d = d || {};
@@ -1517,8 +1820,12 @@ a, button, summary, select, label, input { touch-action: manipulation; -webkit-t
     var form = h("form", "pfpage");
     var toc = h("aside", "pftoc"), main = h("div", "pfmain");
     toc.appendChild(h("div", "pfkicker", "Job preferences"));
+    var lg = h("a", null, "🌐 Language"); lg.href = "#pf-language";
+    lg.addEventListener("click", function (e) { e.preventDefault(); var t = $("pf-language"); if (t) t.scrollIntoView({ behavior: "smooth", block: "start" }); });
+    toc.appendChild(lg);
     main.appendChild(h("h2", null, cfg.title));
     main.appendChild(h("p", "pfsub", "Tell us what you're looking for so we only bring you matches worth your time."));
+    main.appendChild(uiLangCard());
     var ctl = {}, pairBox = null, card = null;
     cfg.fields.forEach(function (f) {
       if (f.t === "sub") {
@@ -3126,6 +3433,7 @@ a, button, summary, select, label, input { touch-action: manipulation; -webkit-t
     if (wanted === "offers") setTimeout(openOffers, 0); else if (wanted === "preferences") setTimeout(openPreferencesEditor, 0);
     var onErr = function () { showError("Could not read the database. Reload the page."); };
     db.doc("meta/import").onSnapshot(function (s) { state.meta = s.exists ? s.data() : null; render(); }, onErr);
+    db.doc("settings/ui").onSnapshot(function (s) { var l = s.exists && s.data() && s.data().lang; if (l && l !== UI.lang) setUiLang(l); }, onErr);
     db.doc("settings/preferences").onSnapshot(function (s) { state.prefs = s.exists ? s.data() : null; }, onErr);
     function refreshOffers() { if (state.view === "offers") renderOffers(); }
     db.collection("matches").onSnapshot(function (snap) {
