@@ -421,6 +421,11 @@ textarea.inl { resize: vertical; }
 .qa .note { margin-left: 7px; }
 .qa .rm { position: absolute; top: 8px; right: 10px; border: 0; background: none; color: var(--s-low); font-weight: 700; }
 
+/* onglets par statut : défilent côte à côte sur écran étroit */
+.stabs { overflow-x: auto; scrollbar-width: none; padding: 0; }
+.stabs::-webkit-scrollbar { display: none; }
+.stabs .tab { flex: none; white-space: nowrap; }
+
 /* Mobile : pas de double-tap zoom ni de halo gris, rien ne déborde, le contenu garde la largeur de l'écran */
 html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 /* le fond et le filet du bandeau haut débordent volontairement (100vmax) : sans cela la page défile de plus d'un écran vers la droite */
@@ -490,6 +495,7 @@ a, button, summary, select, label, input { touch-action: manipulation; -webkit-t
   .formpage, .formpage.offers { padding: 12px; border-radius: 10px; }
   .tabs { padding: 0; overflow-x: auto; scrollbar-width: none; }
   .tab { flex: 1 1 0; min-height: 48px; padding: 8px 6px; white-space: nowrap; }
+  .tabs.stabs .tab { flex: none; padding: 8px 12px; }
   .vtable { display: block; border: 0; min-width: 0; font-size: 15px; }
   .vtable thead { display: block; }
   .vtable thead:not(:has(button)) { display: none; }
@@ -2342,13 +2348,12 @@ a, button, summary, select, label, input { touch-action: manipulation; -webkit-t
     return m ? m[1].trim() : "";
   }
   function bestScore(id) { var ms = offerMatches(id); return ms.length ? Math.max.apply(null, ms.map(function (m) { return m.score; })) : null; }
-  function filteredApps() {
+  function filteredApps(skipStatus) {
     var f = state.of, order = OFFER_STATUSES.map(function (x) { return x[0]; });
     var rows = offerRows().filter(function (o) {
       var d = day(o.createdAt);
       var st = o.status || "not_applied";
-      if (f.status && st !== f.status) return false;
-      if (!f.status && f.hideDone && DONE_STATUSES.indexOf(st) >= 0) return false;
+      if (!skipStatus && f.status && st !== f.status) return false;
       if (f.from && d < f.from) return false;
       if (f.to && d > f.to) return false;
       return true;
@@ -2381,7 +2386,19 @@ a, button, summary, select, label, input { touch-action: manipulation; -webkit-t
     var pages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
     if (f.page > pages) f.page = pages;
     function redo(resetPage) { if (resetPage) f.page = 1; f.open = null; renderOffers(true); }
-    var card = h("section", "vgrid"), meta = h("div", "actions");
+    var card = h("section", "vgrid");
+    var counts = {}, byDate = filteredApps(true);
+    byDate.forEach(function (o) { var k = o.status || "not_applied"; counts[k] = (counts[k] || 0) + 1; });
+    var stabs = h("div", "tabs stabs"); stabs.setAttribute("role", "tablist"); stabs.setAttribute("aria-label", "Applications by status");
+    [["", "All", byDate.length]].concat(OFFER_STATUSES.map(function (x) { return [x[0], x[1], counts[x[0]] || 0]; })).forEach(function (t) {
+      var b = h("button", "tab", t[1] + " (" + t[2] + ")"); b.type = "button"; b.setAttribute("role", "tab");
+      b.setAttribute("aria-selected", (f.status || "") === t[0] ? "true" : "false");
+      b.addEventListener("click", function () { f.status = t[0]; redo(true); });
+      stabs.appendChild(b);
+    });
+    card.appendChild(stabs);
+    setTimeout(function () { var on = stabs.querySelector('[aria-selected="true"]'); if (on && stabs.scrollWidth > stabs.clientWidth) stabs.scrollLeft = on.offsetLeft - (stabs.clientWidth - on.offsetWidth) / 2; }, 0);
+    var meta = h("div", "actions");
     meta.appendChild(h("span", "sp"));
     meta.appendChild(h("span", "note", rows.length + " of " + all.length + " application" + (all.length > 1 ? "s" : "") + (f.from ? " · added since " + f.from : "")));
     card.appendChild(meta);
@@ -2422,7 +2439,7 @@ a, button, summary, select, label, input { touch-action: manipulation; -webkit-t
     }
     var table = h("table", "vtable offtable"), thead = h("thead"), hr = h("tr");
     var cg = h("colgroup"); [19, 26, 9, 13, 14, 8, 11].forEach(function (w) { var c = h("col"); c.style.width = w + "%"; cg.appendChild(c); }); table.appendChild(cg);
-    hr.appendChild(th("Company", { sort: "company" })); hr.appendChild(th("Job title", {})); hr.appendChild(th("Mode", { sort: "mode" })); hr.appendChild(th("HQ", { sort: "hq" })); hr.appendChild(th("Status", { sort: "status", filter: "status" }));
+    hr.appendChild(th("Company", { sort: "company" })); hr.appendChild(th("Job title", {})); hr.appendChild(th("Mode", { sort: "mode" })); hr.appendChild(th("HQ", { sort: "hq" })); hr.appendChild(th("Status", { sort: "status" }));
     hr.appendChild(th("Score", { sort: "score" })); hr.appendChild(th("Added", { sort: "added", filter: "added" }));
     thead.appendChild(hr); table.appendChild(thead);
     var tbody = h("tbody");
@@ -2452,9 +2469,6 @@ a, button, summary, select, label, input { touch-action: manipulation; -webkit-t
     cardLabels(table, ["", "", "Mode", "HQ", "Status", "Score", "Added"]);
     var holder = h("div", "vtwrap"); holder.appendChild(table); card.appendChild(holder);
     var foot = h("div", "actions");
-    var doneCount = all.filter(function (o) { return DONE_STATUSES.indexOf(o.status || "not_applied") >= 0; }).length;
-    if (doneCount && !f.status) foot.appendChild(btn(f.hideDone ? "Show finished (" + doneCount + ")" : "Hide finished", "small", function () { f.hideDone = !f.hideDone; redo(true); }));
-    if (f.status) foot.appendChild(btn("Clear status", "small", function () { f.status = ""; redo(true); }));
     foot.appendChild(h("span", "sp"));
     if (pages > 1) {
       var prev = btn("← Previous", "small", function () { f.page--; renderOffers(true); }); prev.disabled = f.page <= 1;
